@@ -1,0 +1,1125 @@
+/*
+ * Created by Marius Hoggenmüller on 04.02.14
+ * Copyright (c) 2014 Marius Hoggenmüller. All rights reserved.
+ * 
+ */
+
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedList;
+
+import codeanticode.gsvideo.GSMovie;
+import controlP5.ControlEvent;
+import controlP5.ControlP5;
+import controlP5.Textfield;
+import processing.core.*;
+
+public class ProcessingMain extends PApplet {
+	
+	private static final long serialVersionUID = 1L;
+	
+	//Network settings
+	private final String IP = "224.1.1.1";
+	private final int PORT = 5026;
+	private final int[] CONTROLLER_ID = {4, 1};
+	
+	//Init Nozzles, Node, Sculpture Objects
+	private final int NODE1_LEDS[] = {90,60,75,60,75,75,60,75};
+	private final int NODE2_LEDS[] = {75,75,75,75,60,60,75,75,60,90};
+	private final int NODE3_LEDS[] = {75,75,75,60,90,75,75,60,75,75,75};
+	private final int NODE4_LEDS[] = {60,75,60,75,60,75,75,60};
+	private final int NODE5_LEDS[] = {60,90,75,60,75,75,75,90,75,75,60};
+	private final int NODE6_LEDS[] = {75,75,45,90,60,60,90,75,60};
+	private final int NODE7_LEDS[] = {75,75,75,75,60,60,60,60,90};
+		
+	Node node1, node2, node3, node4, node5, node6, node7;
+
+	Pavillon scp;
+
+	//Variables for GUI
+	ControlP5 cp5;
+
+	//Animation Stuff
+	private PGraphics pg, pg2;
+
+	private int counter1;
+	private int counter2;
+
+	private int counter3;
+
+	private float y=0;
+
+	private boolean next;
+
+	private LinkedList<Nozzle> path;
+
+	private PGraphics pg_last;
+
+	private int color;
+
+	private ColorPoint cp;
+
+	private DrawPath dp;
+
+	private int color1;
+
+	private int color2;
+
+	private ArrayList<hsvGradient> hsv1 = new ArrayList<hsvGradient>();
+
+	private int startHue;
+	
+	//DrawPathApplication
+	private ArrayList<DrawPath> dpList= new ArrayList<DrawPath>();
+	private ArrayList<ColorPoint> cpList= new ArrayList<ColorPoint>();
+	int max_path = 1;
+	
+	//Shine
+	private static int SHINE_HOR_MAX = 1;
+	private static int SHINE_VERT_MAX = 8;
+	private ArrayList<HorizontalShine> horizontalShineList = new ArrayList<HorizontalShine>();
+	private ArrayList<VerticalShine> verticalShineList = new ArrayList<VerticalShine>();
+
+	private LinkedList<Nozzle> nozzlePath;
+
+	private ColorFade colorFade1, colorFade2, colorFade3, colorFade4, colorFade5, colorFade6, colorFade7, colorFade8, colorFade9, colorFade10;
+
+	int h=0;
+
+	private ColorFadeList cfl;
+	
+	private GSMovie m;
+
+	private boolean flash;
+	
+	//Initiate as Application
+	public static void main(String args[]) {
+	    PApplet.main(new String[] { "--present", "ProcessingMain" });
+	  }
+
+	public void setup() {
+		
+		
+		size(1200,800);
+		
+		//frameRate(10);
+		
+		//Init GUI with Textfields, Buttons
+		cp5 = new ControlP5(this);
+
+		cp5.addTextfield("IP")
+		   .setPosition(10,10)
+		   .setSize(50,15)
+		   .setColor(color(255,255,255))
+		   .setColorCaptionLabel(color(0,0,0))
+		   .setText(IP);
+		;
+		
+		cp5.addTextfield("PORT")
+		   .setPosition(70,10)
+		   .setSize(30,15)
+		   .setColor(color(255,255,255))
+		   .setColorCaptionLabel(color(0,0,0))
+		   .setText(Integer.toString(PORT));
+		;
+		
+		cp5.addTextfield("ID-1")
+		   .setPosition(110,10)
+		   .setSize(20,15)
+		   .setColor(color(255,255,255))
+		   .setColorCaptionLabel(color(0,0,0))
+		   .setText(Integer.toString(CONTROLLER_ID[0]));
+		;
+		
+		cp5.addTextfield("ID-2")
+		   .setPosition(140,10)
+		   .setSize(20,15)
+		   .setColor(color(255,255,255))
+		   .setColorCaptionLabel(color(0,0,0))
+		   .setText(Integer.toString(CONTROLLER_ID[1]));
+		;
+		
+		cp5.addButton("OK")
+		   .setPosition(170,10)
+		   .setSize(20,15)
+		;
+		
+		
+
+		pg = createGraphics(12, 5, P2D);
+		pg2 = createGraphics(12, 5, P2D);
+
+		
+		node1 = new Node(this);
+		node2 = new Node(this);
+		node3 = new Node(this);
+		node4 = new Node(this);
+		node5 = new Node(this);
+		node6 = new Node(this);
+		node7 = new Node(this);
+
+		node1.add(NODE1_LEDS);
+		node2.add(NODE2_LEDS);
+		node3.add(NODE3_LEDS);
+		node4.add(NODE4_LEDS);
+		node5.add(NODE5_LEDS);
+		node6.add(NODE6_LEDS);
+		node7.add(NODE7_LEDS);
+		
+		scp = new Pavillon(this, IP, PORT, CONTROLLER_ID);
+		scp.add(node1, node2, node3, node4, node5, node6, node7);
+		scp.setAdj();
+		
+		counter1=0;
+		counter2=0;
+		
+		next=true;
+		path = scp.breadthFirstSearch(scp.nozzleList.get(0), scp.nozzleList.get(19));
+		
+		pg_last = createGraphics(12,5,P2D);
+		
+		cp = new ColorPoint(this, color);
+		dp = new DrawPath(path, cp);
+		
+		
+		startHue = 120;
+
+		for(Nozzle n : scp.nozzleList){
+			  hsv1.add(new hsvGradient(this, n, startHue-2*n.id, 120, 120));
+
+		}
+
+		//color1 = (int) random(0,360);
+		  //color2 = (int) random(0,360);
+		  		
+		scp.start();
+		
+		//Horizontal Shine
+		/*for(int i=0; i<SHINE_MAX; i++) {
+		colorMode(HSB, 360, 100, 100);
+		color = color(50, 100, 100);
+		nozzlePath = createRandomPath();
+		horizontalShineList.add(new HorizontalShine(this, nozzlePath, color,(int)random(1,4)));
+		//horizontalShineList.get(i).setUpShine();;
+		}*/
+		
+		//Vertical Shine
+		/*for(int i=0; i<SHINE_MAX; i++) {
+		colorMode(HSB, 360, 100, 100);
+		color = color(50, 0, 100);
+		nozzlePath = createPath(i);
+		verticalShineList.add(new VerticalShine(this, nozzlePath, color,1));
+		//verticalShineList.get(i).setUpShine();;
+		}*/
+		
+
+		colorFade1 = new ColorFade(this, 360, 100, 100);
+		colorFade1.hueFade(0, 100000);
+		colorFade1.brightnessFade(80, 1000);
+		//colorFade1.start();
+		
+		colorFade2 = new ColorFade(this, 360, 100, 100);
+		colorFade2.hueFade(0, 100000);
+		colorFade2.brightnessFade(60, 1000);
+		//colorFade2.start();
+		
+		colorFade3 = new ColorFade(this, 360, 100, 100);
+		colorFade3.hueFade(0, 100000);
+		colorFade3.brightnessFade(40, 1000);
+		//colorFade3.start();
+		
+		colorFade4 = new ColorFade(this, 360, 100, 100);
+		colorFade4.hueFade(0, 100000);
+		colorFade4.brightnessFade(20, 1000);
+		//colorFade4.start();
+		
+		colorFade5 = new ColorFade(this, 360, 100, 100);
+		colorFade5.hueFade(0, 100000);
+		colorFade5.brightnessFade(0, 1000);
+		//colorFade5.start();
+		
+		colorFade6 = new ColorFade(this, 360, 100, 0);
+		colorFade6.hueFade(0, 100000);
+		colorFade6.brightnessFade(100, 1000);
+		//colorFade6.start();
+		
+		colorFade7 = new ColorFade(this, 360, 100, 20);
+		colorFade7.hueFade(0, 100000);
+		colorFade7.brightnessFade(100, 1000);
+		//colorFade7.start();
+		
+		colorFade8 = new ColorFade(this, 360, 100, 40);
+		colorFade8.hueFade(0, 100000);
+		colorFade8.brightnessFade(100, 1000);
+		//colorFade8.start();
+		
+		colorFade9 = new ColorFade(this, 360, 100, 60);
+		colorFade9.hueFade(0, 100000);
+		colorFade9.brightnessFade(100, 1000);
+		//colorFade9.start();
+		
+		colorFade10 = new ColorFade(this, 360, 100, 80);
+		colorFade10.hueFade(0, 100000);
+		colorFade10.brightnessFade(100, 1000);
+		//colorFade10.start();
+		
+		cfl = new ColorFadeList(this);
+		cfl.addColorFade(colorFade1);
+		cfl.addColorFade(colorFade2);
+		cfl.addColorFade(colorFade3);
+		cfl.addColorFade(colorFade4);
+		cfl.addColorFade(colorFade5);
+		cfl.addColorFade(colorFade6);
+		cfl.addColorFade(colorFade7);
+		cfl.addColorFade(colorFade8);
+		//cfl.addColorFade(colorFade9);
+		//cfl.addColorFade(colorFade10);
+		cfl.start();
+		
+		m = new GSMovie(this, "ko.avi");
+		m.loop();
+		
+		flash = true;
+	}
+	
+	// Called every time a new frame is available to read
+	public void movieEvent(GSMovie movie) {
+	    movie.read();
+	  }
+
+
+	public void draw() {
+		
+		
+		//Movie
+		//PImage imgMovie = m.get();
+		/*for(Nozzle n : scp.nozzleList) {
+			PGraphics pg = n.sysA;
+			pg.beginDraw();
+			pg.set(0,0,imgMovie);
+		}*/
+		
+		//image(imgMovie, 0, 0);
+		//PGraphics pg_vid = createGraphics(100,100, P2D);
+		//pg_vid.beginDraw();
+		//pg_vid.set(0,0,imgMovie);
+		//image(pg_vid,0,0);
+		  //colorFade.draw();
+		  //System.out.println(frameRate);
+		  //background(colorFade.hue, colorFade.saturation, colorFade.brightness);
+		
+		/*for(Nozzle n : scp.nozzleList) {
+			  PGraphics pg = n.sysA;
+			  pg.beginDraw();
+			  pg.colorMode(HSB, 360, 100, 100);
+			  pg.noStroke();
+			  pg.fill(colorFade1.hue-n.id*1, colorFade1.saturation, colorFade1.brightness);
+			  pg.rect(0, 0, 2, 1);
+			  pg.rect(4, 0, 2, 1);
+			  pg.fill(colorFade2.hue-n.id*1, colorFade2.saturation, colorFade2.brightness);
+			  pg.rect(0, 1, 2, 1);
+			  pg.rect(4, 1, 2, 1);
+			  pg.fill(colorFade3.hue-n.id*1, colorFade3.saturation, colorFade3.brightness);
+			  pg.rect(0, 2, 2, 1);
+			  pg.rect(4, 2, 2, 1);
+			  pg.fill(colorFade4.hue-n.id*1, colorFade4.saturation, colorFade4.brightness);
+			  pg.rect(0, 3, 2, 1);
+			  pg.rect(4, 3, 2, 1);
+			  pg.fill(colorFade5.hue-n.id*1, colorFade5.saturation, colorFade5.brightness);
+			  pg.rect(0, 4, 2, 1);
+			  pg.rect(4, 4, 2, 1);
+			  pg.fill(colorFade6.hue-n.id*1, colorFade6.saturation, colorFade6.brightness);
+			  pg.rect(2, 0, 2, 1);
+			  pg.rect(6, 0, 2, 1);
+			  pg.fill(colorFade7.hue-n.id*1, colorFade7.saturation, colorFade7.brightness);
+			  pg.rect(2, 1, 2, 1);
+			  pg.rect(6, 1, 2, 1);
+			  pg.fill(colorFade8.hue-n.id*1, colorFade8.saturation, colorFade8.brightness);
+			  pg.rect(2, 2, 2, 1);
+			  pg.rect(6, 2, 2, 1);
+			  pg.fill(colorFade9.hue-n.id*1, colorFade9.saturation, colorFade9.brightness);
+			  pg.rect(2, 3, 2, 1);
+			  pg.rect(6, 3, 2, 1);
+			  pg.fill(colorFade10.hue-n.id*1, colorFade10.saturation, colorFade10.brightness);
+			  pg.rect(2, 4, 2, 1);
+			  pg.rect(6, 4, 2, 1);
+			  pg.endDraw();
+		  }*/
+		
+		
+		  /*for(Nozzle n : scp.nozzleList) {
+			  PGraphics pg = n.sysA;
+			  pg.beginDraw();
+			  pg.colorMode(HSB, 360, 100, 100);
+			  pg.noStroke();
+			  pg.fill(colorFade1.hue, colorFade1.saturation, colorFade1.brightness);
+			  pg.rect(0, 0, pg.width, 1);
+			  pg.fill(colorFade2.hue, colorFade2.saturation-10, colorFade2.brightness);
+			  pg.rect(0, 1, pg.width, 1);
+			  pg.fill(colorFade3.hue, colorFade3.saturation-20, colorFade3.brightness);
+			  pg.rect(0, 2, pg.width, 1);
+			  pg.fill(colorFade4.hue, colorFade4.saturation-30, colorFade4.brightness);
+			  pg.rect(0, 3, pg.width, 1);
+			  pg.fill(colorFade5.hue, colorFade5.saturation-40, colorFade5.brightness);
+			  pg.rect(0, 4, pg.width, 1);
+			  pg.endDraw();
+		  }*/
+		  
+		  /*for(Nozzle n : scp.nozzleList) {
+			  PGraphics pg = n.sysA;
+			  pg.beginDraw();
+			  pg.colorMode(HSB, 360, 100, 100);
+			  pg.noStroke();
+			  pg.fill(colorFade1.hue, colorFade1.saturation, colorFade1.brightness+n.id);
+			  pg.rect(0, 0, pg.width, pg.height);
+			  pg.endDraw();
+		  }*/
+		
+		  //scp.clearSysA();
+		  
+		  
+		  //Glitzer
+		  //if(frameCount%10==0) {
+		  /*for(Nozzle n : nozzlePath) {
+			  PGraphics pg = n.sysA;
+			  pg.beginDraw();
+			  pg.colorMode(HSB, 360, 100, 100);
+			  pg.stroke(0, 0, 50);
+			  pg.strokeWeight(1);
+			  pg.point(random(0+h, 1+h), random(0, pg.height));
+			  pg.endDraw();
+		  }
+		  if(h<12) {
+		  h=h+1;
+		  } else {
+		  h = 0;	  
+		  }*/
+		  //}
+		  //scp.setColor(305, 55, 26);
+		  
+		  color1 = 260;
+		  color2 = 302;
+		  //int startHue = 42;
+		  		  
+		  for(Nozzle n : scp.nozzleList) {
+			  
+
+			  int fr = frameCount%480;
+			  if(fr==0){
+			  hsv1.get(n.id).setHue(260-1*n.id);	  
+			  }else if(fr<120){
+			  //hsv1.get(n.id).updateHue(1);
+			  hsv1.get(n.id).updateSaturation(1);
+			  //hsv1.get(n.id).updateBrightness(1+0.01*n.id);
+			  }else if(fr==120){
+			  hsv1.get(n.id).setHue(260-1*n.id);
+		      }else if(fr<240){
+			  //hsv1.get(n.id).updateHue(1);
+			  hsv1.get(n.id).updateSaturation(-0.2);
+			  //hsv1.get(n.id).updateBrightness(-(1+0.1*n.id));
+		  	  }else if(fr==240){
+		  	  hsv1.get(n.id).setHue(260-1*n.id);
+		  	  }else if(fr<360){
+		  	  //hsv1.get(n.id).updateHue(-1);
+		  	  hsv1.get(n.id).updateSaturation(0.2);
+			  //hsv1.get(n.id).updateBrightness(1+0.1*n.id);	  
+		  	  }else if(fr==360){
+			  hsv1.get(n.id).setHue(260-1*n.id);
+		  	  }else{
+			  //hsv1.get(n.id).updateHue(-1);
+		  	  hsv1.get(n.id).updateSaturation(-1);
+			  //hsv1.get(n.id).updateBrightness(-(1+0.01*n.id));		  		  
+		  	  }
+			  
+		  //hsvGradient hsv1 = new hsvGradient(this, n, startHue-2*n.id);
+		  //hsv1.get(n.id).drawHueGradient();
+		  hsv1.get(n.id).drawSaturationGradient();
+		  }
+
+		  //scp.setColor(302, 75, 50);
+		  //scp.clearSysA();
+		  
+		  
+		  //yellowCold();
+
+		  scp.dimm(80);
+		  //updateLightDot();
+		  //drawLightDot();
+		  
+		  /*for(int i=0; i<horizontalShineList.size(); i++) {
+			  System.out.println("COUNTER: "+i);
+		  
+		  horizontalShineList.get(i).updateShine();
+		  horizontalShineList.get(i).drawShine();
+		  }*/
+		  
+		  
+		  /*for(Iterator<HorizontalShine> shIterator = horizontalShineList.iterator(); shIterator.hasNext();){
+			  HorizontalShine sh = shIterator.next();
+			  
+			  sh.updateShine();
+			  sh.drawShine();
+			  
+			  if(sh.isDead()){
+				  shIterator.remove();
+			  }
+		  }
+		  
+		  while(horizontalShineList.size()<SHINE_HOR_MAX){
+			  nozzlePath = createPath(7,6,5,4,3,2,1,0);
+			  //nozzlePath = createRandomPath();
+			  colorMode(HSB, 360, 100, 100);
+			  color = color((int)random(0,20), 100, 100);
+			  horizontalShineList.add(new HorizontalShine(this, nozzlePath, color, (int) random(2,2)));  
+		  }*/
+		  
+		  
+		  
+		  /*for(Iterator<VerticalShine> shIterator = verticalShineList.iterator(); shIterator.hasNext();){
+			  VerticalShine sh = shIterator.next();
+			  
+			  sh.updateShine();
+			  sh.drawShine();
+			  
+			  if(sh.isDead()){
+				  shIterator.remove();
+			  }
+		  }
+		  
+		  colorMode(HSB, 360, 100, 100);
+		  color = color((int)random(0,360), 100, 100);
+			
+		  if(verticalShineList.size()==0){
+			  //if(frameCount%2000==0){
+			  for(int i=0; i<SHINE_VERT_MAX; i++) {
+					//colorMode(HSB, 360, 100, 100);
+					//color = color((int)random(0,360), 100, 100);
+					nozzlePath = createPath(i);
+					verticalShineList.add(new VerticalShine(this, nozzlePath, color,1));
+					//verticalShineList.get(i).setUpShine();;
+					}
+			  //}
+		  }*/
+		  
+		  /*while(verticalShineList.size()<SHINE_VERT_MAX){
+			  nozzlePath = createRandomPath();
+			  //nozzlePath = createPath(0);
+			  colorMode(HSB, 360, 100, 100);
+			  color = color((int)random(280,320), 0, 100);
+			  verticalShineList.add(new VerticalShine(this, nozzlePath, color));  
+		  }*/
+		  
+		  
+		  
+		  
+		  /*if(horizontalShineList.size()<SHINE_MAX){
+			    
+			  for(int i=0; i<SHINE_MAX; i++){
+			  	nozzlePath = createPath((int)random(0,5));
+			  	horizontalShineList.add(new HorizontalShine(this, nozzlePath, color));
+			  	//horizontalShineList.get(i).setUpShine(); 
+			  }
+		  }*/
+		  
+		  
+		  /*for(int i=0; i<SHINE_MAX; i++) {
+			  verticalShineList.get(i).updateShine();
+			  verticalShineList.get(i).drawShine();
+			  if(verticalShineList.get(i).isDead()){
+				    System.out.println("COUNTER: "+i);
+				    verticalShineList.remove(i);
+				  	nozzlePath = createPath(0,1,2,3,4,5,6,7);
+				  	verticalShineList.add(new VerticalShine(this, nozzlePath, color));
+				  	verticalShineList.get(i).setUpShine();  
+			  }
+		  }*/
+
+		  //yellowCold();
+
+		  //color = 0;
+		  
+		  //scp.clearSysA();
+		  
+		  //yellowCold();
+		  
+		  /*dp.update();
+		  dp.draw();
+		  
+		  if(dp.isDead()){
+			  System.out.println("GO HERE");
+			  path = scp.breadthFirstSearch(scp.nozzleList.get(0), scp.nozzleList.get(19));
+			  cp = new ColorPoint(this, color);
+			  dp = new DrawPath(path, cp);  
+		  }*/
+		  
+		  //drawPathApplication();
+		  
+			  /*if(next){
+			  //System.out.println(path.size());
+			  if(path.size()==0){
+				  int r1=0;
+				  int r2=0;
+				  do{
+				  r1 = (int)random(0,7);
+				  r2 = (int)random(48,65);
+				  }while(r1==r2);
+				  System.out.println(r1);
+				  System.out.println(r2);
+				  path = scp.breadthFirstSearch(scp.nozzleList.get(r1), scp.nozzleList.get(r2));
+				  color = 0;
+			  }
+			  pg = path.removeLast().sysA;
+			  next = !next;
+		  }
+		  
+		  pg.beginDraw();
+		  pg.colorMode(HSB);
+		  pg.fill(color, 255, 255, (frameCount%5)*50);
+		  pg.noStroke();
+		  pg.rect(0, 0, pg.width, pg.height);
+		  pg.endDraw();
+		  
+		  pg_last.beginDraw();
+		  pg_last.colorMode(HSB);
+		  pg_last.background(0);
+		  pg_last.fill(color, 255, 255, 250-(frameCount%5)*50);
+		  //System.out.println(249-frameCount%25*10);
+		  pg_last.noStroke();
+		  pg_last.rect(0, 0, pg_last.width, pg_last.height);
+		  
+		  if(frameCount%5==0){
+			  next = true;
+			  pg_last.background(0);
+			  pg_last = pg;
+		  }
+		  
+		  pg_last.endDraw();*/
+
+		  //ArrayList<Nozzle> ng_list = scp.nozzleList.get((int)random(0,65)).getNeighbour();
+		  
+		  //scp.clearSysA();
+		  /*for(Nozzle n : scp.nozzleList){
+			  pg = n.sysA;
+			  pg.beginDraw();
+			  pg.background(0);
+			  pg.endDraw();
+		  }*/
+		  
+		  /*for(Nozzle n : ng_list) {
+			  pg = n.sysA;
+			  pg.beginDraw();
+			  pg.colorMode(HSB);
+			  pg.fill(color, 255, 255, 255);
+			  pg.noStroke();
+			  pg.rect(0, 0, pg.width, pg.height);
+			  pg.endDraw();
+		  }*/
+		  //System.out.println(frameRate);
+		  
+		  /*//for(Nozzle n : scp.nozzleList) {
+			  pg = scp.nozzleList.get(counter1).sysA;
+			  pg.beginDraw();
+			  pg.background(0);
+			  pg.colorMode(HSB);
+			  for(int i=0; i<pg.height; i++) {
+			  pg.fill(42-5*i, 255-(frameCount%25)*10, 255);
+			  pg.rect(0, i, pg.width, 1);
+			  }
+			  pg.endDraw();
+		  //}*/
+		  
+		  //Animate SystemA
+		  //pg = scp.nozzleList.get(counter1).sysA;
+		  /*pg.beginDraw();
+		  //pg.background(0);
+		  for(int ix=0; ix<pg.width; ix++){
+			pg.colorMode(HSB);	
+			pg.fill(60+50+3*ix+counter1,255,255,(frameCount%25)*10);
+			pg.noStroke();
+			pg.rect(ix, 0, 1, 5);
+		  }
+		  pg.endDraw();
+		  
+		  if(frameCount%25==0){
+			  counter1++;
+		  }
+		  if(counter1>=scp.nozzleList.size()){
+			  counter1=0;
+		  }*/
+			  
+			//Animate SystemB
+		  	  /*counter2 = -400+((frameCount%100)*8);
+			  if(counter2<=0){
+			  for(Nozzle nozzle : scp.nozzleList){
+				  pg2 = nozzle.sysA;
+				  pg2.beginDraw();
+				  pg2.colorMode(RGB);
+				  pg2.background(255);
+				  if(counter2<=-50){
+					  System.out.println("T1: "+(350-(counter2+400)));
+					  for(int ix=0; ix<pg2.height; ix++){
+							pg2.colorMode(HSB);	
+							pg2.fill(42-5*ix,350-(counter2+400),255,255);
+							pg2.noStroke();
+							pg2.rect(0, ix, pg.width, 1);
+					   }
+				  //pg2.background(counter2,0,0);
+				  }else {
+					  System.out.println("T2: "+(50+counter2));
+					  for(int ix=0; ix<pg2.height; ix++){
+							pg2.colorMode(HSB);	
+							pg2.fill(127-5*ix,50+counter2,255,100);
+							pg2.noStroke();
+							pg2.rect(0, ix, pg.width, 1);
+					   }
+				  }
+				  pg2.endDraw();
+			  }
+			  }else{
+			  //counter2 = (frameCount%100)*4;
+			  for(Nozzle nozzle : scp.nozzleList){
+				  pg2 = nozzle.sysA;
+				  pg2.beginDraw();
+				  pg2.colorMode(RGB);
+				  pg2.background(255);
+				  if(counter2<50){
+					  System.out.println("T3: "+(50-counter2));
+					  for(int ix=0; ix<pg2.height; ix++){
+							pg2.colorMode(HSB);	
+							pg2.fill(127-5*ix,50-counter2,255,100);
+							pg2.noStroke();
+							pg2.rect(0, ix, pg.width, 1);
+					   }
+				  //pg2.background(counter2,0,0);
+				  }else {
+					  System.out.println("T4: "+(-50+counter2));
+					  for(int ix=0; ix<pg2.height; ix++){
+							pg2.colorMode(HSB);	
+							pg2.fill(42-5*ix,-50+counter2,255,255);
+							pg2.noStroke();
+							pg2.rect(0, ix, pg.width, 1);
+					   }
+				  }
+				  pg2.endDraw();
+			  }
+			 }*/
+			  
+				//Animate SystemB
+		  	  /*counter2 = -400+((frameCount%100)*8);
+		  	  int color1=42;
+		  	  int color2=127;
+		  	  int dimm=0; //(frameCount%300)/2;
+			  if(counter2<=0){
+			  for(Nozzle nozzle : scp.nozzleList){
+				  pg2 = nozzle.sysA;
+				  pg2.beginDraw();
+				  pg2.colorMode(RGB);
+				  pg2.background(255);
+				  if(counter2<=-200){
+					  System.out.println("T1: "+(350-(counter2+400)));
+					  for(int iy=0; iy<pg2.height; iy++){
+							pg2.colorMode(HSB);	
+							pg2.fill(color1-5*iy,200-(counter2+400),255,255);
+							pg2.noStroke();
+							pg2.rect(0, iy, 2, 1);
+							pg2.rect(4, iy, 2, 1);
+							pg2.rect(8, iy, 2, 1);
+							pg2.rect(12, iy, 2, 1);
+					   }
+				  //pg2.background(counter2,0,0);
+				  }else {
+					  System.out.println("T2: "+(50+counter2));
+					  for(int iy=0; iy<pg2.height; iy++){
+							pg2.colorMode(HSB);	
+							pg2.fill(color2-5*iy,200+counter2,255,255);
+							pg2.noStroke();
+							pg2.rect(0, iy, 2, 1);
+							pg2.rect(4, iy, 2, 1);
+							pg2.rect(8, iy, 2, 1);
+							pg2.rect(12, iy, 2, 1);
+							pg2.colorMode(RGB);	
+							pg2.fill(255,255,255,200-counter2);
+							pg2.noStroke();
+							pg2.rect(0, iy, 2, 1);
+							pg2.rect(4, iy, 2, 1);
+							pg2.rect(8, iy, 2, 1);
+							pg2.rect(12, iy, 2, 1);
+					   }
+				  }
+				  pg2.colorMode(RGB);
+				  pg2.fill(0,0,0,dimm);
+				  pg2.noStroke();
+				  pg2.rect(0, 0, pg.width, pg.height);
+				  pg2.endDraw();
+			  }
+			  }else{
+			  //counter2 = (frameCount%100)*4;
+			  for(Nozzle nozzle : scp.nozzleList){
+				  pg2 = nozzle.sysA;
+				  pg2.beginDraw();
+				  pg2.colorMode(RGB);
+				  pg2.background(0);
+				  if(counter2<200){
+					  System.out.println("T3: "+(50-counter2));
+					  for(int iy=0; iy<pg2.height; iy++){
+							pg2.colorMode(HSB);	
+							pg2.fill(color2-5*iy,200-counter2,255,255);
+							pg2.noStroke();
+							pg2.rect(0, iy, 2, 1);
+							pg2.rect(4, iy, 2, 1);
+							pg2.rect(8, iy, 2, 1);
+							pg2.rect(12, iy, 2, 1);
+							pg2.colorMode(RGB);	
+							pg2.fill(255,255,255,200-counter2);
+							pg2.noStroke();
+							pg2.rect(0, iy, 2, 1);
+							pg2.rect(4, iy, 2, 1);
+							pg2.rect(8, iy, 2, 1);
+							pg2.rect(12, iy, 2, 1);
+					   }
+				  //pg2.background(counter2,0,0);
+				  }else {
+					  System.out.println("T4: "+(-50+counter2));
+					  for(int iy=0; iy<pg2.height; iy++){
+							pg2.colorMode(HSB);	
+							pg2.fill(color1-5*iy,-200+counter2,255,255);
+							pg2.noStroke();
+							pg2.rect(0, iy, 2, 1);
+							pg2.rect(4, iy, 2, 1);
+							pg2.rect(8, iy, 2, 1);
+							pg2.rect(12, iy, 2, 1);
+					   }
+				  }
+				  pg2.colorMode(RGB);
+				  pg2.fill(0,0,0,dimm);
+				  pg2.noStroke();
+				  pg2.rect(0, 0, pg.width, pg.height);
+				  pg2.endDraw();
+			  }
+			 }
+		     
+			  if(counter2<=0){
+				  for(Nozzle nozzle : scp.nozzleList){
+					  pg2 = nozzle.sysA;
+					  pg2.beginDraw();
+					  pg2.colorMode(RGB);
+					  //pg2.background(0);
+					  if(counter2<=-200){
+						  System.out.println("T1: "+(350-(counter2+400)));
+						  for(int iy=0; iy<pg2.height; iy++){
+								pg2.colorMode(HSB);	
+								pg2.fill(color2-5*iy,200-(counter2+400),255,255);
+								pg2.noStroke();
+								pg2.rect(2, iy, 2, 1);
+								pg2.rect(6, iy, 2, 1);
+								pg2.rect(10, iy, 2, 1);
+								pg2.rect(14, iy, 2, 1);
+								pg2.colorMode(RGB);	
+								pg2.fill(255,255,255,200-(counter2+400));
+								pg2.noStroke();
+								pg2.rect(2, iy, 2, 1);
+								pg2.rect(6, iy, 2, 1);
+								pg2.rect(10, iy, 2, 1);
+								pg2.rect(14, iy, 2, 1);
+						   }
+					  //pg2.background(counter2,0,0);
+					  }else {
+						  System.out.println("T2: "+(50+counter2));
+						  for(int iy=0; iy<pg2.height; iy++){
+								pg2.colorMode(HSB);	
+								pg2.fill(color1-5*iy,200+counter2,255,255);
+								pg2.noStroke();
+								pg2.rect(2, iy, 2, 1);
+								pg2.rect(6, iy, 2, 1);
+								pg2.rect(10, iy, 2, 1);
+								pg2.rect(14, iy, 2, 1);
+						   }
+					  }
+					  pg2.colorMode(RGB);
+					  pg2.fill(0,0,0,dimm);
+					  pg2.noStroke();
+					  pg2.rect(0, 0, pg.width, pg.height);
+					  pg2.endDraw();
+				  }
+				  }else{
+				  //counter2 = (frameCount%100)*4;
+				  for(Nozzle nozzle : scp.nozzleList){
+					  pg2 = nozzle.sysA;
+					  pg2.beginDraw();
+					  pg2.colorMode(RGB);
+					  //pg2.background(0);
+					  if(counter2<200){
+						  System.out.println("T3: "+(50-counter2));
+						  for(int iy=0; iy<pg2.height; iy++){
+								pg2.colorMode(HSB);	
+								pg2.fill(color1-5*iy,200-counter2,255,255);
+								pg2.noStroke();
+								pg2.rect(2, iy, 2, 1);
+								pg2.rect(6, iy, 2, 1);
+								pg2.rect(10, iy, 2, 1);
+								pg2.rect(14, iy, 2, 1);
+						   }
+					  //pg2.background(counter2,0,0);
+					  }else {
+						  System.out.println("T4: "+(-50+counter2));
+						  for(int iy=0; iy<pg2.height; iy++){
+								pg2.colorMode(HSB);	
+								pg2.fill(color2-5*iy,-200+counter2,255,255);
+								pg2.noStroke();
+								pg2.rect(2, iy, 2, 1);
+								pg2.rect(6, iy, 2, 1);
+								pg2.rect(10, iy, 2, 1);
+								pg2.rect(14, iy, 2, 1);
+								pg2.colorMode(RGB);	
+								pg2.fill(255,255,255,counter2-200);
+								pg2.noStroke();
+								pg2.rect(2, iy, 2, 1);
+								pg2.rect(6, iy, 2, 1);
+								pg2.rect(10, iy, 2, 1);
+								pg2.rect(14, iy, 2, 1);
+						   }
+					  }
+					  pg2.colorMode(RGB);
+					  pg2.fill(0,0,0,dimm);
+					  pg2.noStroke();
+					  pg2.rect(0, 0, pg.width, pg.height);
+					  pg2.endDraw();
+				  }
+				 }*/
+		  //easyColor();
+			  
+		  /*if(flash){
+			  scp.setColor(0, 0, 100);
+		  }else scp.setColor(0, 0, 0);
+		  
+		  flash = !flash;*/
+		  
+		  //Animate SystemB
+		  counter2 = (frameCount%400);
+		  for(Nozzle nozzle : scp.nozzleList){
+			  pg2 = nozzle.sysB;
+			  pg2.beginDraw();
+			  pg2.colorMode(RGB);
+			  if(counter2<200){
+			  pg2.background(counter2,counter2,counter2);
+			  }else pg2.background(200+(200-counter2),200+(200-counter2),200+(200-counter2));
+			  pg2.endDraw();
+		  }
+		  		  
+		  //Draw on GUI  
+		  node1.drawOnGui(10, 50);
+		  node2.drawOnGui(150, 50);
+		  node3.drawOnGui(300, 50);
+		  node4.drawOnGui(450, 50);
+		  node5.drawOnGui(600, 50);
+		  node6.drawOnGui(750, 50);
+		  node7.drawOnGui(900, 50);
+		  
+		  //Send DMX-Data
+		  //scp.send();
+		    //tint(255, 20);
+		    //image(m, mouseX-m.width/2, mouseY-m.height/2);
+
+	}
+
+	
+	public void easyColor() {
+		
+		scp.clearSysA();
+
+		for(Iterator<HorizontalShine> shIterator = horizontalShineList.iterator(); shIterator.hasNext();){
+		  HorizontalShine sh = shIterator.next();
+		  
+		  sh.updateShine();
+		  sh.drawShine();
+		  
+		  if(sh.isDead()){
+			  shIterator.remove();
+		  }
+	  }
+	  
+	  while(horizontalShineList.size()<SHINE_HOR_MAX){
+		  nozzlePath = createPath(7,6,5,4,3,2,1,0);
+		  //nozzlePath = createRandomPath(0, 17, 57, 65);
+		  colorMode(HSB, 360, 100, 100);
+		  color = color((int)random(0,20), 100, 100);
+		  horizontalShineList.add(new HorizontalShine(this, nozzlePath, color, (int) random(2,2)));  
+	  }
+	}
+	
+	public LinkedList<Nozzle> createRandomPath(int r1_start, int r1_end, int r2_start, int r2_end) {
+	LinkedList<Nozzle> randomPath = new LinkedList<Nozzle>();
+	do{
+      int r1=0;
+	  int r2=0;
+	  do{
+	    r1 = (int)random(r1_start,r1_end);
+	    r2 = (int)random(r2_start,r2_end);
+	    //System.out.println("randomPath.size: "+randomPath.size());
+	  }while(r1==r2 | r1>r2);
+	  randomPath = scp.breadthFirstSearch(scp.nozzleList.get(r1), scp.nozzleList.get(r2));
+	}while(randomPath.size()<5);
+	return randomPath;
+	}
+	
+	public LinkedList<Nozzle> createClosedPath() {
+		LinkedList<Nozzle> randomPath = new LinkedList<Nozzle>();
+		do{
+	      int r1=0;
+		  int r2=0;
+		  do{
+		    r1 = (int)random(0,16);
+		    r2 = (int)random(0,65);
+		    //System.out.println("randomPath.size: "+randomPath.size());
+		  }while(r1==r2 | r1>r2);
+		  randomPath = scp.breadthFirstSearch(scp.nozzleList.get(r1), scp.nozzleList.get(r2));
+		}while(randomPath.size()<5);
+		return randomPath;
+		}
+	
+	public LinkedList<Nozzle> createPath(int...i) {
+		LinkedList<Nozzle> path = new LinkedList<Nozzle>();
+		for(int f : i){
+		path.add(scp.nozzleList.get(f));
+		}
+		return path;
+	}
+
+	public void drawPathApplication() {
+		if(dpList.size()<max_path){
+			int r1=0;
+			int r2=0;
+			do{
+			r1 = (int)random(0,0);
+			r2 = (int)random(20,20);
+			}while(r1==r2);
+			LinkedList<Nozzle> randomPath = scp.breadthFirstSearch(scp.nozzleList.get(r1), scp.nozzleList.get(r2));
+			ColorPoint cp = new ColorPoint(this, (int) random(180,240));
+			dpList.add(new DrawPath(randomPath, cp));
+		}
+		
+		for(Iterator<DrawPath> dpIterator = dpList.iterator(); dpIterator.hasNext();){
+		//for(DrawPath dp : dpList){
+			DrawPath dp = dpIterator.next();
+			dp.update();
+			dp.draw();
+			
+			if(dp.isDead()){
+				  System.out.println("GO HERE");
+				  dpIterator.remove();
+				  //path = scp.breadthFirstSearch(scp.nozzleList.get(0), scp.nozzleList.get(19));
+				  //cp = new ColorPoint(this, color);
+				  //dp = new DrawPath(path, cp);  
+			}
+		}
+	}
+	
+	public void yellowCold(){
+		//Animate SystemB
+	  	  counter2 = -400+((frameCount%800)*1);
+	  	  int color1=60;
+	  	  int color2=180;
+	  	  int dimm=0; //(frameCount%300)/2;
+		  if(counter2<=0){
+		  for(Nozzle nozzle : scp.nozzleList){
+			  pg2 = nozzle.sysA;
+			  pg2.beginDraw();
+			  pg2.colorMode(RGB);
+			  pg2.background(255);
+			  if(counter2<=-200){
+				  //System.out.println("T1: "+(350-(counter2+400)));
+				  for(int iy=0; iy<pg2.height; iy++){
+						pg2.colorMode(HSB);	
+						pg2.fill(color1-5*iy,200-(counter2+400),255,255);
+						pg2.noStroke();
+						pg2.rect(0, iy, pg.width, 1);
+				   }
+			  //pg2.background(counter2,0,0);
+			  }else {
+				  //System.out.println("T2: "+(50+counter2));
+				  for(int iy=0; iy<pg2.height; iy++){
+						pg2.colorMode(HSB);	
+						pg2.fill(color2+5*iy,200+counter2,255,255);
+						pg2.noStroke();
+						pg2.rect(0, iy, pg.width, 1);
+						pg2.colorMode(RGB);	
+						pg2.fill(255,255,255,200-counter2);
+						pg2.noStroke();
+						pg2.rect(0, iy, pg.width, 1);
+				   }
+			  }
+			  pg2.colorMode(RGB);
+			  pg2.fill(0,0,0,dimm);
+			  pg2.noStroke();
+			  pg2.rect(0, 0, pg.width, pg.height);
+			  pg2.endDraw();
+			  
+			  /*for(int ix=0; ix<pg2.width; ix++){
+			  pg2.beginDraw();
+			  pg2.colorMode(RGB);
+			  pg2.fill(0,0,0,255);
+			  pg2.rect(ix,y,1,1);
+			  pg2.endDraw();
+			  }*/
+			  
+		  }
+		  }else{
+		  //counter2 = (frameCount%100)*4;
+		  for(Nozzle nozzle : scp.nozzleList){
+			  pg2 = nozzle.sysA;
+			  pg2.beginDraw();
+			  pg2.colorMode(RGB);
+			  pg2.background(0);
+			  if(counter2<200){
+				  //System.out.println("T3: "+(50-counter2));
+				  for(int iy=0; iy<pg2.height; iy++){
+						pg2.colorMode(HSB);	
+						pg2.fill(color2+5*iy,200-counter2,255,255);
+						pg2.noStroke();
+						pg2.rect(0, iy, pg.width, 1);
+						pg2.colorMode(RGB);	
+						pg2.fill(255,255,255,200-counter2);
+						pg2.noStroke();
+						pg2.rect(0, iy, pg.width, 1);
+				   }
+			  //pg2.background(counter2,0,0);
+			  }else {
+				  //System.out.println("T4: "+(-50+counter2));
+				  for(int iy=0; iy<pg2.height; iy++){
+						pg2.colorMode(HSB);	
+						pg2.fill(color1-5*iy,-200+counter2,255,255);
+						pg2.noStroke();
+						pg2.rect(0, iy, pg.width, 1);
+				   }
+			  }
+			  pg2.colorMode(RGB);
+			  pg2.fill(0,0,0,0);
+			  pg2.noStroke();
+			  pg2.rect(0, 0, pg.width, pg.height);
+			  pg2.endDraw();
+			  
+		  }
+		  
+		 }
+	  scp.dimm(100);
+	}
+
+	
+	@SuppressWarnings("deprecation")
+	public void controlEvent(ControlEvent theEvent) {
+		  println(theEvent.controller().name());	  
+	}
+
+		// function buttonA will receive changes from 
+		// controller with name buttonA
+	public void OK(int theValue) {
+		  println("a button event from buttonA: "+theValue);
+		  scp.setIP_ADRESS(cp5.get(Textfield.class,"IP").getText());
+		  scp.setPORT(Integer.parseInt(cp5.get(Textfield.class,"PORT").getText()));
+		  int[] id = {Integer.parseInt(cp5.get(Textfield.class,"ID-1").getText()),
+				      Integer.parseInt(cp5.get(Textfield.class,"ID-2").getText())};
+		  scp.setID(id);
+	}
+
+}
