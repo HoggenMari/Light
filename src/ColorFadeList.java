@@ -45,7 +45,7 @@ public class ColorFadeList extends Thread {
 			int huePassedTime = timer - cf.hueSavedTime;
 			if(cf.activeSaturation) {
 			if (saturationPassedTime >= cf.saturationTotalTime) {
-				System.out.println("SAURATIONTIME "+p.millis());
+				//System.out.println("SAURATIONTIME "+p.millis());
 				p.colorMode(PConstants.HSB, 360, 100, 100);
 			    cf.saturation = cf.saturation + cf.saturationAdd;
 			    //p.background(hue, saturation, brightness);
@@ -82,7 +82,7 @@ public class ColorFadeList extends Thread {
 			}
 			if(cf.activeHue) {
 				if (huePassedTime >= cf.hueTotalTime) {
-					System.out.println("ACTIVEHUE: "+p.millis());
+					//System.out.println("ACTIVEHUE: "+p.millis());
 					p.colorMode(PConstants.HSB, 360, 100, 100);
 				    cf.hue = cf.hue + cf.hueAdd;
 				    //p.background(hue, saturation, brightness);

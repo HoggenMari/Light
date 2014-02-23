@@ -88,9 +88,11 @@ public class discoDot {
 		pg.beginDraw();
 		pg.colorMode(PConstants.HSB, 360, 100, 100);
 		int num = (int) p.random(0, 5);
-		pg.stroke(dot.c.hue, dot.c.saturation, dot.c.brightness);
-		pg.point(dot.x, 1);
-		pg.point(dot.x, 3);
+		pg.fill(dot.c.hue, dot.c.saturation, dot.c.brightness, 180);
+		pg.noStroke();
+		pg.rect(dot.x, 0, 1, 1);
+		pg.rect(dot.x, 2, 1, 1);
+		pg.rect(dot.x, 4, 1, 1);
 		//pg.point(dot.x, 4);
 		pg.endDraw();
 		}
