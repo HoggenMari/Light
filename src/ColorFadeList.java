@@ -17,6 +17,10 @@ public class ColorFadeList extends Thread {
 		colorFadeList.add(cf);
 	}
 	
+	public ColorFade get(int num) {
+		return colorFadeList.get(num);
+	}
+	
 	public void start() {
 		super.start();
 	}
@@ -39,7 +43,7 @@ public class ColorFadeList extends Thread {
 			int saturationPassedTime = timer - cf.saturationSavedTime;
 			int brightnessPassedTime = timer - cf.brightnessSavedTime;
 			int huePassedTime = timer - cf.hueSavedTime;
-			/*if(cf.activeSaturation) {
+			if(cf.activeSaturation) {
 			if (saturationPassedTime >= cf.saturationTotalTime) {
 				System.out.println("SAURATIONTIME "+p.millis());
 				p.colorMode(PConstants.HSB, 360, 100, 100);
@@ -56,7 +60,7 @@ public class ColorFadeList extends Thread {
 				}
 			}
 			}
-			}*/
+			}
 			if(cf.activeBrightness) {
 			if (brightnessPassedTime >= cf.brightnessTotalTime) {
 				//System.out.println("ACTIVEBRIGHTNESS: "+cf+" "+p.millis()+" "+cf.brightness);
@@ -76,7 +80,7 @@ public class ColorFadeList extends Thread {
 				}
 			}
 			}
-			/*if(cf.activeHue) {
+			if(cf.activeHue) {
 				if (huePassedTime >= cf.hueTotalTime) {
 					System.out.println("ACTIVEHUE: "+p.millis());
 					p.colorMode(PConstants.HSB, 360, 100, 100);
@@ -93,7 +97,7 @@ public class ColorFadeList extends Thread {
 						cf.hueAdd = 1;
 					}
 			}
-			}*/
+			}
 		}
 		//System.out.println("FERTIG: "+p.millis());
 		}

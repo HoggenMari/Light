@@ -376,6 +376,7 @@ public class Pavillon extends Thread {
 			pg.beginDraw();
 			pg.colorMode(PConstants.HSB);
 			pg.fill(0, 0, 0, alpha);
+			pg.noStroke();
 			pg.rect(0, 0, pg.width, pg.height);
 			pg.endDraw();
 		}

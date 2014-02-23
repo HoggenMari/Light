@@ -92,7 +92,11 @@ public class ProcessingMain extends PApplet {
 	private GSMovie m;
 
 	private boolean flash;
+
+	private ArrayList<discoDot> discoDotList = new ArrayList<discoDot>();
 	
+	double k = 1.0;
+	  
 	//Initiate as Application
 	public static void main(String args[]) {
 	    PApplet.main(new String[] { "--present", "ProcessingMain" });
@@ -277,10 +281,19 @@ public class ProcessingMain extends PApplet {
 		//cfl.addColorFade(colorFade10);
 		cfl.start();
 		
-		m = new GSMovie(this, "ko.avi");
-		m.loop();
+		//m = new GSMovie(this, "ko.avi");
+		//m.loop();
 		
 		flash = true;
+		
+		ColorFade cf = new ColorFade(this, 180, 50, 30);
+		cf.brightnessFade(60, 1000);
+		cf.start();
+		
+		for(Nozzle n : scp.nozzleList) {
+		discoDotList.add(new discoDot(this, n));
+		}
+		
 	}
 	
 	// Called every time a new frame is available to read
@@ -288,6 +301,15 @@ public class ProcessingMain extends PApplet {
 	    movie.read();
 	  }
 
+	public void discoDots() {
+		int timer = (int) random(5,5);
+		for(discoDot d : discoDotList ) {
+			if(frameCount%timer==0){
+			d.update();
+			}
+			d.draw();
+		}
+	}
 
 	public void draw() {
 		
@@ -398,7 +420,7 @@ public class ProcessingMain extends PApplet {
 		  //}
 		  //scp.setColor(305, 55, 26);
 		  
-		  color1 = 260;
+		  /*color1 = 260;
 		  color2 = 302;
 		  //int startHue = 42;
 		  		  
@@ -435,15 +457,32 @@ public class ProcessingMain extends PApplet {
 		  //hsvGradient hsv1 = new hsvGradient(this, n, startHue-2*n.id);
 		  //hsv1.get(n.id).drawHueGradient();
 		  hsv1.get(n.id).drawSaturationGradient();
-		  }
+		  }*/
 
 		  //scp.setColor(302, 75, 50);
-		  //scp.clearSysA();
+		  scp.clearSysA();
 		  
-		  
-		  //yellowCold();
+		  discoDots();
 
-		  scp.dimm(80);
+		  yellowCold();
+
+		  if(frameCount%5==0) {
+		  if(k>5) {
+			  k = -5;
+		  } else {
+			  k++;
+		  }
+		  }
+		  
+		  for(Nozzle n : scp.nozzleList) {
+			  PGraphics pg = n.sysA;
+			  pg.beginDraw();
+			  pg.colorMode(HSB, 360, 100, 100);
+			  pg.fill(0, 0, 0, (int) (Math.sin(0.05*n.id+k)*150));
+			  pg.rect(0, 0, pg.width, pg.height);
+			  pg.endDraw();
+		  }
+		  //scp.dimm(80);
 		  //updateLightDot();
 		  //drawLightDot();
 		  
@@ -455,7 +494,7 @@ public class ProcessingMain extends PApplet {
 		  }*/
 		  
 		  
-		  /*for(Iterator<HorizontalShine> shIterator = horizontalShineList.iterator(); shIterator.hasNext();){
+		  for(Iterator<HorizontalShine> shIterator = horizontalShineList.iterator(); shIterator.hasNext();){
 			  HorizontalShine sh = shIterator.next();
 			  
 			  sh.updateShine();
@@ -472,7 +511,7 @@ public class ProcessingMain extends PApplet {
 			  colorMode(HSB, 360, 100, 100);
 			  color = color((int)random(0,20), 100, 100);
 			  horizontalShineList.add(new HorizontalShine(this, nozzlePath, color, (int) random(2,2)));  
-		  }*/
+		  }
 		  
 		  
 		  
@@ -895,6 +934,7 @@ public class ProcessingMain extends PApplet {
 		  
 		  flash = !flash;*/
 		  
+		  
 		  //Animate SystemB
 		  counter2 = (frameCount%400);
 		  for(Nozzle nozzle : scp.nozzleList){
@@ -915,6 +955,8 @@ public class ProcessingMain extends PApplet {
 		  node5.drawOnGui(600, 50);
 		  node6.drawOnGui(750, 50);
 		  node7.drawOnGui(900, 50);
+		  
+		  
 		  
 		  //Send DMX-Data
 		  //scp.send();

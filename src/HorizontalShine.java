@@ -24,9 +24,9 @@ public class HorizontalShine {
 		this.color = color;
 		this.speed = speed;
 		
-		int rhue = (int) p.random(0,360);
+		int rhue = (int) p.random(62,62);
 		colorFade1 = new ColorFade(p, rhue, 100, 100);
-		colorFade1.hueFade(rhue - 100, 10000);
+		colorFade1.hueFade(rhue - 10, 10000);
 		colorFade1.start();
 		
 		p.colorMode(PConstants.HSB, 360, 100, 100, 100);
@@ -87,12 +87,14 @@ public class HorizontalShine {
 				pg.noStroke();
 				pg.colorMode(PConstants.HSB, 360, 100, 100);
 				System.out.println("ColorFade: "+colorFade1.hue);
-				pg.fill(ld.col, colorFade1.saturation, colorFade1.brightness,ld.lifetime);
+				pg.fill(colorFade1.hue, colorFade1.saturation, colorFade1.brightness,ld.lifetime);
 				System.out.println(ld.lifetime);
-				pg.rect((int)ld.x,(int)ld.y,speed,5);
-				pg.stroke(colorFade1.hue, 0, 100);
+				//pg.rect((int)ld.x,(int)ld.y,speed,5);
+				pg.stroke(colorFade1.hue, 0, 100, ld.lifetime);
 				pg.strokeWeight(1);
-				//pg.point(p.random(ld.x-20, ld.x), p.random(0, pg.height));
+				int ldx = (int) p.random(ld.x-20, ld.x);
+				//pg.line(ldx, ld.y, ldx, 5);
+				pg.point(p.random(ld.x-20, ld.x), p.random(0, pg.height));
 				pg.endDraw();
 				//ld.lifetime -= 1;
 			}else{
