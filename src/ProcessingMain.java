@@ -96,6 +96,8 @@ public class ProcessingMain extends PApplet {
 	private ArrayList<discoDot> discoDotList = new ArrayList<discoDot>();
 	
 	double k = 1.0;
+
+	private RandomLampManager rlm, rlm2;
 	  
 	//Initiate as Application
 	public static void main(String args[]) {
@@ -301,6 +303,9 @@ public class ProcessingMain extends PApplet {
 		discoDotList.add(new discoDot(this, n));
 		}
 		
+		rlm = new RandomLampManager(this, scp);
+		rlm2 = new RandomLampManager(this, scp);
+
 	}
 	
 	// Called every time a new frame is available to read
@@ -309,7 +314,7 @@ public class ProcessingMain extends PApplet {
 	  }
 
 	public void discoDots() {
-		int timer = (int) random(10,10);
+		int timer = (int) random(5,5);
 		for(discoDot d : discoDotList ) {
 			if(frameCount%timer==0){
 			d.update();
@@ -468,6 +473,8 @@ public class ProcessingMain extends PApplet {
 
 		  scp.clearSysA();
 
+			rlm.draw();
+			rlm2.draw();
 
 		  PGraphics randomLamp = scp.nozzleList.get((int) random(4,4)).sysB;
 		  randomLamp.beginDraw();

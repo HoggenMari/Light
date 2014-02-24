@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.Iterator;
 
 import processing.core.PApplet;
 import processing.core.PConstants;
@@ -43,7 +44,7 @@ public class ColorFadeList extends Thread {
 			int saturationPassedTime = timer - cf.saturationSavedTime;
 			int brightnessPassedTime = timer - cf.brightnessSavedTime;
 			int huePassedTime = timer - cf.hueSavedTime;
-			if(cf.activeSaturation) {
+			if(cf.activeSaturation && cf.saturationLoop<cf.saturationLoopMax) {
 			if (saturationPassedTime >= cf.saturationTotalTime) {
 				//System.out.println("SAURATIONTIME "+p.millis());
 				p.colorMode(PConstants.HSB, 360, 100, 100);
@@ -55,13 +56,15 @@ public class ColorFadeList extends Thread {
 				cf.saturationStart = cf.saturation;
 				if(cf.saturationEnd < cf.saturation) {
 					cf.saturationAdd = -1;
+					cf.saturationLoop += 1;
 				}else{ 
 					cf.saturationAdd = 1;
+					cf.saturationLoop += 1;
 				}
 			}
 			}
 			}
-			if(cf.activeBrightness) {
+			if(cf.activeBrightness && cf.brightnessLoop<cf.brightnessLoopMax) {
 			if (brightnessPassedTime >= cf.brightnessTotalTime) {
 				//System.out.println("ACTIVEBRIGHTNESS: "+cf+" "+p.millis()+" "+cf.brightness);
 				p.colorMode(PConstants.HSB, 360, 100, 100);
@@ -70,17 +73,19 @@ public class ColorFadeList extends Thread {
 				cf.brightnessSavedTime = timer; // Save the current time to restart the timer!
 			}
 			if(cf.brightness == cf.brightnessEnd) {
-				System.out.println("CHANGE: "+cf+" "+p.millis()+" "+cf.brightness);
+				//System.out.println("CHANGE: "+cf+" "+p.millis()+" "+cf.brightness);
 				cf.brightnessEnd = cf.brightnessStart;
 				cf.brightnessStart = cf.brightness;
 				if(cf.brightnessEnd < cf.brightness) {
 					cf.brightnessAdd = -1;
+					cf.brightnessLoop += 1;
 				}else{ 
 					cf.brightnessAdd = 1;
+					cf.brightnessLoop += 1;
 				}
 			}
 			}
-			if(cf.activeHue) {
+			if(cf.activeHue && cf.hueLoop<cf.hueLoopMax) {
 				if (huePassedTime >= cf.hueTotalTime) {
 					//System.out.println("ACTIVEHUE: "+p.millis());
 					p.colorMode(PConstants.HSB, 360, 100, 100);
@@ -93,12 +98,27 @@ public class ColorFadeList extends Thread {
 					cf.hueStart = cf.hue;
 					if(cf.hueEnd < cf.hue) {
 						cf.hueAdd = -1;
+						cf.hueLoop += 1;
 					}else{ 
 						cf.hueAdd = 1;
+						cf.hueLoop += 1;
 					}
 			}
 			}
 		}
+		
+		for(Iterator<ColorFade> cfIterator = colorFadeList.iterator(); cfIterator.hasNext();){
+			ColorFade cf = cfIterator.next();
+		
+			if(cf.loop) {
+				//System.out.println("GO1 "+cf.brightnessLoop+" "+cf.brightnessLoopMax);
+			if(cf.hueLoop >= cf.hueLoopMax || cf.saturationLoop >= cf.saturationLoopMax || cf.brightnessLoop >= cf.brightnessLoopMax) {
+				cfIterator.remove();
+				//System.out.println("GO2");
+
+			}
+			}
 		//System.out.println("FERTIG: "+p.millis());
 		}
+	}
 }
