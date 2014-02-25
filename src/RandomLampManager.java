@@ -22,7 +22,7 @@ public class RandomLampManager {
 	}
 	
 	public void drawRandomLamp(){
-		System.out.println("DRAWLAMP");
+		//System.out.println("DRAWLAMP");
 		pg.beginDraw();
 		pg.background(0);
 		pg.colorMode(PConstants.HSB, 360, 100, 100);
@@ -41,10 +41,14 @@ public class RandomLampManager {
 		private PApplet p;
 		private ColorFade colorFade;
 		private int MAX_RANDOM_LAMP = 5;
+		private int minLamp;
+		private int maxLamp;
 
-		public RandomLampManager(PApplet p, Pavillon pavillon) {
+		public RandomLampManager(PApplet p, Pavillon pavillon, int minLamp, int maxLamp) {
 			this.p = p;
 			this.pavillon = pavillon;
+			this.minLamp = minLamp;
+			this.maxLamp = maxLamp;
 			
 			cfl = new ColorFadeList(p);
 			colorFade = new ColorFade(p, 0, 100, 0);
@@ -63,7 +67,7 @@ public class RandomLampManager {
 				colorFade.brightnessFade(100, randomTime, 2);
 				cfl.addColorFade(colorFade);
 				randomLampList.clear();
-				MAX_RANDOM_LAMP = (int) p.random(3, 12);
+				MAX_RANDOM_LAMP = (int) p.random(minLamp, maxLamp);
 			}
 			if(randomLampList.size() < MAX_RANDOM_LAMP) {
 				int random = (int) p.random(0, pavillon.nozzleList.size());

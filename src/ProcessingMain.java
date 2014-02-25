@@ -12,6 +12,7 @@ import java.util.LinkedList;
 import codeanticode.gsvideo.GSMovie;
 import controlP5.ControlEvent;
 import controlP5.ControlP5;
+import controlP5.RadioButton;
 import controlP5.Textfield;
 import processing.core.*;
 
@@ -25,7 +26,7 @@ public class ProcessingMain extends PApplet {
 	private final int[] CONTROLLER_ID = {4, 1};
 	
 	//Init Nozzles, Node, Sculpture Objects
-	private final int NODE1_LEDS[] = {90,60,75,60,75,75,60,75};
+	private final int NODE1_LEDS[] = {75,60,75,60,90,75,60,75};
 	private final int NODE2_LEDS[] = {75,75,75,75,60,60,75,75,60,90};
 	private final int NODE3_LEDS[] = {75,75,75,60,90,75,75,60,75,75,75};
 	private final int NODE4_LEDS[] = {60,75,60,75,60,75,75,60};
@@ -39,6 +40,9 @@ public class ProcessingMain extends PApplet {
 
 	//Variables for GUI
 	ControlP5 cp5;
+	RadioButton r;
+	float[] active = {0, 0};
+	boolean activeArray [] = {false, false};
 
 	//Animation Stuff
 	private PGraphics pg, pg2;
@@ -109,7 +113,7 @@ public class ProcessingMain extends PApplet {
 		
 		size(1200,800);
 		
-		//frameRate(10);
+		//frameRate(1);
 		
 		//Init GUI with Textfields, Buttons
 		cp5 = new ControlP5(this);
@@ -149,6 +153,17 @@ public class ProcessingMain extends PApplet {
 		cp5.addButton("OK")
 		   .setPosition(170,10)
 		   .setSize(20,15)
+		;
+		
+		r = cp5.addRadioButton("radioButton")
+		   .setPosition(220,10)
+		   .setSize(15,15)
+		   .setColorForeground(color(120))
+		   .setColorActive(color(255))
+		   .setColorLabel(color(0))
+		   .setItemsPerRow(5)
+		   .setSpacingColumn(50)
+		   .addItem("Pathos",1)
 		;
 		
 		
@@ -220,7 +235,7 @@ public class ProcessingMain extends PApplet {
 		}*/
 		
 
-		colorFade1 = new ColorFade(this, 360, 100, 100);
+		/*colorFade1 = new ColorFade(this, 360, 100, 100);
 		colorFade1.hueFade(0, 100000);
 		colorFade1.brightnessFade(80, 1000);
 		//colorFade1.start();
@@ -297,15 +312,42 @@ public class ProcessingMain extends PApplet {
 		
 		ColorFade cf = new ColorFade(this, 180, 50, 30);
 		cf.brightnessFade(60, 1000);
-		cf.start();
+		cf.start();*/
 		
+		setupPathosLight();
+		
+
+	}
+	
+	//SETUP PATHOSLIGHT
+	public void setupPathosLight() {
+		//create DiscoDots
 		for(Nozzle n : scp.nozzleList) {
-		discoDotList.add(new discoDot(this, n));
+			discoDotList.add(new discoDot(this, n));
+			}
+		//create LampManager
+		rlm = new RandomLampManager(this, scp, 3, 12);
+		rlm2 = new RandomLampManager(this, scp, 3, 12);
+	}
+	
+	//DRAW PATHOSLIGHT
+	public void drawPathosLight() {
+		//clear Old Frame
+		scp.clearSysA();
+		//scp.dimm(80);
+		//LampManager
+				rlm.draw();
+				rlm2.draw();
+		
+		//DiscoDots
+		int timer = (int) random(15,15);
+		for(discoDot d : discoDotList ) {
+			if(frameCount%timer==0){
+			d.update();
+			}
+			d.draw();
 		}
 		
-		rlm = new RandomLampManager(this, scp);
-		rlm2 = new RandomLampManager(this, scp);
-
 	}
 	
 	// Called every time a new frame is available to read
@@ -325,6 +367,7 @@ public class ProcessingMain extends PApplet {
 
 	public void draw() {
 		
+		//System.out.println(frameRate);
 		
 		//Movie
 		//PImage imgMovie = m.get();
@@ -471,23 +514,22 @@ public class ProcessingMain extends PApplet {
 		  hsv1.get(n.id).drawSaturationGradient();
 		  }*/
 
-		  scp.clearSysA();
-
-			rlm.draw();
-			rlm2.draw();
-
-		  PGraphics randomLamp = scp.nozzleList.get((int) random(4,4)).sysB;
+		  /*PGraphics randomLamp = scp.nozzleList.get((int) random(4,4)).sysB;
 		  randomLamp.beginDraw();
 		  randomLamp.colorMode(HSB, 360, 100, 100);
 		  randomLamp.noStroke();
 		  randomLamp.fill(colorFade11.hue, colorFade11.saturation, colorFade11.brightness);
 		  randomLamp.rect(0, 0, randomLamp.width, randomLamp.height);
-		  randomLamp.endDraw();
+		  randomLamp.endDraw();*/
 		  //scp.setColor(302, 75, 50);
 		  //yellowCold();
 
-		  discoDots();
-
+		  for(int i=0; i<activeArray.length; i++){
+		  if(activeArray[i]){
+			  drawPathosLight();
+		  }
+		  }
+		  
 		  /*yellowCold();
 
 		  if(frameCount%5==0) {
@@ -535,16 +577,19 @@ public class ProcessingMain extends PApplet {
 			  //nozzlePath = createRandomPath();
 			  colorMode(HSB, 360, 100, 100);
 			  color = color((int)random(0,20), 100, 100);
-			  horizontalShineList.add(new HorizontalShine(this, nozzlePath, color, (int) random(2,2)));  
+			  horizontalShineList.add(new HorizontalShine(this, nozzlePath, color, (int) random(1,1)));  
 		  }*/
 		  
 		  
-		  
+		 
+		  //scp.clearSysA();
 		  
 		  /*for(Iterator<VerticalShine> shIterator = verticalShineList.iterator(); shIterator.hasNext();){
 			  VerticalShine sh = shIterator.next();
 			  
+			  if(frameCount%5==0){
 			  sh.updateShine();
+			  }
 			  sh.drawShine();
 			  
 			  if(sh.isDead()){
@@ -566,6 +611,7 @@ public class ProcessingMain extends PApplet {
 					}
 			  //}
 		  }*/
+		  
 		  
 		  /*while(verticalShineList.size()<SHINE_VERT_MAX){
 			  nozzlePath = createRandomPath();
@@ -1176,7 +1222,18 @@ public class ProcessingMain extends PApplet {
 	
 	@SuppressWarnings("deprecation")
 	public void controlEvent(ControlEvent theEvent) {
-		  println(theEvent.controller().name());	  
+		if(theEvent.isFrom(r)) {
+		    print("got an event from "+theEvent.getName()+"\t");
+		    for(int i=0;i<theEvent.getGroup().getArrayValue().length;i++) {
+		    	if(active[i] != theEvent.getGroup().getArrayValue(i)) {
+		    		activeArray[i] =! activeArray[i];
+		    	}
+		    }
+		    println("\t "+theEvent.getValue());
+		    active = theEvent.getGroup().getArrayValue();
+		    scp.clearSysA();
+		    scp.clearSysB();
+		  }  
 	}
 
 		// function buttonA will receive changes from 

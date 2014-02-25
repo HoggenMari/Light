@@ -10,7 +10,7 @@ import processing.core.PGraphics;
 public class VerticalShine {
 	
 	PApplet p;
-	private static int LIGHT_DOT_COUNT=30;
+	private static int LIGHT_DOT_COUNT=1;
 	LinkedList<Nozzle> path = new LinkedList<Nozzle>();
 	ArrayList<LightDot> ldList= new ArrayList<LightDot>();
 	boolean dead = false;
@@ -85,11 +85,11 @@ public class VerticalShine {
 				pg.noStroke();
 				pg.colorMode(PConstants.HSB, 360, 100, 100);
 				pg.fill(ld.col,ld.lifetime);
-				pg.rect((int)ld.x,(int)ld.y,12,speed);
+				pg.rect((int)ld.x,(int)ld.y,12,1);
 				pg.stroke(0, 0, 100);
 				pg.strokeWeight(1);
 				if(ld.hashCode()%10==0) {
-				pg.point(p.random(0, pg.width), p.random(0, pg.height));
+				//pg.point(p.random(0, pg.width), p.random(0, pg.height));
 				}
 				pg.endDraw();
 				//ld.lifetime -= 0.5;
