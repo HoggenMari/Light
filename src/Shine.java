@@ -6,10 +6,14 @@ import processing.core.PGraphics;
 
 
 public class Shine extends HorizontalMove {
+	
 
-	public Shine(LinkedList<Nozzle> path) {
-		super(path);
+	public Shine(PApplet p, LinkedList<Nozzle> path) {
+		super(p, path);
 		// TODO Auto-generated constructor stub
+		//int randomHue = (int) p.random(0, 360);
+		//ColorFade colorFade = new ColorFade(p, randomHue, 100, 100);
+		//colorFade.hueFade(randomHue-60, 500);
 	}
 
 	public void draw() {

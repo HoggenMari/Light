@@ -2,12 +2,17 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 
+import processing.core.PApplet;
+
 public class HorizontalMove {
 
 	protected ArrayList<Dot> dotList = new ArrayList<Dot>();
 	private int DOT_LENGTH = 50;
+	private boolean dead = false;
+	protected PApplet p;
 
-	public HorizontalMove(LinkedList<Nozzle> path) {
+	public HorizontalMove(PApplet p, LinkedList<Nozzle> path) {
+		this.p = p;
 		int lifeSizeFactor = 255/(DOT_LENGTH-1);
 		for(int i=0; i<DOT_LENGTH; i++) {
 			dotList.add(new Dot(-1-i, 0, 255-i*lifeSizeFactor, path));
@@ -33,7 +38,18 @@ public class HorizontalMove {
 				}
 				
 				//System.out.println("Position X:"+ld.x);	
-			}
+		}
+		if(dotList.size()==0){
+			dead = true;
+		}
+	}
+	
+	public void draw(){
+		
+	}
+	
+	public boolean isDead() {
+		return dead;
 	}
 	
 }

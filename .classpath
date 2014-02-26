@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
+	<classpathentry kind="lib" path="libs/core.jar"/>
+	<classpathentry kind="lib" path="libs/gstreamer-java.jar"/>
+	<classpathentry kind="lib" path="libs/GSVideo.jar"/>
+	<classpathentry kind="lib" path="libs/jna.jar"/>
+	<classpathentry kind="lib" path="libs/controlP5/library/controlP5.jar"/>
+	<classpathentry kind="lib" path="libs/RXTXcomm.jar"/>
+	<classpathentry kind="lib" path="libs/serial.jar"/>
+	<classpathentry kind="lib" path="libs/Arduino.jar"/>
+	<classpathentry kind="lib" path="libs/rxtx-2.1.7.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

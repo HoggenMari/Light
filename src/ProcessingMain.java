@@ -5,16 +5,18 @@
  */
 
 
+import java.util.AbstractSequentialList;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 
 import codeanticode.gsvideo.GSMovie;
+import controlP5.CheckBox;
 import controlP5.ControlEvent;
 import controlP5.ControlP5;
-import controlP5.RadioButton;
 import controlP5.Textfield;
 import processing.core.*;
+import processing.serial.*;
 
 public class ProcessingMain extends PApplet {
 	
@@ -40,9 +42,15 @@ public class ProcessingMain extends PApplet {
 
 	//Variables for GUI
 	ControlP5 cp5;
-	RadioButton r;
-	float[] active = {0, 0};
+	private CheckBox checkbox;
+	float checkbox_array[] = {0,0};
 	boolean activeArray [] = {false, false};
+	
+	//Arduino Communication
+	static final String ARDUINO_DEVICE = "/dev/tty.usbmodemda121";
+	static int lf = 10; // Linefeed in ASCII
+	String myString = null; // Serial Output String
+	Serial myPort; // Serial port you are using
 
 	//Animation Stuff
 	private PGraphics pg, pg2;
@@ -104,6 +112,8 @@ public class ProcessingMain extends PApplet {
 	private RandomLampManager rlm, rlm2;
 
 	private HorizontalMove horMove;
+
+	private ArrayList<HorizontalMove> horizontalMoveList = new ArrayList<HorizontalMove>();
 	  
 	//Initiate as Application
 	public static void main(String args[]) {
@@ -112,9 +122,16 @@ public class ProcessingMain extends PApplet {
 
 	public void setup() {
 		
-		
 		size(1200,800);
 		
+		//initArduino();
+
+		  String portName = Serial.list()[5];
+		  for(int i=0; i<Serial.list().length; i++) {
+		    System.out.println(Serial.list()[i]);
+		  }
+		  myPort = new Serial(this, portName, 9600);
+		  
 		//frameRate(1);
 		
 		//Init GUI with Textfields, Buttons
@@ -157,17 +174,11 @@ public class ProcessingMain extends PApplet {
 		   .setSize(20,15)
 		;
 		
-		r = cp5.addRadioButton("radioButton")
-		   .setPosition(220,10)
-		   .setSize(15,15)
-		   .setColorForeground(color(120))
-		   .setColorActive(color(255))
-		   .setColorLabel(color(0))
-		   .setItemsPerRow(5)
-		   .setSpacingColumn(50)
-		   .addItem("Pathos",1)
-		;
-		
+		checkbox = cp5.addCheckBox("checkBox").setPosition(220, 10)
+				.setColorForeground(color(120)).setColorActive(color(200))
+				.setColorLabel(color(0)).setSize(15, 15).setItemsPerRow(7)
+				.setSpacingColumn(45).setSpacingRow(20).addItem("Pathos", 0)
+				.addItem("Shine", 50);
 		
 
 		pg = createGraphics(12, 5, P2D);
@@ -319,9 +330,23 @@ public class ProcessingMain extends PApplet {
 		setupPathosLight();
 		
 		nozzlePath = createPath(7,6,5,4,3,2,1,0);
-		horMove = new Shine(nozzlePath);
+		horizontalMoveList.add(new Shine(this, nozzlePath));
+		horizontalMoveList.add(new Glitter(this, nozzlePath));
 		
+	}
+	
+	//SETUP ARDUINO
+	public void initArduino() {
+		for (int i = 0; i < Serial.list().length; i++) {
+			System.out.println("Device " + i + " " + Serial.list()[i]);
+		}
 
+		try {
+			myPort = new Serial(this, Serial.list()[4], 4800);
+			myPort.clear();
+		} catch (Exception e) {
+			System.out.println("Serial konnte nicht initialisiert werden");
+		}
 	}
 	
 	//SETUP PATHOSLIGHT
@@ -338,7 +363,7 @@ public class ProcessingMain extends PApplet {
 	//DRAW PATHOSLIGHT
 	public void drawPathosLight() {
 		//clear Old Frame
-		scp.clearSysA();
+		//scp.clearSysA();
 		//scp.dimm(80);
 		//LampManager
 				rlm.draw();
@@ -353,6 +378,30 @@ public class ProcessingMain extends PApplet {
 			d.draw();
 		}
 		
+	}
+	
+	//SETUP SHINE
+	
+	
+	//DRAW SHINE
+	public void drawShine() {
+		for(Iterator<HorizontalMove> hMIterator = horizontalMoveList.iterator(); hMIterator.hasNext();){
+			  HorizontalMove hM = hMIterator.next();
+			  
+			  hM.update();
+			  hM.draw();
+			  
+			  if(hM.isDead()){
+				  hMIterator.remove();
+			  }
+		  }
+
+		  while(horizontalMoveList.size()<5){
+			  nozzlePath = createPath(7,6,5,4,3,2,1,0);
+			  //nozzlePath = createRandomPath();
+			  horizontalMoveList.add(new Shine(this, nozzlePath));  
+			  horizontalMoveList.add(new Glitter(this, nozzlePath)); 
+		  }
 	}
 	
 	// Called every time a new frame is available to read
@@ -460,9 +509,6 @@ public class ProcessingMain extends PApplet {
 		
 		  scp.clearSysA();
 		  
-		  horMove.update();
-		  ((Shine) horMove).draw();
-		  
 		  //Glitzer
 		  //if(frameCount%10==0) {
 		  /*for(Nozzle n : nozzlePath) {
@@ -531,12 +577,12 @@ public class ProcessingMain extends PApplet {
 		  //scp.setColor(302, 75, 50);
 		  //yellowCold();
 
-		  for(int i=0; i<activeArray.length; i++){
-		  if(activeArray[i]){
+		  if(activeArray[0]){
 			  drawPathosLight();
 		  }
+		  if(activeArray[1]){
+			  drawShine();
 		  }
-		  
 		  /*yellowCold();
 
 		  if(frameCount%5==0) {
@@ -1226,21 +1272,58 @@ public class ProcessingMain extends PApplet {
 	  scp.dimm(100);
 	}
 
+	//ARDUINO SERIAL EVENT
+	public void serialEvent(Serial myPort) {
+		try {
+			myString = myPort.readStringUntil(lf);
+			if (myString != null) {
+				String[] spl1 = split(myString, '\n');
+				spl1 = split(spl1[0], ':');
+
+				for (int i = 0; i < spl1.length; i++) {
+					String[] spl2 = split(spl1[i], ',');
+					if (spl2.length >= 2) {
+						int posX = parseWithDefault(spl2[0], 0);
+						int posY = parseWithDefault(spl2[1], 0);
+						System.out.println(posX);
+						System.out.println(posY);
+					}
+				}
+			}
+		} catch (Exception e) {
+			println("Initialization exception");
+		}
+	}
+	
+	// Auxiliary function for parsing Arduino Data
+	public static int parseWithDefault(String number, int defaultVal) {
+		try {
+			return Integer.parseInt(number);
+		} catch (NumberFormatException e) {
+			return defaultVal;
+		}
+	}
+	
 	
 	@SuppressWarnings("deprecation")
 	public void controlEvent(ControlEvent theEvent) {
-		if(theEvent.isFrom(r)) {
+		if(theEvent.getGroup().getName() == "checkBox") {
 		    print("got an event from "+theEvent.getName()+"\t");
-		    for(int i=0;i<theEvent.getGroup().getArrayValue().length;i++) {
-		    	if(active[i] != theEvent.getGroup().getArrayValue(i)) {
-		    		activeArray[i] =! activeArray[i];
-		    	}
+		    System.out.println(theEvent.getGroup().getArrayValue().length);
+		    if(checkbox_array[0] != theEvent.getGroup().getArrayValue(0)) {
+		    	activeArray[0] =! activeArray[0];
+		    	System.out.println("BUTTON1");
+		    } else if(checkbox_array[1] != theEvent.getGroup().getArrayValue(1)) {
+		    	activeArray[1] =! activeArray[1];
+		    	System.out.println("BUTTON2");
 		    }
+		    
+		}
 		    println("\t "+theEvent.getValue());
-		    active = theEvent.getGroup().getArrayValue();
+		    System.out.println("ACTIVE_ARRAY: "+activeArray[0]+" "+activeArray[1]);
+		    checkbox_array = checkbox.getArrayValue();
 		    scp.clearSysA();
 		    scp.clearSysB();
-		  }  
 	}
 
 		// function buttonA will receive changes from 
