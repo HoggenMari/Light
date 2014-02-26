@@ -124,13 +124,13 @@ public class ProcessingMain extends PApplet {
 		
 		size(1200,800);
 		
-		//initArduino();
+		initArduino();
 
-		  String portName = Serial.list()[5];
+		  /*String portName = Serial.list()[5];
 		  for(int i=0; i<Serial.list().length; i++) {
 		    System.out.println(Serial.list()[i]);
 		  }
-		  myPort = new Serial(this, portName, 9600);
+		  myPort = new Serial(this, portName, 9600);*/
 		  
 		//frameRate(1);
 		
@@ -181,8 +181,8 @@ public class ProcessingMain extends PApplet {
 				.addItem("Shine", 50);
 		
 
-		pg = createGraphics(12, 5, P2D);
-		pg2 = createGraphics(12, 5, P2D);
+		pg = createGraphics(12, 5);
+		pg2 = createGraphics(12, 5);
 
 		
 		node1 = new Node(this);
@@ -211,7 +211,7 @@ public class ProcessingMain extends PApplet {
 		next=true;
 		path = scp.breadthFirstSearch(scp.nozzleList.get(0), scp.nozzleList.get(19));
 		
-		pg_last = createGraphics(12,5,P2D);
+		pg_last = createGraphics(12,5);
 		
 		cp = new ColorPoint(this, color);
 		dp = new DrawPath(path, cp);
@@ -342,7 +342,7 @@ public class ProcessingMain extends PApplet {
 		}
 
 		try {
-			myPort = new Serial(this, Serial.list()[4], 4800);
+			myPort = new Serial(this, Serial.list()[4], 9600);
 			myPort.clear();
 		} catch (Exception e) {
 			System.out.println("Serial konnte nicht initialisiert werden");
