@@ -102,6 +102,8 @@ public class ProcessingMain extends PApplet {
 	double k = 1.0;
 
 	private RandomLampManager rlm, rlm2;
+
+	private HorizontalMove horMove;
 	  
 	//Initiate as Application
 	public static void main(String args[]) {
@@ -316,6 +318,9 @@ public class ProcessingMain extends PApplet {
 		
 		setupPathosLight();
 		
+		nozzlePath = createPath(7,6,5,4,3,2,1,0);
+		horMove = new Shine(nozzlePath);
+		
 
 	}
 	
@@ -453,8 +458,10 @@ public class ProcessingMain extends PApplet {
 			  pg.endDraw();
 		  }*/
 		
-		  //scp.clearSysA();
+		  scp.clearSysA();
 		  
+		  horMove.update();
+		  ((Shine) horMove).draw();
 		  
 		  //Glitzer
 		  //if(frameCount%10==0) {

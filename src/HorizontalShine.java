@@ -82,7 +82,7 @@ public class HorizontalShine {
 			//System.out.println("DRAW: "+ld.x);
 			PGraphics pg = ld.current.sysA;
 
-			if(ld.lifetime-50>0){
+			if(ld.lifetime>0){
 				pg.beginDraw();
 				pg.noStroke();
 				pg.colorMode(PConstants.HSB, 360, 100, 100);
