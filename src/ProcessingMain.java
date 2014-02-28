@@ -27,7 +27,7 @@ public class ProcessingMain extends PApplet {
 	private final int[] CONTROLLER_ID = {4, 1};
 	
 	//Init Nozzles, Node, Sculpture Objects
-	private final int NODE1_LEDS[] = {75,60,75,60,90,75,60,75};
+	private final int NODE1_LEDS[] = {75,60,75,60,60,75,60,75};
 	private final int NODE2_LEDS[] = {75,75,75,75,60,60,75,75,60,90};
 	private final int NODE3_LEDS[] = {75,75,75,60,90,75,75,60,75,75,75};
 	private final int NODE4_LEDS[] = {60,75,60,75,60,75,75,60};
@@ -112,6 +112,12 @@ public class ProcessingMain extends PApplet {
 	private ColorFadeList colorTubeList = new ColorFadeList(this);
 
 	private ColorFade hueFade;
+
+	private NozzleLayer lampLayer;
+
+	private NozzleLayer flowerLayer;
+
+	private PGraphics flowerLayerGraphics;
 	  
 	//Initiate as Application
 	public static void main(String args[]) {
@@ -120,8 +126,8 @@ public class ProcessingMain extends PApplet {
 
 	public void setup() {
 		
-		size(1200,800);
-		
+		size(1050,750);
+	
 		//initArduino();
 		  
 		//frameRate(10);
@@ -171,14 +177,10 @@ public class ProcessingMain extends PApplet {
 				.setColorLabel(color(0,0,255)).setSize(15, 15).setItemsPerRow(7)
 				.setSpacingColumn(45).setSpacingRow(20).addItem("Tube", 0)
 				.addItem("Pathos", 50).addItem("Shine", 100).addItem("Lamp", 150)
-				.addItem("Flower", 200).addItem("HueFade", 250);
-		
-		//checkbox.getItem(0).setState(true);
-		
+				.addItem("Flower", 200).addItem("HueFade", 250);		
 
 		pg = createGraphics(12, 5);
 		pg2 = createGraphics(12, 5);
-
 		
 		node1 = new Node(this);
 		node2 = new Node(this);
@@ -199,164 +201,27 @@ public class ProcessingMain extends PApplet {
 		scp = new Pavillon(this, IP, PORT, CONTROLLER_ID);
 		scp.add(node1, node2, node3, node4, node5, node6, node7);
 		scp.setAdj();
+		scp.start();
 		
 		counter2=0;
 								
-		
 		startHue = 120;
 
 		for(Nozzle n : scp.nozzleList){
 			  hsv1.add(new hsvGradient(this, n, startHue-2*n.id, 120, 120));
-
 		}
-
-		//color1 = (int) random(0,360);
-		  //color2 = (int) random(0,360);
-		  		
-		scp.start();
-		
-		//Horizontal Shine
-		/*for(int i=0; i<SHINE_MAX; i++) {
-		colorMode(HSB, 360, 100, 100);
-		color = color(50, 100, 100);
-		nozzlePath = createRandomPath();
-		horizontalShineList.add(new HorizontalShine(this, nozzlePath, color,(int)random(1,4)));
-		//horizontalShineList.get(i).setUpShine();;
-		}*/
-		
-		//Vertical Shine
-		/*for(int i=0; i<SHINE_MAX; i++) {
-		colorMode(HSB, 360, 100, 100);
-		color = color(50, 0, 100);
-		nozzlePath = createPath(i);
-		verticalShineList.add(new VerticalShine(this, nozzlePath, color,1));
-		//verticalShineList.get(i).setUpShine();;
-		}*/
-		
-		cfFlower = new ColorFade(this, 220, 100, 100);
-		cfFlower.hueFade(180, 2000);
-		//cfFlower.brightnessFade(80, 1000);
-		cfList.addColorFade(cfFlower);
-		
-		
-		int h = 0;
-		lampFade = new ColorFade(this, h, 100, 0);
-		lampFade.hueFade(h+50, 1000);
-		lampFade.brightnessFade(100, 1000);
-		cfList.addColorFade(lampFade);
-
-		sTube = new ColorFade(this, 0, 100, 100);
-		sTube.hueFade(h+50, 1000);
-		
-		sTube2 = new ColorFade(this, 0, 100, 50);
-		sTube2.brightnessFade(40, 1000);
-		
-		colorTubeList.start();
-		
-		colorTubeList.addColorFade(sTube);
-		colorTubeList.addColorFade(sTube2);
-
-
-		/*colorFade1 = new ColorFade(this, 360, 100, 100);
-		colorFade1.hueFade(0, 100000);
-		colorFade1.brightnessFade(80, 1000);
-		//colorFade1.start();
-		
-		colorFade2 = new ColorFade(this, 360, 100, 100);
-		colorFade2.hueFade(0, 100000);
-		colorFade2.brightnessFade(60, 1000);
-		//colorFade2.start();
-		
-		colorFade3 = new ColorFade(this, 360, 100, 100);
-		colorFade3.hueFade(0, 100000);
-		colorFade3.brightnessFade(40, 1000);
-		//colorFade3.start();
-		
-		colorFade4 = new ColorFade(this, 360, 100, 100);
-		colorFade4.hueFade(0, 100000);
-		colorFade4.brightnessFade(20, 1000);
-		//colorFade4.start();
-		
-		colorFade5 = new ColorFade(this, 360, 100, 100);
-		colorFade5.hueFade(0, 100000);
-		colorFade5.brightnessFade(0, 1000);
-		//colorFade5.start();
-		
-		colorFade6 = new ColorFade(this, 360, 100, 0);
-		colorFade6.hueFade(0, 100000);
-		colorFade6.brightnessFade(100, 1000);
-		//colorFade6.start();
-		
-		colorFade7 = new ColorFade(this, 360, 100, 20);
-		colorFade7.hueFade(0, 100000);
-		colorFade7.brightnessFade(100, 1000);
-		//colorFade7.start();
-		
-		colorFade8 = new ColorFade(this, 360, 100, 40);
-		colorFade8.hueFade(0, 100000);
-		colorFade8.brightnessFade(100, 1000);
-		//colorFade8.start();
-		
-		colorFade9 = new ColorFade(this, 360, 100, 60);
-		colorFade9.hueFade(0, 100000);
-		colorFade9.brightnessFade(100, 1000);
-		//colorFade9.start();
-		
-		colorFade10 = new ColorFade(this, 360, 100, 80);
-		colorFade10.hueFade(0, 100000);
-		colorFade10.brightnessFade(100, 1000);
-		//colorFade10.start();
-		
-		
-		colorFade11 = new ColorFade(this, 0, 100, 0);
-		colorFade11.hueFade(50, 2000);
-		colorFade11.brightnessFade(100, 2000);
-		
-		
-		cfl = new ColorFadeList(this);
-		cfl.addColorFade(colorFade1);
-		cfl.addColorFade(colorFade2);
-		cfl.addColorFade(colorFade3);
-		cfl.addColorFade(colorFade4);
-		cfl.addColorFade(colorFade5);
-		cfl.addColorFade(colorFade6);
-		cfl.addColorFade(colorFade7);
-		cfl.addColorFade(colorFade8);
-		//cfl.addColorFade(colorFade9);
-		//cfl.addColorFade(colorFade10);
-		cfl.addColorFade(colorFade11);
-		cfl.start();
 		
 		//m = new GSMovie(this, "ko.avi");
 		//m.loop();
 		
-		flash = true;
-		
-		ColorFade cf = new ColorFade(this, 180, 50, 30);
-		cf.brightnessFade(60, 1000);
-		cf.start();*/
-		
 		cfList.start();
-
 		
 		setupPathosLight();
-		
-		nozzlePath = createPath(0,1,2,3,4,5,6,7);
-		horizontalMoveList.add(new Shine(this, nozzlePath));
-		horizontalMoveList.add(new Glitter(this, nozzlePath));
-		
 		setupYellowBlue();
-		
-		setupHueBackground();
-
-		/*for(int i=0; i<1; i++){
-		nozzlePath = createRandomPath(0,8,58,65);
-		NozzleLayer nLayer = new NozzleLayer(this, scp, nozzlePath);
-		sTubeList.add(new SimpleTube(this, nLayer, colorTubeList.get(i), (int)random(20,20)));
-		}*/
-		//layerGraphics = nLayer.getLayer();
-				
+		setupHueBackground();		
 		setUpLamp();
+		setupFlower();
+		setupSimpleTube();
 	}
 	
 	//SETUP ARDUINO
@@ -373,12 +238,22 @@ public class ProcessingMain extends PApplet {
 		}
 	}
 	
+	//SETUP FLOWER
+	public void setupFlower(){
+		cfFlower = new ColorFade(this, 220, 100, 100);
+		cfFlower.hueFade(180, 2000);
+		cfList.addColorFade(cfFlower);
+		nozzlePath = createPath(7,6,5,4,3,2,1,0);
+		flowerLayer = new NozzleLayer(this, scp, nozzlePath);
+		flowerLayerGraphics = flowerLayer.getLayer();
+	}
+	
 	//SETUP PATHOSLIGHT
 	public void setupPathosLight() {
 		//create DiscoDots
 		for(Nozzle n : scp.nozzleList) {
 			discoDotList.add(new discoDot(this, n));
-			}
+		}
 		//create LampManager
 		rlm = new RandomLampManager(this, scp, 3, 12);
 		rlm2 = new RandomLampManager(this, scp, 3, 12);
@@ -425,6 +300,20 @@ public class ProcessingMain extends PApplet {
 		  }
 	}
 	
+	//SETUP SIMPLETUBE
+	public void setupSimpleTube(){
+		sTube = new ColorFade(this, 0, 100, 100);
+		sTube.hueFade(h+50, 1000);
+		
+		sTube2 = new ColorFade(this, 0, 100, 50);
+		sTube2.brightnessFade(40, 1000);
+		
+		colorTubeList.start();
+		
+		colorTubeList.addColorFade(sTube);
+		colorTubeList.addColorFade(sTube2);
+	}
+	
 	//DRAW SIMPLETUBE
 	public void drawSimpleTube(){
 	for(Iterator<SimpleTube> sTIterator = sTubeList.iterator(); sTIterator.hasNext();){
@@ -467,8 +356,9 @@ public class ProcessingMain extends PApplet {
 	
 	//SETUP LAMP
 	public void setUpLamp() {
-		nLayer = new NozzleLayer(this, scp, nozzlePath);
-		layerGraphics = nLayer.getLayer();
+		nozzlePath = createPath(7,6,5,4,3,2,1,0);
+		lampLayer = new NozzleLayer(this, scp, nozzlePath);
+		layerGraphics = lampLayer.getLayer();
 		int h = 0;
 		lampFade = new ColorFade(this, h, 100, 0);
 		lampFade.hueFade(h+50, 1000);
@@ -484,7 +374,7 @@ public class ProcessingMain extends PApplet {
 		layerGraphics.fill(lampFade.hue, lampFade.saturation, lampFade.brightness);
 		layerGraphics.rect(0, 0, layerGraphics.width, layerGraphics.height);
 		layerGraphics.endDraw();
-		nLayer.add();
+		lampLayer.add();
 	}
 	
 	// Called every time a new frame is available to read
@@ -654,6 +544,10 @@ public class ProcessingMain extends PApplet {
 		  //nLayer.add();
 		  		  
 		  //Draw on GUI  
+		  
+		  colorMode(RGB);
+		  background(255);
+		  		  
 		  node1.drawOnGui(10, 50);
 		  node2.drawOnGui(150, 50);
 		  node3.drawOnGui(300, 50);
@@ -661,20 +555,23 @@ public class ProcessingMain extends PApplet {
 		  node5.drawOnGui(600, 50);
 		  node6.drawOnGui(750, 50);
 		  node7.drawOnGui(900, 50);
+		  
+		  fill(0);
+		  text("Created by Marius Hoggenmüller on 04.02.14. Copyright (c) 2014 Marius Hoggenmüller, LMU Munich. All rights reserved.", 10, 740);
 
 	}
 	
 	
 
 	public void openFlower(){
-		layerGraphics.beginDraw();
-		layerGraphics.clear();
-		layerGraphics.colorMode(HSB,360,100,100);
-		  layerGraphics.fill(cfFlower.hue, cfFlower.saturation, cfFlower.brightness, 255);
-		  layerGraphics.noStroke();
-		  layerGraphics.rect(0, y, 100, -5);
+		flowerLayerGraphics.beginDraw();
+		flowerLayerGraphics.clear();
+		flowerLayerGraphics.colorMode(HSB,360,100,100);
+		flowerLayerGraphics.fill(cfFlower.hue, cfFlower.saturation, cfFlower.brightness, 255);
+		flowerLayerGraphics.noStroke();
+		flowerLayerGraphics.rect(0, y, 100, -5);
 		  
-		  layerGraphics.endDraw();
+		flowerLayerGraphics.endDraw();
 		  
 		  if(y<5) {
 			  y += 0.4;
@@ -693,7 +590,7 @@ public class ProcessingMain extends PApplet {
 		  }
 		 
 		  
-		  nLayer.add();
+		  flowerLayer.add();
 	}
 	
 	public void easyColor() {
