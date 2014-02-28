@@ -1,8 +1,7 @@
 import processing.core.PApplet;
-import processing.core.PConstants;
 
 
-public class ColorFade extends Thread {
+public class ColorFade {
 
 	PApplet p;
 	int hue;
@@ -140,74 +139,5 @@ public class ColorFade extends Thread {
 		}
 		//System.out.println(diff+" "+brightnessTotalTime);	
 		activeBrightness = true;
-	}
-	
-	public void start() {
-	    running = true;
-	    super.start();
-	}
-	
-	public void run() {
-	    while (true) {
-	      draw();
-	    }
-	  }
-	
-	public void draw() {
-		int saturationPassedTime = p.millis() - saturationSavedTime;
-		int brightnessPassedTime = p.millis() - brightnessSavedTime;
-		int huePassedTime = p.millis() - hueSavedTime;
-		if (saturationPassedTime >= saturationTotalTime) {
-			//System.out.println(p.millis());
-			p.colorMode(PConstants.HSB, 360, 100, 100);
-		    saturation = saturation + saturationAdd;
-		    //p.background(hue, saturation, brightness);
-			saturationSavedTime = p.millis(); // Save the current time to restart the timer!
-		if(saturation == saturationEnd) {
-			saturationEnd = saturationStart;
-			saturationStart = saturation;
-			if(saturationEnd < saturation) {
-				saturationAdd = -1;
-			}else{ 
-				saturationAdd = 1;
-			}
-		}
-		}
-		if(activeBrightness) {
-		if (brightnessPassedTime >= brightnessTotalTime) {
-			//System.out.println(p.millis());
-			p.colorMode(PConstants.HSB, 360, 100, 100);
-		    brightness = brightness + brightnessAdd;
-		    //p.background(hue, saturation, brightness);
-			brightnessSavedTime = p.millis(); // Save the current time to restart the timer!
-		}
-		if(brightness == brightnessEnd) {
-			brightnessEnd = brightnessStart;
-			brightnessStart = brightness;
-			if(brightnessEnd < brightness) {
-				brightnessAdd = -1;
-			}else{ 
-				brightnessAdd = 1;
-			}
-		}
-		}
-		if(activeHue) {
-			if (huePassedTime >= hueTotalTime) {
-				//System.out.println(p.millis());
-				p.colorMode(PConstants.HSB, 360, 100, 100);
-			    hue = hue + hueAdd;
-			    //p.background(hue, saturation, brightness);
-				hueSavedTime = p.millis(); // Save the current time to restart the timer!
-			}
-			if(hue == hueEnd) {
-				hueEnd = hueStart;
-				hueStart = hue;
-				if(hueEnd < hue) {
-					hueAdd = -1;
-				}else{ 
-					hueAdd = 1;
-				}
-		}
-		}
 	}
 }

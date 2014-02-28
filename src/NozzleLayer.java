@@ -29,7 +29,8 @@ public class NozzleLayer {
 	
 	public void add() {
 		int currentX = 0;
-		for(Nozzle n : nozzlePath) {
+		for(int i=nozzlePath.size()-1; i>-1; i--) {
+			Nozzle n = nozzlePath.get(i);
 			PGraphics p = scp.nozzleList.get(n.id).sysA;
 			PImage img = pg.get(currentX, 0, currentX+p.width, 5);
 			p.beginDraw();

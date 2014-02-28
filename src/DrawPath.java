@@ -1,7 +1,5 @@
 import java.util.LinkedList;
 
-import processing.core.PGraphics;
-
 public class DrawPath {
 	
 	private LinkedList<Nozzle> path;

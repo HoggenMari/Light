@@ -5,7 +5,6 @@
  */
 
 
-import java.util.AbstractSequentialList;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -14,7 +13,6 @@ import codeanticode.gsvideo.GSMovie;
 import controlP5.CheckBox;
 import controlP5.ControlEvent;
 import controlP5.ControlP5;
-import controlP5.ControllerGroup;
 import controlP5.Textfield;
 import processing.core.*;
 import processing.serial.*;
@@ -44,8 +42,8 @@ public class ProcessingMain extends PApplet {
 	//Variables for GUI
 	ControlP5 cp5;
 	private CheckBox checkbox;
-	float checkbox_array[] = {0,0,0,0};
-	boolean activeArray [] = {false, false, false, false};
+	float checkbox_array[] = {0,0,0,0,0,0};
+	boolean activeArray [] = {false, false, false, false, false, false};
 	
 	//Arduino Communication
 	static final String ARDUINO_DEVICE = "/dev/tty.usbmodemda121";
@@ -56,28 +54,10 @@ public class ProcessingMain extends PApplet {
 	//Animation Stuff
 	private PGraphics pg, pg2;
 
-	private int counter1;
 	private int counter2;
 
-	private int counter3;
 
 	private float y=0;
-
-	private boolean next;
-
-	private LinkedList<Nozzle> path;
-
-	private PGraphics pg_last;
-
-	private int color;
-
-	private ColorPoint cp;
-
-	private DrawPath dp;
-
-	private int color1;
-
-	private int color2;
 
 	private ArrayList<hsvGradient> hsv1 = new ArrayList<hsvGradient>();
 
@@ -85,34 +65,24 @@ public class ProcessingMain extends PApplet {
 	
 	//DrawPathApplication
 	private ArrayList<DrawPath> dpList= new ArrayList<DrawPath>();
-	private ArrayList<ColorPoint> cpList= new ArrayList<ColorPoint>();
 	int max_path = 1;
 	
 	//Shine
 	private static int SHINE_HOR_MAX = 1;
 	private static int SHINE_VERT_MAX = 8;
-	private ArrayList<HorizontalShine> horizontalShineList = new ArrayList<HorizontalShine>();
-	private ArrayList<VerticalShine> verticalShineList = new ArrayList<VerticalShine>();
+	//private ArrayList<HorizontalShine> horizontalShineList = new ArrayList<HorizontalShine>();
 
 	private LinkedList<Nozzle> nozzlePath;
 
-	private ColorFade colorFade1, colorFade2, colorFade3, colorFade4, colorFade5, colorFade6, colorFade7, colorFade8, colorFade9, colorFade10, colorFade11;
-
 	int h=0;
-
-	private ColorFadeList cfl;
 	
 	private GSMovie m;
-
-	private boolean flash;
 
 	private ArrayList<discoDot> discoDotList = new ArrayList<discoDot>();
 	
 	double k = 1.0;
 
 	private RandomLampManager rlm, rlm2;
-
-	private HorizontalMove horMove;
 
 	private ArrayList<HorizontalMove> horizontalMoveList = new ArrayList<HorizontalMove>();
 
@@ -127,21 +97,21 @@ public class ProcessingMain extends PApplet {
 	double x=0.1;
 	double acc=0.05;
 
-	private long ns;
-
-	private float xn;
-
-	private float yn;
-
-	private float xs;
-
-	private double zn;
-
 	private ColorFade cfFlower;
 
 	private int z = 0;
 
-	private ColorFade lampFade;;
+	private ColorFade lampFade;
+
+	private ColorFade sTube;
+	
+	private ArrayList<SimpleTube> sTubeList = new ArrayList<SimpleTube>();
+
+	private ColorFade sTube2;
+
+	private ColorFadeList colorTubeList = new ColorFadeList(this);
+
+	private ColorFade hueFade;
 	  
 	//Initiate as Application
 	public static void main(String args[]) {
@@ -153,12 +123,6 @@ public class ProcessingMain extends PApplet {
 		size(1200,800);
 		
 		//initArduino();
-
-		  /*String portName = Serial.list()[5];
-		  for(int i=0; i<Serial.list().length; i++) {
-		    System.out.println(Serial.list()[i]);
-		  }
-		  myPort = new Serial(this, portName, 9600);*/
 		  
 		//frameRate(10);
 		
@@ -204,9 +168,12 @@ public class ProcessingMain extends PApplet {
 		
 		checkbox = cp5.addCheckBox("checkBox").setPosition(220, 10)
 				.setColorForeground(color(120)).setColorActive(color(200))
-				.setColorLabel(color(0)).setSize(15, 15).setItemsPerRow(7)
-				.setSpacingColumn(45).setSpacingRow(20).addItem("Pathos", 0)
-				.addItem("Shine", 50).addItem("Flower", 100).addItem("Lamp", 150);
+				.setColorLabel(color(0,0,255)).setSize(15, 15).setItemsPerRow(7)
+				.setSpacingColumn(45).setSpacingRow(20).addItem("Tube", 0)
+				.addItem("Pathos", 50).addItem("Shine", 100).addItem("Lamp", 150)
+				.addItem("Flower", 200).addItem("HueFade", 250);
+		
+		//checkbox.getItem(0).setState(true);
 		
 
 		pg = createGraphics(12, 5);
@@ -233,17 +200,8 @@ public class ProcessingMain extends PApplet {
 		scp.add(node1, node2, node3, node4, node5, node6, node7);
 		scp.setAdj();
 		
-		counter1=0;
 		counter2=0;
-		
-		next=true;
-		path = scp.breadthFirstSearch(scp.nozzleList.get(0), scp.nozzleList.get(19));
-		
-		pg_last = createGraphics(12,5);
-		
-		cp = new ColorPoint(this, color);
-		dp = new DrawPath(path, cp);
-		
+								
 		
 		startHue = 120;
 
@@ -286,6 +244,17 @@ public class ProcessingMain extends PApplet {
 		lampFade.hueFade(h+50, 1000);
 		lampFade.brightnessFade(100, 1000);
 		cfList.addColorFade(lampFade);
+
+		sTube = new ColorFade(this, 0, 100, 100);
+		sTube.hueFade(h+50, 1000);
+		
+		sTube2 = new ColorFade(this, 0, 100, 50);
+		sTube2.brightnessFade(40, 1000);
+		
+		colorTubeList.start();
+		
+		colorTubeList.addColorFade(sTube);
+		colorTubeList.addColorFade(sTube2);
 
 
 		/*colorFade1 = new ColorFade(this, 360, 100, 100);
@@ -377,9 +346,17 @@ public class ProcessingMain extends PApplet {
 		horizontalMoveList.add(new Glitter(this, nozzlePath));
 		
 		setupYellowBlue();
+		
+		setupHueBackground();
 
-		nLayer = new NozzleLayer(this, scp, nozzlePath);
-		layerGraphics = nLayer.getLayer();
+		/*for(int i=0; i<1; i++){
+		nozzlePath = createRandomPath(0,8,58,65);
+		NozzleLayer nLayer = new NozzleLayer(this, scp, nozzlePath);
+		sTubeList.add(new SimpleTube(this, nLayer, colorTubeList.get(i), (int)random(20,20)));
+		}*/
+		//layerGraphics = nLayer.getLayer();
+				
+		setUpLamp();
 	}
 	
 	//SETUP ARDUINO
@@ -426,10 +403,7 @@ public class ProcessingMain extends PApplet {
 		}
 		
 	}
-	
-	//SETUP SHINE
-	
-	
+		
 	//DRAW SHINE
 	public void drawShine() {
 		for(Iterator<HorizontalMove> hMIterator = horizontalMoveList.iterator(); hMIterator.hasNext();){
@@ -449,6 +423,68 @@ public class ProcessingMain extends PApplet {
 			  horizontalMoveList.add(new Shine(this, nozzlePath));  
 			  horizontalMoveList.add(new Glitter(this, nozzlePath)); 
 		  }
+	}
+	
+	//DRAW SIMPLETUBE
+	public void drawSimpleTube(){
+	for(Iterator<SimpleTube> sTIterator = sTubeList.iterator(); sTIterator.hasNext();){
+		  SimpleTube sT = sTIterator.next();
+		  
+		  sT.draw();
+		  
+		  if(sT.isDead()){
+			  //System.out.println("DEAD");
+			  sTIterator.remove();
+		  }
+	  }
+	  
+	  while(sTubeList.size()<2){
+		  nozzlePath = createRandomPath(0,8,58,65);
+		  NozzleLayer nLayer = new NozzleLayer(this, scp, nozzlePath);
+		  sTubeList.add(new SimpleTube(this, nLayer, colorTubeList.get((int)random(0,2)), (int)random(20,100), 1+Math.random()*0.5));
+	  }
+	}
+	
+	//SETUP HUEBACKGROUND
+	public void setupHueBackground(){
+		hueFade = new ColorFade(this, 240, 90, 90);
+		hueFade.hueFade(150, 5000);
+		hueFade.brightnessFade(40, 10000);
+		cfList.addColorFade(hueFade);
+	}
+	
+	public void drawHueBackground(){
+		for(Nozzle n : scp.nozzleList){
+			PGraphics pg = n.sysA;
+			pg.beginDraw();
+			pg.colorMode(HSB, 360, 100, 100);
+			pg.noStroke();
+			pg.fill(hueFade.hue-n.id, hueFade.saturation, hueFade.brightness);
+			pg.rect(0, 0, pg.width, pg.height);
+			pg.endDraw();
+		}
+	}
+	
+	//SETUP LAMP
+	public void setUpLamp() {
+		nLayer = new NozzleLayer(this, scp, nozzlePath);
+		layerGraphics = nLayer.getLayer();
+		int h = 0;
+		lampFade = new ColorFade(this, h, 100, 0);
+		lampFade.hueFade(h+50, 1000);
+		lampFade.brightnessFade(100, 1000);
+		cfList.addColorFade(lampFade);
+	}
+	
+	//DRAW LAMO
+	public void NodeLamp() {
+		layerGraphics.beginDraw();
+		layerGraphics.colorMode(HSB,360,100,100);
+		layerGraphics.noStroke();
+		layerGraphics.fill(lampFade.hue, lampFade.saturation, lampFade.brightness);
+		layerGraphics.rect(0, 0, layerGraphics.width, layerGraphics.height);
+		layerGraphics.endDraw();
+		nLayer.add();
 	}
 	
 	// Called every time a new frame is available to read
@@ -472,24 +508,38 @@ public class ProcessingMain extends PApplet {
 		//background(lampFade.hue,lampFade.saturation,lampFade.brightness);
 		  scp.clearSysA();
 
+		  if(activeArray[5]){
+			  drawHueBackground();
+		  }
 		  if(activeArray[0]){
-			  drawPathosLight();
+			  drawSimpleTube();
 		  }
 		  if(activeArray[1]){
-			  drawShine();
+			  drawPathosLight();
 		  }
 		  if(activeArray[2]){
-			  openFlower();
+			  drawShine();
 		  }
 		  if(activeArray[3]){
 			  NodeLamp();
 		  }
+		  if(activeArray[4]){
+			  openFlower();
+		  }
 
 		  drawYellowBlue();
 		  
+		  if(frameCount%100==0){
+		  System.out.println(frameRate);
+		  }	  
+		  /*for(NozzleLayer nL : nLayerList){
+			  nL.add();
+		  }*/
 		  
-
-		  layerGraphics.beginDraw();
+		  
+		  
+		  
+		  /*layerGraphics.beginDraw();
 		  layerGraphics.clear();
 		  layerGraphics.colorMode(RGB);
 		  
@@ -522,15 +572,15 @@ public class ProcessingMain extends PApplet {
 				  z=0;
 				  cfFlower.hue=(int) random(0,60);
 				  }
-				  /*if(acc<0.2){
+				  if(acc<0.2){
 					  acc +=0.02;
 				  } else {
 					  acc = 0.05;
-				  }*/
+				  }
 			  }
 			 
 			  
-			  nLayer.add();
+			  nLayer.add();*/
 			  
 			  
 			  
@@ -601,7 +651,7 @@ public class ProcessingMain extends PApplet {
 		  }*/
 		 		 
 		  
-		  nLayer.add();
+		  //nLayer.add();
 		  		  
 		  //Draw on GUI  
 		  node1.drawOnGui(10, 50);
@@ -614,15 +664,7 @@ public class ProcessingMain extends PApplet {
 
 	}
 	
-	public void NodeLamp() {
-		layerGraphics.beginDraw();
-		layerGraphics.colorMode(HSB,360,100,100);
-		layerGraphics.noStroke();
-		layerGraphics.fill(lampFade.hue, lampFade.saturation, lampFade.brightness);
-		layerGraphics.rect(0, 0, layerGraphics.width, layerGraphics.height);
-		layerGraphics.endDraw();
-		nLayer.add();
-	}
+	
 
 	public void openFlower(){
 		layerGraphics.beginDraw();
@@ -656,7 +698,7 @@ public class ProcessingMain extends PApplet {
 	
 	public void easyColor() {
 		
-		scp.clearSysA();
+		/*scp.clearSysA();
 
 		for(Iterator<HorizontalShine> shIterator = horizontalShineList.iterator(); shIterator.hasNext();){
 		  HorizontalShine sh = shIterator.next();
@@ -675,7 +717,7 @@ public class ProcessingMain extends PApplet {
 		  colorMode(HSB, 360, 100, 100);
 		  color = color((int)random(0,20), 100, 100);
 		  horizontalShineList.add(new HorizontalShine(this, nozzlePath, color, (int) random(2,2)));  
-	  }
+	  }*/
 	}
 	
 	public LinkedList<Nozzle> createRandomPath(int r1_start, int r1_end, int r2_start, int r2_end) {
@@ -706,7 +748,7 @@ public class ProcessingMain extends PApplet {
 		  randomPath = scp.breadthFirstSearch(scp.nozzleList.get(r1), scp.nozzleList.get(r2));
 		}while(randomPath.size()<5);
 		return randomPath;
-		}
+	}
 	
 	public LinkedList<Nozzle> createPath(int...i) {
 		LinkedList<Nozzle> path = new LinkedList<Nozzle>();
@@ -714,35 +756,6 @@ public class ProcessingMain extends PApplet {
 		path.add(scp.nozzleList.get(f));
 		}
 		return path;
-	}
-
-	public void drawPathApplication() {
-		if(dpList.size()<max_path){
-			int r1=0;
-			int r2=0;
-			do{
-			r1 = (int)random(0,0);
-			r2 = (int)random(20,20);
-			}while(r1==r2);
-			LinkedList<Nozzle> randomPath = scp.breadthFirstSearch(scp.nozzleList.get(r1), scp.nozzleList.get(r2));
-			ColorPoint cp = new ColorPoint(this, (int) random(180,240));
-			dpList.add(new DrawPath(randomPath, cp));
-		}
-		
-		for(Iterator<DrawPath> dpIterator = dpList.iterator(); dpIterator.hasNext();){
-		//for(DrawPath dp : dpList){
-			DrawPath dp = dpIterator.next();
-			dp.update();
-			dp.draw();
-			
-			if(dp.isDead()){
-				  System.out.println("GO HERE");
-				  dpIterator.remove();
-				  //path = scp.breadthFirstSearch(scp.nozzleList.get(0), scp.nozzleList.get(19));
-				  //cp = new ColorPoint(this, color);
-				  //dp = new DrawPath(path, cp);  
-			}
-		}
 	}
 	
 	public void setupYellowBlue() {
@@ -892,9 +905,9 @@ public class ProcessingMain extends PApplet {
 	
 	@SuppressWarnings("deprecation")
 	public void controlEvent(ControlEvent theEvent) {
-		if(theEvent.getGroup().getName() == "checkBox") {
+		//if(theEvent.getGroup().getName() == "checkBox") {
 		    print("got an event from "+theEvent.getName()+"\t");
-		    System.out.println(theEvent.getGroup().getArrayValue().length);
+		    //System.out.println(theEvent.getGroup().getArrayValue().length);
 		    if(checkbox_array[0] != theEvent.getGroup().getArrayValue(0)) {
 		    	activeArray[0] =! activeArray[0];
 		    	System.out.println("BUTTON1");
@@ -906,10 +919,16 @@ public class ProcessingMain extends PApplet {
 		    	System.out.println("BUTTON3");
 		    } else if(checkbox_array[3] != theEvent.getGroup().getArrayValue(3)) {
 		    	activeArray[3] =! activeArray[3];
-		    	System.out.println("BUTTON3");
+		    	System.out.println("BUTTON4");
+		    } else if(checkbox_array[4] != theEvent.getGroup().getArrayValue(4)) {
+		    	activeArray[4] =! activeArray[4];
+		    	System.out.println("BUTTON5");
+		    } else if(checkbox_array[5] != theEvent.getGroup().getArrayValue(5)) {
+		    	activeArray[5] =! activeArray[5];
+		    	System.out.println("BUTTON6");
 		    }
 		    
-		}
+		//}
 		    println("\t "+theEvent.getValue());
 		    System.out.println("ACTIVE_ARRAY: "+activeArray[0]+" "+activeArray[1]);
 		    checkbox_array = checkbox.getArrayValue();

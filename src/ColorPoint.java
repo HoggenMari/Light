@@ -9,7 +9,6 @@ public class ColorPoint {
 	private PGraphics pg;
 	private int x;
 	private int y;
-	private double vx = 2;
 	private double vy = 1.05;
 	private int color;
 	private PApplet p;

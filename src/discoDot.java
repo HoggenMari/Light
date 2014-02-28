@@ -9,8 +9,6 @@ import processing.core.PGraphics;
 public class discoDot {
 
 	ArrayList<DiscoDotParticle> list = new ArrayList<DiscoDotParticle>();
-	private int x;
-	private int y;
 	private Nozzle n;
 	private boolean remove;
 	private PApplet p;
@@ -87,7 +85,7 @@ public class discoDot {
 		PGraphics pg = n.sysA;
 		pg.beginDraw();
 		pg.colorMode(PConstants.HSB, 360, 100, 100);
-		int num = (int) p.random(0, 5);
+		//int num = (int) p.random(0, 5);
 		pg.fill(dot.c.hue, dot.c.saturation, dot.c.brightness, 255);
 		pg.noStroke();
 		pg.rect(dot.x, 0, 1, 1);
