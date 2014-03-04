@@ -5,6 +5,7 @@
  */
 
 
+import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -13,6 +14,7 @@ import codeanticode.gsvideo.GSMovie;
 import controlP5.CheckBox;
 import controlP5.ControlEvent;
 import controlP5.ControlP5;
+import controlP5.ControllerGroup;
 import controlP5.Textfield;
 import processing.core.*;
 import processing.serial.*;
@@ -118,6 +120,20 @@ public class ProcessingMain extends PApplet {
 	private NozzleLayer flowerLayer;
 
 	private PGraphics flowerLayerGraphics;
+
+	private ColorFade pushColor;
+
+	private boolean up = true;
+
+	private int alpha = 50;
+
+	private int value1;
+
+	private int value2;
+
+	private boolean alphaUP = true;
+
+	private ArrayList<Pendulum> pendulumList = new ArrayList<Pendulum>();
 	  
 	//Initiate as Application
 	public static void main(String args[]) {
@@ -222,8 +238,10 @@ public class ProcessingMain extends PApplet {
 		setUpLamp();
 		setupFlower();
 		setupSimpleTube();
+		setupPush();
+		
 	}
-	
+		
 	//SETUP ARDUINO
 	public void initArduino() {
 		for (int i = 0; i < Serial.list().length; i++) {
@@ -235,6 +253,127 @@ public class ProcessingMain extends PApplet {
 			myPort.clear();
 		} catch (Exception e) {
 			System.out.println("Serial konnte nicht initialisiert werden");
+		}
+	}
+	
+	//DRAW SIMPLETUBE
+	public void drawPendulum(){
+	for(Iterator<Pendulum> pTIterator = pendulumList .iterator(); pTIterator.hasNext();){
+		  Pendulum p = pTIterator.next();
+		  
+		  p.draw();
+		  
+		  if(p.isDead()){
+			  //System.out.println("DEAD");
+			  pTIterator.remove();
+		  }
+	  }
+	  
+	  while(pendulumList.size()<5){
+		  nozzlePath = createPath(7,6,5,4,3,2,1,0);
+		  NozzleLayer nLayer = new NozzleLayer(this, scp, nozzlePath);
+		  pendulumList.add(new Pendulum(nLayer));
+	  }
+	}
+	
+	//SETUP PUSH
+	public void setupPush(){
+		pushColor = new ColorFade(this, 360, 100, 100);
+		pushColor.hueFade(140, 10000);
+		cfList.addColorFade(pushColor);
+	}
+	
+	//DRAW PUSH
+	public void drawPush(){
+		for(Nozzle n : scp.nozzleList){
+			PGraphics pg = n.sysA;
+			pg.beginDraw();
+			pg.clear();
+			pg.colorMode(HSB,360,100,100,100);
+			pg.noStroke();
+			pg.fill(pushColor.hue-n.id, pushColor.saturation, 100-alpha);
+			//pg.rect(0, y-1, pg.width, 1);
+			pg.fill(pushColor.hue-n.id, pushColor.saturation, alpha);
+			pg.rect(0, y, pg.width, 1);
+			pg.endDraw();
+		}
+		
+		if(up){
+		if(alphaUP ){
+		if(y==0){
+		alpha+=3;
+		}else if(y==1){
+		alpha+=3;
+		}else if(y==2){
+		alpha+=3;
+		}else if(y==3){
+		alpha+=3;
+		}else if(y==4){
+		alpha+=3;
+		}
+		}else{
+		if(y==0){
+		alpha-=3;
+		}else if(y==1){
+		alpha-=3;
+		}else if(y==2){
+		alpha-=3;
+		}else if(y==3){
+		alpha-=3;
+		}else if(y==4){
+		alpha-=3;
+		}
+		}
+		}else{
+		if(alphaUP ){
+		if(y==0){
+		alpha+=3;
+		}else if(y==1){
+		alpha+=3;
+		}else if(y==2){
+		alpha+=3;
+		}else if(y==3){
+		alpha+=3;
+		}else if(y==4){
+		alpha+=3;
+		}
+		}else{
+		if(y==0){
+		alpha-=3;
+		}else if(y==1){
+		alpha-=3;
+		}else if(y==2){
+		alpha-=3;
+		}else if(y==3){
+		alpha-=3;
+		}else if(y==4){
+		alpha-=3;
+		}
+		}	
+		}
+		if(alpha>=100){
+			alphaUP = false;
+		}
+		//if(frameCount%10==0){
+		if(!alphaUP && alpha<=20){
+			alphaUP = true;
+			alpha=20;
+		if(up){
+			y+=1;
+		}else{
+			y-=1;
+		}
+		}
+		//}
+		if(y<=0){
+			up = true;
+			value1=100;
+			value2=0;
+		}
+		if(y>=4){
+			up=false;
+			value1=0;
+			value2=100;
 		}
 	}
 	
@@ -396,7 +535,8 @@ public class ProcessingMain extends PApplet {
 		
 		//colorMode(HSB,360,100,100);
 		//background(lampFade.hue,lampFade.saturation,lampFade.brightness);
-		  scp.clearSysA();
+		  
+		scp.clearSysA();
 
 		  if(activeArray[5]){
 			  drawHueBackground();
@@ -426,8 +566,8 @@ public class ProcessingMain extends PApplet {
 			  nL.add();
 		  }*/
 		  
-		  
-		  
+		  //drawPush();
+		  drawPendulum();
 		  
 		  /*layerGraphics.beginDraw();
 		  layerGraphics.clear();
