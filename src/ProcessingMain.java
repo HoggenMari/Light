@@ -29,7 +29,7 @@ public class ProcessingMain extends PApplet {
 	private final int[] CONTROLLER_ID = {4, 1};
 	
 	//Init Nozzles, Node, Sculpture Objects
-	private final int NODE1_LEDS[] = {75,60,75,60,60,75,60,75};
+	private final int NODE1_LEDS[] = {75,60,75,60,90,75,60,75};
 	private final int NODE2_LEDS[] = {75,75,75,75,60,60,75,75,60,90};
 	private final int NODE3_LEDS[] = {75,75,75,60,90,75,75,60,75,75,75};
 	private final int NODE4_LEDS[] = {60,75,60,75,60,75,75,60};
@@ -44,8 +44,8 @@ public class ProcessingMain extends PApplet {
 	//Variables for GUI
 	ControlP5 cp5;
 	private CheckBox checkbox;
-	float checkbox_array[] = {0,0,0,0,0,0};
-	boolean activeArray [] = {false, false, false, false, false, false};
+	float checkbox_array[] = {0,0,0,0,0,0,0,0};
+	boolean activeArray [] = {false, false, false, false, false, false, false, false};
 	
 	//Arduino Communication
 	static final String ARDUINO_DEVICE = "/dev/tty.usbmodemda121";
@@ -193,7 +193,7 @@ public class ProcessingMain extends PApplet {
 				.setColorLabel(color(0,0,255)).setSize(15, 15).setItemsPerRow(7)
 				.setSpacingColumn(45).setSpacingRow(20).addItem("Tube", 0)
 				.addItem("Pathos", 50).addItem("Shine", 100).addItem("Lamp", 150)
-				.addItem("Flower", 200).addItem("HueFade", 250);		
+				.addItem("Flower", 200).addItem("HueFade", 250).addItem("Pendulum", 300).addItem("Push", 350);		
 
 		pg = createGraphics(12, 5);
 		pg2 = createGraphics(12, 5);
@@ -261,7 +261,7 @@ public class ProcessingMain extends PApplet {
 	for(Iterator<Pendulum> pTIterator = pendulumList .iterator(); pTIterator.hasNext();){
 		  Pendulum p = pTIterator.next();
 		  
-		  p.draw();
+		  p.drawDTubePendulum();
 		  
 		  if(p.isDead()){
 			  //System.out.println("DEAD");
@@ -270,8 +270,8 @@ public class ProcessingMain extends PApplet {
 	  }
 	  
 	  while(pendulumList.size()<5){
-		  nozzlePath = createPath(7,6,5,4,3,2,1,0);
-		  NozzleLayer nLayer = new NozzleLayer(this, scp, nozzlePath);
+		  nozzlePath = createPath(4,3,2,1,0);
+		  HLayer nLayer = new HLayer(this, scp, nozzlePath);
 		  pendulumList.add(new Pendulum(nLayer));
 	  }
 	}
@@ -288,7 +288,6 @@ public class ProcessingMain extends PApplet {
 		for(Nozzle n : scp.nozzleList){
 			PGraphics pg = n.sysA;
 			pg.beginDraw();
-			pg.clear();
 			pg.colorMode(HSB,360,100,100,100);
 			pg.noStroke();
 			pg.fill(pushColor.hue-n.id, pushColor.saturation, 100-alpha);
@@ -301,53 +300,53 @@ public class ProcessingMain extends PApplet {
 		if(up){
 		if(alphaUP ){
 		if(y==0){
-		alpha+=3;
+		alpha+=15;
 		}else if(y==1){
-		alpha+=3;
+		alpha+=15;
 		}else if(y==2){
-		alpha+=3;
+		alpha+=15;
 		}else if(y==3){
-		alpha+=3;
+		alpha+=15;
 		}else if(y==4){
-		alpha+=3;
+		alpha+=15;
 		}
 		}else{
 		if(y==0){
-		alpha-=3;
+		alpha-=15;
 		}else if(y==1){
-		alpha-=3;
+		alpha-=15;
 		}else if(y==2){
-		alpha-=3;
+		alpha-=15;
 		}else if(y==3){
-		alpha-=3;
+		alpha-=15;
 		}else if(y==4){
-		alpha-=3;
+		alpha-=15;
 		}
 		}
 		}else{
 		if(alphaUP ){
 		if(y==0){
-		alpha+=3;
+		alpha+=15;
 		}else if(y==1){
-		alpha+=3;
+		alpha+=15;
 		}else if(y==2){
-		alpha+=3;
+		alpha+=15;
 		}else if(y==3){
-		alpha+=3;
+		alpha+=15;
 		}else if(y==4){
-		alpha+=3;
+		alpha+=15;
 		}
 		}else{
 		if(y==0){
-		alpha-=3;
+		alpha-=15;
 		}else if(y==1){
-		alpha-=3;
+		alpha-=15;
 		}else if(y==2){
-		alpha-=3;
+		alpha-=15;
 		}else if(y==3){
-		alpha-=3;
+		alpha-=15;
 		}else if(y==4){
-		alpha-=3;
+		alpha-=15;
 		}
 		}	
 		}
@@ -408,7 +407,7 @@ public class ProcessingMain extends PApplet {
 				rlm2.draw();
 		
 		//DiscoDots
-		int timer = (int) random(15,15);
+		int timer = (int) random(5,5);
 		for(discoDot d : discoDotList ) {
 			if(frameCount%timer==0){
 			d.update();
@@ -522,7 +521,7 @@ public class ProcessingMain extends PApplet {
 	  }
 
 	public void discoDots() {
-		int timer = (int) random(5,5);
+		int timer = (int) random(1,1);
 		for(discoDot d : discoDotList ) {
 			if(frameCount%timer==0){
 			d.update();
@@ -556,6 +555,12 @@ public class ProcessingMain extends PApplet {
 		  if(activeArray[4]){
 			  openFlower();
 		  }
+		  if(activeArray[6]){
+			  drawPendulum();
+		  }
+		  if(activeArray[7]){
+			  drawPush();
+		  }
 
 		  drawYellowBlue();
 		  
@@ -567,7 +572,7 @@ public class ProcessingMain extends PApplet {
 		  }*/
 		  
 		  //drawPush();
-		  drawPendulum();
+		  //drawPendulum();
 		  
 		  /*layerGraphics.beginDraw();
 		  layerGraphics.clear();
@@ -963,6 +968,12 @@ public class ProcessingMain extends PApplet {
 		    } else if(checkbox_array[5] != theEvent.getGroup().getArrayValue(5)) {
 		    	activeArray[5] =! activeArray[5];
 		    	System.out.println("BUTTON6");
+		    } else if(checkbox_array[6] != theEvent.getGroup().getArrayValue(6)) {
+		    	activeArray[6] =! activeArray[6];
+		    	System.out.println("BUTTON7");
+		    } else if(checkbox_array[7] != theEvent.getGroup().getArrayValue(7)) {
+		    	activeArray[7] =! activeArray[7];
+		    	System.out.println("BUTTON8");
 		    }
 		    
 		//}

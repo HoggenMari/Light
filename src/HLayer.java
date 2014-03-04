@@ -5,21 +5,15 @@ import processing.core.PGraphics;
 import processing.core.PImage;
 
 
-public class NozzleLayer {
-	
-	protected LinkedList<Nozzle> nozzlePath;
-	protected PGraphics pg;
-	protected int totalWidth;
-	protected PApplet p;
-	protected Pavillon scp;
+public class HLayer extends Layer{
 
-	public NozzleLayer(PApplet p, Pavillon scp, LinkedList<Nozzle> nozzlePath) {
-		this.p = p;
-		this.scp = scp;
-		this.nozzlePath = nozzlePath;
+	public HLayer(PApplet p, Pavillon scp, LinkedList<Nozzle> nozzlePath) {
+		super(p, scp, nozzlePath);
+		// TODO Auto-generated constructor stub
 	}
 	
 	public PGraphics getLayer() {
+		int totalWidth = 0;
 		for(Nozzle n : nozzlePath) {
 			totalWidth += n.sysA.width;
 		}
