@@ -144,7 +144,7 @@ public class ProcessingMain extends PApplet {
 		
 		size(1050,750);
 	
-		//initArduino();
+		initArduino();
 		  
 		//frameRate(10);
 		
@@ -230,15 +230,17 @@ public class ProcessingMain extends PApplet {
 		//m = new GSMovie(this, "ko.avi");
 		//m.loop();
 		
-		cfList.start();
 		
-		setupPathosLight();
+		//setupPathosLight();
 		setupYellowBlue();
 		setupHueBackground();		
 		setUpLamp();
 		setupFlower();
 		setupSimpleTube();
-		setupPush();
+		//setupPush();
+		
+		cfList.start();
+
 		
 	}
 		
@@ -249,7 +251,7 @@ public class ProcessingMain extends PApplet {
 		}
 
 		try {
-			myPort = new Serial(this, Serial.list()[4], 9600);
+			myPort = new Serial(this, Serial.list()[4], 4800);
 			myPort.clear();
 		} catch (Exception e) {
 			System.out.println("Serial konnte nicht initialisiert werden");
@@ -261,7 +263,7 @@ public class ProcessingMain extends PApplet {
 	for(Iterator<Pendulum> pTIterator = pendulumList .iterator(); pTIterator.hasNext();){
 		  Pendulum p = pTIterator.next();
 		  
-		  p.drawDTubePendulum();
+		  p.drawHorizontal();;
 		  
 		  if(p.isDead()){
 			  //System.out.println("DEAD");
@@ -300,53 +302,53 @@ public class ProcessingMain extends PApplet {
 		if(up){
 		if(alphaUP ){
 		if(y==0){
-		alpha+=15;
+		alpha+=13;
 		}else if(y==1){
-		alpha+=15;
+		alpha+=11;
 		}else if(y==2){
-		alpha+=15;
+		alpha+=9;
 		}else if(y==3){
-		alpha+=15;
+		alpha+=7;
 		}else if(y==4){
-		alpha+=15;
+		alpha+=3;
 		}
 		}else{
 		if(y==0){
-		alpha-=15;
+		alpha-=13;
 		}else if(y==1){
-		alpha-=15;
+		alpha-=11;
 		}else if(y==2){
-		alpha-=15;
+		alpha-=9;
 		}else if(y==3){
-		alpha-=15;
+		alpha-=7;
 		}else if(y==4){
-		alpha-=15;
+		alpha-=3;
 		}
 		}
 		}else{
 		if(alphaUP ){
 		if(y==0){
-		alpha+=15;
+		alpha+=13;
 		}else if(y==1){
-		alpha+=15;
+		alpha+=11;
 		}else if(y==2){
-		alpha+=15;
+		alpha+=9;
 		}else if(y==3){
-		alpha+=15;
+		alpha+=7;
 		}else if(y==4){
-		alpha+=15;
+		alpha+=3;
 		}
 		}else{
 		if(y==0){
-		alpha-=15;
+		alpha-=13;
 		}else if(y==1){
-		alpha-=15;
+		alpha-=11;
 		}else if(y==2){
-		alpha-=15;
+		alpha-=9;
 		}else if(y==3){
-		alpha-=15;
+		alpha-=7;
 		}else if(y==4){
-		alpha-=15;
+		alpha-=3;
 		}
 		}	
 		}
@@ -407,7 +409,7 @@ public class ProcessingMain extends PApplet {
 				rlm2.draw();
 		
 		//DiscoDots
-		int timer = (int) random(5,5);
+		int timer = (int) random(10,10);
 		for(discoDot d : discoDotList ) {
 			if(frameCount%timer==0){
 			d.update();
@@ -430,7 +432,7 @@ public class ProcessingMain extends PApplet {
 			  }
 		  }
 
-		  while(horizontalMoveList.size()<1){
+		  while(horizontalMoveList.size()<0){
 			  nozzlePath = createPath(7,6,5,4,3,2,1,0);
 			  //nozzlePath = createRandomPath();
 			  horizontalMoveList.add(new Shine(this, nozzlePath));  
@@ -499,8 +501,8 @@ public class ProcessingMain extends PApplet {
 		layerGraphics = lampLayer.getLayer();
 		int h = 0;
 		lampFade = new ColorFade(this, h, 100, 0);
-		lampFade.hueFade(h+50, 1000);
-		lampFade.brightnessFade(100, 1000);
+		lampFade.hueFade(h+50, 1000, 2);
+		lampFade.brightnessFade(100, 1000, 2);
 		cfList.addColorFade(lampFade);
 	}
 	
@@ -562,7 +564,7 @@ public class ProcessingMain extends PApplet {
 			  drawPush();
 		  }
 
-		  drawYellowBlue();
+		  //drawYellowBlue();
 		  
 		  if(frameCount%100==0){
 		  System.out.println(frameRate);
@@ -918,17 +920,42 @@ public class ProcessingMain extends PApplet {
 			myString = myPort.readStringUntil(lf);
 			if (myString != null) {
 				String[] spl1 = split(myString, '\n');
-				spl1 = split(spl1[0], ':');
+				spl1 = split(spl1[0], '-');
+				System.out.println(spl1[0]);
+				if(spl1[0].compareTo("FLASH")==0){
+					System.out.println("BLA");
+					if(horizontalMoveList.size()<1){
+						nozzlePath = createPath(7,6,5,4,3,2,1,0);
+						  //nozzlePath = createRandomPath();
+						  horizontalMoveList.add(new Shine(this, nozzlePath));  
+						  horizontalMoveList.add(new Glitter(this, nozzlePath)); 
+						}
+				}
+				if(spl1[0].compareTo("WII")==0){
+					String[] spl2 = split(spl1[1], '/');
+					//int sender = Integer.parseInt(spl2[0]);
+					System.out.println("SENDER: "+spl2[0]+" "+spl2[1]);
+					spl2 = split(spl2[1], ':');
 
-				for (int i = 0; i < spl1.length; i++) {
-					String[] spl2 = split(spl1[i], ',');
-					if (spl2.length >= 2) {
-						int posX = parseWithDefault(spl2[0], 0);
-						int posY = parseWithDefault(spl2[1], 0);
-						System.out.println(posX);
-						System.out.println(posY);
+					for (int i = 0; i < spl2.length; i++) {
+						String[] spl3 = split(spl2[i], ',');
+						if (spl2.length >= 2) {
+							int posX = parseWithDefault(spl3[0], 0);
+							int posY = parseWithDefault(spl3[1], 0);
+							System.out.println(posX);
+							System.out.println(posY);
+							
+						}
+					}
+					
+					if(horizontalMoveList.size()<1){
+					nozzlePath = createPath(7,6,5,4,3,2,1,0);
+					  //nozzlePath = createRandomPath();
+					  horizontalMoveList.add(new Shine(this, nozzlePath));  
+					  horizontalMoveList.add(new Glitter(this, nozzlePath)); 
 					}
 				}
+				
 			}
 		} catch (Exception e) {
 			println("Initialization exception");

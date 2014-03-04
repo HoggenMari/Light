@@ -5,7 +5,7 @@ import processing.core.PGraphics;
 public class Pendulum {
 	
 	double speed = 1;
-	int timer = 0;
+	int timer = 30;
 	int width = 50;
 	int x = 0;
 	int y = 0;
@@ -135,17 +135,17 @@ public class Pendulum {
 		pg.noStroke();
 		if(value){
 		for(int i=0; i<pg.width-x; i++){
-		pg.fill(220,100-2*i,100,100);
+		pg.fill(60-i,100,100,timer*3);
 		pg.rect(0+x+i, y, 1, width);
 		}
 		}else{
 		for(int i=0; i<pg.width-x; i++){
-		pg.fill(0,100-(2*(pg.width-x)-2*i),100,100);
+		pg.fill(280+i,100,100,timer*3);
 		pg.rect(i, y, 1, width);
 		}	
 		}
 		nozzleLayer.add();
-		speed = speed + 0.5;
+		speed = speed + 0.3;
 		
 		x = x + (int)speed;
 
@@ -158,10 +158,11 @@ public class Pendulum {
 		    speed = speed * -0.93;
 		    System.out.println("GO1");
 		    value = !value;
+			timer--;
+
 		  } 
 		
-		timer++;
-		if(timer==320){
+		if(timer==0){
 			dead = true;
 		}
 	}
