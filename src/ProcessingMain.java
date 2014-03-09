@@ -134,6 +134,10 @@ public class ProcessingMain extends PApplet {
 	private boolean alphaUP = true;
 
 	private ArrayList<Pendulum> pendulumList = new ArrayList<Pendulum>();
+
+	private ArrayList<Strobo> stroboList = new ArrayList<Strobo>();
+	
+	private Sensor s1 = new Sensor(this, 1);
 	  
 	//Initiate as Application
 	public static void main(String args[]) {
@@ -231,7 +235,7 @@ public class ProcessingMain extends PApplet {
 		//m.loop();
 		
 		
-		//setupPathosLight();
+		setupPathosLight();
 		setupYellowBlue();
 		setupHueBackground();		
 		setUpLamp();
@@ -240,7 +244,10 @@ public class ProcessingMain extends PApplet {
 		//setupPush();
 		
 		cfList.start();
-
+		
+		nozzlePath = createPath(4,3,2,1,0);
+		HLayer nLayer = new HLayer(this, scp, nozzlePath);
+		stroboList.add(new Strobo(this, nLayer, 25));
 		
 	}
 		
@@ -251,7 +258,7 @@ public class ProcessingMain extends PApplet {
 		}
 
 		try {
-			myPort = new Serial(this, Serial.list()[4], 4800);
+			myPort = new Serial(this, "/dev/tty.usbmodemfa121", 14400);
 			myPort.clear();
 		} catch (Exception e) {
 			System.out.println("Serial konnte nicht initialisiert werden");
@@ -263,7 +270,7 @@ public class ProcessingMain extends PApplet {
 	for(Iterator<Pendulum> pTIterator = pendulumList .iterator(); pTIterator.hasNext();){
 		  Pendulum p = pTIterator.next();
 		  
-		  p.drawHorizontal();;
+		  p.drawDTubePendulum();
 		  
 		  if(p.isDead()){
 			  //System.out.println("DEAD");
@@ -271,7 +278,7 @@ public class ProcessingMain extends PApplet {
 		  }
 	  }
 	  
-	  while(pendulumList.size()<5){
+	  while(pendulumList.size()<0){
 		  nozzlePath = createPath(4,3,2,1,0);
 		  HLayer nLayer = new HLayer(this, scp, nozzlePath);
 		  pendulumList.add(new Pendulum(nLayer));
@@ -568,7 +575,19 @@ public class ProcessingMain extends PApplet {
 		  
 		  if(frameCount%100==0){
 		  System.out.println(frameRate);
-		  }	  
+		  }	 
+		  
+		  for(Iterator<Strobo> stroboIterator = stroboList.iterator(); stroboIterator.hasNext();){
+			  Strobo strobo = stroboIterator.next();
+			  
+			  //strobo.draw();
+			  
+			  if(strobo.isDead()){
+				  //System.out.println("DEAD");
+				  stroboIterator.remove();
+			  }
+		  }
+
 		  /*for(NozzleLayer nL : nLayerList){
 			  nL.add();
 		  }*/
@@ -579,7 +598,6 @@ public class ProcessingMain extends PApplet {
 		  /*layerGraphics.beginDraw();
 		  layerGraphics.clear();
 		  layerGraphics.colorMode(RGB);
-		  
 		  
 		  
 		  
@@ -703,6 +721,7 @@ public class ProcessingMain extends PApplet {
 		  node6.drawOnGui(750, 50);
 		  node7.drawOnGui(900, 50);
 		  
+		  s1.drawOnGui(1050, 50);
 		  fill(0);
 		  text("Created by Marius Hoggenmüller on 04.02.14. Copyright (c) 2014 Marius Hoggenmüller, LMU Munich. All rights reserved.", 10, 740);
 
@@ -920,39 +939,63 @@ public class ProcessingMain extends PApplet {
 			myString = myPort.readStringUntil(lf);
 			if (myString != null) {
 				String[] spl1 = split(myString, '\n');
-				spl1 = split(spl1[0], '-');
-				System.out.println(spl1[0]);
-				if(spl1[0].compareTo("FLASH")==0){
-					System.out.println("BLA");
-					if(horizontalMoveList.size()<1){
-						nozzlePath = createPath(7,6,5,4,3,2,1,0);
-						  //nozzlePath = createRandomPath();
-						  horizontalMoveList.add(new Shine(this, nozzlePath));  
-						  horizontalMoveList.add(new Glitter(this, nozzlePath)); 
-						}
-				}
-				if(spl1[0].compareTo("WII")==0){
-					String[] spl2 = split(spl1[1], '/');
-					//int sender = Integer.parseInt(spl2[0]);
-					System.out.println("SENDER: "+spl2[0]+" "+spl2[1]);
-					spl2 = split(spl2[1], ':');
+				String[] spl2 = split(spl1[0], '/');
+				//System.out.println(spl1[0]);
 
+				if(spl2[0].compareTo("FLASH")==0){
+					System.out.println("GO: "+spl2[1]);
+					spl2 = split(spl2[1], '-');
+					int id = Integer.parseInt(spl2[0]);
+					/*if(horizontalMoveList.size()<1){
+						nozzlePath = createPath(7,6,5,4,3,2,1,0);
+						//nozzlePath = createRandomPath();
+						horizontalMoveList.add(new Shine(this, nozzlePath));  
+						horizontalMoveList.add(new Glitter(this, nozzlePath)); 
+					}
+					if(stroboList.size()<1){
+						nozzlePath = createPath(7,6,5,4,3,2,1,0);
+						HLayer nLayer = new HLayer(this, scp, nozzlePath);
+						stroboList.add(new Strobo(this, nLayer, 25));  
+					}*/
+					if(pendulumList.size()<1){
+						nozzlePath = createPath(4,3,2,1,0);
+						HLayer nLayer = new HLayer(this, scp, nozzlePath);
+						pendulumList.add(new Pendulum(nLayer));
+					}
+					System.out.println("FLASH mit "+id);
+				}
+				if(spl2[0].compareTo("WII")==0){
+					System.out.println("GO");
+					spl2 = split(spl2[1], '-');
+					int id = Integer.parseInt(spl2[0]);
+					spl2 = split(spl2[1], ':');
+					int[] posX = new int[spl2.length];
+					int[] posY = new int[spl2.length];
+					String output = "WII mit "+id+" ";
 					for (int i = 0; i < spl2.length; i++) {
 						String[] spl3 = split(spl2[i], ',');
 						if (spl2.length >= 2) {
-							int posX = parseWithDefault(spl3[0], 0);
-							int posY = parseWithDefault(spl3[1], 0);
-							System.out.println(posX);
-							System.out.println(posY);
-							
+							posX[i] = parseWithDefault(spl3[0], 0);
+							posY[i] = parseWithDefault(spl3[1], 0);
 						}
+						output += posX[i]+":"+posY[i]+",";
 					}
-					
-					if(horizontalMoveList.size()<1){
+					System.out.println("OUTPUT: "+output);
+					/*if(horizontalMoveList.size()<1){
 					nozzlePath = createPath(7,6,5,4,3,2,1,0);
 					  //nozzlePath = createRandomPath();
 					  horizontalMoveList.add(new Shine(this, nozzlePath));  
 					  horizontalMoveList.add(new Glitter(this, nozzlePath)); 
+					}
+					if(stroboList.size()<1){
+						nozzlePath = createPath(7,6,5,4,3,2,1,0);
+						HLayer nLayer = new HLayer(this, scp, nozzlePath);
+						stroboList.add(new Strobo(this, nLayer, 25));  
+					}*/
+					if(pendulumList.size()<1){
+						nozzlePath = createPath(4,3,2,1,0);
+						HLayer nLayer = new HLayer(this, scp, nozzlePath);
+						pendulumList.add(new Pendulum(nLayer));
 					}
 				}
 				

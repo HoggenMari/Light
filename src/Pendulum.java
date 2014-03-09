@@ -131,7 +131,7 @@ public class Pendulum {
 	public void drawDTubePendulum(){
 		pg.beginDraw();
 		pg.clear();
-		pg.colorMode(PConstants.HSB, 360, 100, 100,255);
+		pg.colorMode(PConstants.HSB, 360, 100, 100,100);
 		pg.noStroke();
 		if(value){
 		for(int i=0; i<pg.width-x; i++){
