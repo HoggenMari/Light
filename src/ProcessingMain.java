@@ -53,6 +53,10 @@ public class ProcessingMain extends PApplet {
 	String myString = null; // Serial Output String
 	Serial myPort; // Serial port you are using
 
+	//Sensors
+	private ArrayList<Sensor> sensorList = new ArrayList<Sensor>();
+	private static int SENSORS = 2;
+
 	//Animation Stuff
 	private PGraphics pg, pg2;
 
@@ -136,8 +140,6 @@ public class ProcessingMain extends PApplet {
 	private ArrayList<Pendulum> pendulumList = new ArrayList<Pendulum>();
 
 	private ArrayList<Strobo> stroboList = new ArrayList<Strobo>();
-	
-	private Sensor s1 = new Sensor(this, 1);
 	  
 	//Initiate as Application
 	public static void main(String args[]) {
@@ -146,7 +148,7 @@ public class ProcessingMain extends PApplet {
 
 	public void setup() {
 		
-		size(1050,750);
+		size(1200,750);
 	
 		initArduino();
 		  
@@ -222,6 +224,11 @@ public class ProcessingMain extends PApplet {
 		scp.add(node1, node2, node3, node4, node5, node6, node7);
 		scp.setAdj();
 		scp.start();
+		
+		
+		for(int i=0; i<SENSORS; i++){
+			sensorList.add(new Sensor(this, i));
+		}
 		
 		counter2=0;
 								
@@ -580,13 +587,17 @@ public class ProcessingMain extends PApplet {
 		  for(Iterator<Strobo> stroboIterator = stroboList.iterator(); stroboIterator.hasNext();){
 			  Strobo strobo = stroboIterator.next();
 			  
-			  //strobo.draw();
+			  strobo.draw();
 			  
 			  if(strobo.isDead()){
 				  //System.out.println("DEAD");
 				  stroboIterator.remove();
 			  }
 		  }
+		  
+		  /*for(Sensor s : sensorList){
+			  System.out.println(s.toString());
+		  }*/
 
 		  /*for(NozzleLayer nL : nLayerList){
 			  nL.add();
@@ -721,7 +732,10 @@ public class ProcessingMain extends PApplet {
 		  node6.drawOnGui(750, 50);
 		  node7.drawOnGui(900, 50);
 		  
-		  s1.drawOnGui(1050, 50);
+		  
+		  sensorList.get(0).drawOnGui(1050, 50);
+		  sensorList.get(1).drawOnGui(1050, 200);
+		  
 		  fill(0);
 		  text("Created by Marius Hoggenmüller on 04.02.14. Copyright (c) 2014 Marius Hoggenmüller, LMU Munich. All rights reserved.", 10, 740);
 
@@ -946,13 +960,16 @@ public class ProcessingMain extends PApplet {
 					System.out.println("GO: "+spl2[1]);
 					spl2 = split(spl2[1], '-');
 					int id = Integer.parseInt(spl2[0]);
+					spl2 = split(spl2[1], ',');
+					int value = Integer.parseInt(spl2[0]);
+					sensorList.get(id-1).addEvent(0);
 					/*if(horizontalMoveList.size()<1){
 						nozzlePath = createPath(7,6,5,4,3,2,1,0);
 						//nozzlePath = createRandomPath();
 						horizontalMoveList.add(new Shine(this, nozzlePath));  
 						horizontalMoveList.add(new Glitter(this, nozzlePath)); 
-					}
-					if(stroboList.size()<1){
+					}*/
+					/*if(stroboList.size()<1){
 						nozzlePath = createPath(7,6,5,4,3,2,1,0);
 						HLayer nLayer = new HLayer(this, scp, nozzlePath);
 						stroboList.add(new Strobo(this, nLayer, 25));  
@@ -962,7 +979,7 @@ public class ProcessingMain extends PApplet {
 						HLayer nLayer = new HLayer(this, scp, nozzlePath);
 						pendulumList.add(new Pendulum(nLayer));
 					}
-					System.out.println("FLASH mit "+id);
+					System.out.println("FLASH mit "+id+" value: "+value);
 				}
 				if(spl2[0].compareTo("WII")==0){
 					System.out.println("GO");
@@ -986,8 +1003,8 @@ public class ProcessingMain extends PApplet {
 					  //nozzlePath = createRandomPath();
 					  horizontalMoveList.add(new Shine(this, nozzlePath));  
 					  horizontalMoveList.add(new Glitter(this, nozzlePath)); 
-					}
-					if(stroboList.size()<1){
+					}*/
+					/*if(stroboList.size()<1){
 						nozzlePath = createPath(7,6,5,4,3,2,1,0);
 						HLayer nLayer = new HLayer(this, scp, nozzlePath);
 						stroboList.add(new Strobo(this, nLayer, 25));  
