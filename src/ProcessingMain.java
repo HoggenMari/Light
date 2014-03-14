@@ -55,7 +55,7 @@ public class ProcessingMain extends PApplet {
 
 	//Sensors
 	private ArrayList<Sensor> sensorList = new ArrayList<Sensor>();
-	private static int SENSORS = 2;
+	private static int SENSORS = 5;
 
 	//Animation Stuff
 	private PGraphics pg, pg2;
@@ -140,6 +140,12 @@ public class ProcessingMain extends PApplet {
 	private ArrayList<Pendulum> pendulumList = new ArrayList<Pendulum>();
 
 	private ArrayList<Strobo> stroboList = new ArrayList<Strobo>();
+
+	private int[] flashArray = new int[5];
+
+	private int flashTimer;
+
+	private boolean flashActive;
 	  
 	//Initiate as Application
 	public static void main(String args[]) {
@@ -227,7 +233,7 @@ public class ProcessingMain extends PApplet {
 		
 		
 		for(int i=0; i<SENSORS; i++){
-			sensorList.add(new Sensor(this, i));
+			sensorList.add(new Sensor(this, i+1));
 		}
 		
 		counter2=0;
@@ -550,6 +556,23 @@ public class ProcessingMain extends PApplet {
 		
 		//colorMode(HSB,360,100,100);
 		//background(lampFade.hue,lampFade.saturation,lampFade.brightness);
+		
+		if(abs(millis()-flashTimer)>=20 && flashActive){
+			int minValue = flashArray[0];  
+			int minPos = 0;
+			  for(int i=1;i<flashArray.length;i++){  
+			    if(flashArray[i] < minValue){  
+			      minValue = flashArray[i];
+			      minPos = i;
+			    }  
+			  }  
+			for(int i=0; i<flashArray.length; i++){
+				flashArray[i] = 1023;
+			}
+			flashActive = false;
+			System.out.println("FLASH mit "+(minPos+1)+" "+minValue);
+			sensorList.get(minPos).setFlash();
+		}
 		  
 		scp.clearSysA();
 
@@ -734,7 +757,10 @@ public class ProcessingMain extends PApplet {
 		  
 		  
 		  sensorList.get(0).drawOnGui(1050, 50);
-		  sensorList.get(1).drawOnGui(1050, 200);
+		  sensorList.get(1).drawOnGui(1050, 150);
+		  sensorList.get(2).drawOnGui(1050, 250);
+		  sensorList.get(3).drawOnGui(1050, 350);
+		  sensorList.get(4).drawOnGui(1050, 450);
 		  
 		  fill(0);
 		  text("Created by Marius HoggenmŸller on 04.02.14. Copyright (c) 2014 Marius HoggenmŸller, LMU Munich. All rights reserved.", 10, 740);
@@ -962,24 +988,26 @@ public class ProcessingMain extends PApplet {
 					int id = Integer.parseInt(spl2[0]);
 					spl2 = split(spl2[1], ',');
 					int value = Integer.parseInt(spl2[0]);
-					sensorList.get(id-1).addEvent(0);
-					/*if(horizontalMoveList.size()<1){
+					if(horizontalMoveList.size()<1){
 						nozzlePath = createPath(7,6,5,4,3,2,1,0);
 						//nozzlePath = createRandomPath();
 						horizontalMoveList.add(new Shine(this, nozzlePath));  
 						horizontalMoveList.add(new Glitter(this, nozzlePath)); 
-					}*/
+					}
 					/*if(stroboList.size()<1){
 						nozzlePath = createPath(7,6,5,4,3,2,1,0);
 						HLayer nLayer = new HLayer(this, scp, nozzlePath);
 						stroboList.add(new Strobo(this, nLayer, 25));  
-					}*/
+					}
 					if(pendulumList.size()<1){
 						nozzlePath = createPath(4,3,2,1,0);
 						HLayer nLayer = new HLayer(this, scp, nozzlePath);
 						pendulumList.add(new Pendulum(nLayer));
-					}
-					System.out.println("FLASH mit "+id+" value: "+value);
+					}*/
+					//System.out.println("FLASH mit "+id+" value: "+value);
+					flashArray [id-1]=value;
+					flashActive = true;
+					flashTimer = millis();
 				}
 				if(spl2[0].compareTo("WII")==0){
 					System.out.println("GO");
@@ -998,22 +1026,23 @@ public class ProcessingMain extends PApplet {
 						output += posX[i]+":"+posY[i]+",";
 					}
 					System.out.println("OUTPUT: "+output);
-					/*if(horizontalMoveList.size()<1){
+					if(horizontalMoveList.size()<1){
 					nozzlePath = createPath(7,6,5,4,3,2,1,0);
 					  //nozzlePath = createRandomPath();
 					  horizontalMoveList.add(new Shine(this, nozzlePath));  
 					  horizontalMoveList.add(new Glitter(this, nozzlePath)); 
-					}*/
+					}
 					/*if(stroboList.size()<1){
 						nozzlePath = createPath(7,6,5,4,3,2,1,0);
 						HLayer nLayer = new HLayer(this, scp, nozzlePath);
 						stroboList.add(new Strobo(this, nLayer, 25));  
-					}*/
+					}
 					if(pendulumList.size()<1){
 						nozzlePath = createPath(4,3,2,1,0);
 						HLayer nLayer = new HLayer(this, scp, nozzlePath);
 						pendulumList.add(new Pendulum(nLayer));
-					}
+					}*/
+					sensorList.get(id-1).setWi(posX, posY);
 				}
 				
 			}
