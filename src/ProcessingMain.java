@@ -146,7 +146,17 @@ public class ProcessingMain extends PApplet {
 	private int flashTimer;
 
 	private boolean flashActive;
-	  
+
+	private ControlP5 cp5Sensor;
+	private ArrayList<CheckBox> checkBoxSensorList = new ArrayList<CheckBox>();
+	private float[][] checkBoxSensorArray= {{0,0},{0,0},{0,0},{0,0},{0,0},{0,0},{0,0},{0,0},{0,0},{0,0}};
+    private boolean flashActiveArray[] = {true,true,true,true,true};
+    private boolean wiActiveArray[] = {true,true,true,true,true};
+    
+    private ArrayList<Effect> effectList = new ArrayList<Effect>();
+    
+    private ArrayList<Node> nodeList = new ArrayList<Node>();
+    
 	//Initiate as Application
 	public static void main(String args[]) {
 	    PApplet.main(new String[] { "--present", "ProcessingMain" });
@@ -200,6 +210,11 @@ public class ProcessingMain extends PApplet {
 		   .setSize(20,15)
 		;
 		
+		cp5.addButton("SETUP")
+			.setPosition(1050, 10)
+			.setSize(20,15)
+		;
+		
 		checkbox = cp5.addCheckBox("checkBox").setPosition(220, 10)
 				.setColorForeground(color(120)).setColorActive(color(200))
 				.setColorLabel(color(0,0,255)).setSize(15, 15).setItemsPerRow(7)
@@ -226,15 +241,35 @@ public class ProcessingMain extends PApplet {
 		node6.add(NODE6_LEDS);
 		node7.add(NODE7_LEDS);
 		
+		nodeList.add(node1);
+		nodeList.add(node2);
+		nodeList.add(node3);
+		nodeList.add(node4);
+		nodeList.add(node5);
+		nodeList.add(node6);
+		nodeList.add(node7);
+		
 		scp = new Pavillon(this, IP, PORT, CONTROLLER_ID);
 		scp.add(node1, node2, node3, node4, node5, node6, node7);
 		scp.setAdj();
 		scp.start();
 		
+		cp5Sensor = new ControlP5(this);
 		
 		for(int i=0; i<SENSORS; i++){
-			sensorList.add(new Sensor(this, i+1));
+			sensorList.add(new Sensor(this, i+1, 1050, 50+i*130));
+			String name = "checkBoxSensor"+i;
+			String nameF = "Flash"+i;
+			String nameW = "Wi"+i;
+			checkBoxSensorList.add(cp5Sensor.addCheckBox(name).setPosition(1050, 55+i*130)
+					.setColorForeground(color(120)).setColorActive(color(200))
+					.setColorLabel(color(0,0,0)).setSize(15, 15).setItemsPerRow(7)
+					.setSpacingColumn(45).setSpacingRow(15).addItem(nameF, 0)
+					.addItem(nameW, 50));
+		
 		}
+				
+		
 		
 		counter2=0;
 								
@@ -254,7 +289,7 @@ public class ProcessingMain extends PApplet {
 		setUpLamp();
 		setupFlower();
 		setupSimpleTube();
-		//setupPush();
+		setupPush();
 		
 		cfList.start();
 		
@@ -573,6 +608,26 @@ public class ProcessingMain extends PApplet {
 			System.out.println("FLASH mit "+(minPos+1)+" "+minValue);
 			sensorList.get(minPos).setFlash();
 		}
+		
+		for(Sensor s : sensorList){
+			System.out.println("SENSOR: "+s.getID()+" STATE: "+s.getState());
+			if(s.getState()){
+				if(activeArray[6]){
+				nozzlePath = createNodePath(nodeList.get(s.getID()-1));
+				HLayer nLayer = new HLayer(this, scp, nozzlePath);
+				effectList.add(new Pendulum(nLayer));
+				s.setState(false);
+				}else if(activeArray[2]){
+					//
+				}else{
+				nozzlePath = createNodePath(nodeList.get(s.getID()-1));
+				HLayer nLayer = new HLayer(this, scp, nozzlePath);
+				effectList.add(new Strobo(this, nLayer, 25));
+				s.setState(false);
+				}
+			}
+		}
+	
 		  
 		scp.clearSysA();
 
@@ -600,23 +655,13 @@ public class ProcessingMain extends PApplet {
 		  if(activeArray[7]){
 			  drawPush();
 		  }
-
+		  
 		  //drawYellowBlue();
 		  
 		  if(frameCount%100==0){
 		  System.out.println(frameRate);
 		  }	 
-		  
-		  for(Iterator<Strobo> stroboIterator = stroboList.iterator(); stroboIterator.hasNext();){
-			  Strobo strobo = stroboIterator.next();
-			  
-			  strobo.draw();
-			  
-			  if(strobo.isDead()){
-				  //System.out.println("DEAD");
-				  stroboIterator.remove();
-			  }
-		  }
+		 
 		  
 		  /*for(Sensor s : sensorList){
 			  System.out.println(s.toString());
@@ -744,6 +789,26 @@ public class ProcessingMain extends PApplet {
 		  		  
 		  //Draw on GUI  
 		  
+		  
+		  for(Iterator<Effect> effectIterator = effectList.iterator(); effectIterator.hasNext();){
+			  Effect e = effectIterator.next();
+			  
+			  e.draw();
+			  
+			  if(e.isDead()){
+				  //System.out.println("DEAD");
+				  effectIterator.remove();
+			  }
+		  }
+		  
+		  
+		  
+		  /*for(Effect e : effectList){
+			  System.out.println("GO EFFEKT LIST");
+				e.draw();
+				
+		  }*/
+		  
 		  colorMode(RGB);
 		  background(255);
 		  		  
@@ -755,12 +820,9 @@ public class ProcessingMain extends PApplet {
 		  node6.drawOnGui(750, 50);
 		  node7.drawOnGui(900, 50);
 		  
-		  
-		  sensorList.get(0).drawOnGui(1050, 50);
-		  sensorList.get(1).drawOnGui(1050, 150);
-		  sensorList.get(2).drawOnGui(1050, 250);
-		  sensorList.get(3).drawOnGui(1050, 350);
-		  sensorList.get(4).drawOnGui(1050, 450);
+		  for(Sensor s : sensorList){
+			  s.drawOnGui();
+		  }
 		  
 		  fill(0);
 		  text("Created by Marius Hoggenmüller on 04.02.14. Copyright (c) 2014 Marius Hoggenmüller, LMU Munich. All rights reserved.", 10, 740);
@@ -857,6 +919,14 @@ public class ProcessingMain extends PApplet {
 		LinkedList<Nozzle> path = new LinkedList<Nozzle>();
 		for(int f : i){
 		path.add(scp.nozzleList.get(f));
+		}
+		return path;
+	}
+	
+	public LinkedList<Nozzle> createNodePath(Node node){
+		LinkedList<Nozzle> path = new LinkedList<Nozzle>();
+		for(Nozzle n : node.nozzleList){
+			path.add(n);
 		}
 		return path;
 	}
@@ -977,6 +1047,7 @@ public class ProcessingMain extends PApplet {
 	public void serialEvent(Serial myPort) {
 		try {
 			myString = myPort.readStringUntil(lf);
+			System.out.println(myString);
 			if (myString != null) {
 				String[] spl1 = split(myString, '\n');
 				String[] spl2 = split(spl1[0], '/');
@@ -988,12 +1059,12 @@ public class ProcessingMain extends PApplet {
 					int id = Integer.parseInt(spl2[0]);
 					spl2 = split(spl2[1], ',');
 					int value = Integer.parseInt(spl2[0]);
-					if(horizontalMoveList.size()<1){
+					/*if(horizontalMoveList.size()<1){
 						nozzlePath = createPath(7,6,5,4,3,2,1,0);
 						//nozzlePath = createRandomPath();
 						horizontalMoveList.add(new Shine(this, nozzlePath));  
 						horizontalMoveList.add(new Glitter(this, nozzlePath)); 
-					}
+					}*/
 					/*if(stroboList.size()<1){
 						nozzlePath = createPath(7,6,5,4,3,2,1,0);
 						HLayer nLayer = new HLayer(this, scp, nozzlePath);
@@ -1026,12 +1097,13 @@ public class ProcessingMain extends PApplet {
 						output += posX[i]+":"+posY[i]+",";
 					}
 					System.out.println("OUTPUT: "+output);
-					if(horizontalMoveList.size()<1){
+					sensorList.get(id-1).setWi(posX, posY); 
+					/*if(horizontalMoveList.size()<1){
 					nozzlePath = createPath(7,6,5,4,3,2,1,0);
 					  //nozzlePath = createRandomPath();
 					  horizontalMoveList.add(new Shine(this, nozzlePath));  
 					  horizontalMoveList.add(new Glitter(this, nozzlePath)); 
-					}
+					}*/
 					/*if(stroboList.size()<1){
 						nozzlePath = createPath(7,6,5,4,3,2,1,0);
 						HLayer nLayer = new HLayer(this, scp, nozzlePath);
@@ -1042,7 +1114,6 @@ public class ProcessingMain extends PApplet {
 						HLayer nLayer = new HLayer(this, scp, nozzlePath);
 						pendulumList.add(new Pendulum(nLayer));
 					}*/
-					sensorList.get(id-1).setWi(posX, posY);
 				}
 				
 			}
@@ -1063,7 +1134,65 @@ public class ProcessingMain extends PApplet {
 	
 	@SuppressWarnings("deprecation")
 	public void controlEvent(ControlEvent theEvent) {
-		//if(theEvent.getGroup().getName() == "checkBox") {
+		
+		if (theEvent.isFrom(checkBoxSensorList.get(0))) {
+			if(checkBoxSensorArray[0][0] != checkBoxSensorList.get(0).getArrayValue(0)){
+				flashActiveArray[0] =! flashActiveArray[0];
+				System.out.println("SENSOR0"+checkBoxSensorList.get(0).getArrayValue(0));
+				sendArduinoFlash(myPort);
+			} else if(checkBoxSensorArray[0][1] != checkBoxSensorList.get(0).getArrayValue(1)){
+				wiActiveArray[0] =! wiActiveArray[0];
+				System.out.println("SENSOR0"+checkBoxSensorList.get(0).getArrayValue(1));
+				sendArduinoWi(myPort);
+			}
+			checkBoxSensorArray[0] = checkBoxSensorList.get(0).getArrayValue();
+		} else if (theEvent.isFrom(checkBoxSensorList.get(1))) {
+			if(checkBoxSensorArray[1][0] != checkBoxSensorList.get(1).getArrayValue(0)){
+				flashActiveArray[1] =! flashActiveArray[1];
+				System.out.println("SENSOR1"+checkBoxSensorList.get(1).getArrayValue(0));
+				sendArduinoFlash(myPort);
+			} else if(checkBoxSensorArray[1][1] != checkBoxSensorList.get(1).getArrayValue(1)){
+				wiActiveArray[1] =! wiActiveArray[1];
+				System.out.println("SENSOR0"+checkBoxSensorList.get(1).getArrayValue(1));
+				sendArduinoWi(myPort);
+			}
+			checkBoxSensorArray[1] = checkBoxSensorList.get(1).getArrayValue();
+		} else if (theEvent.isFrom(checkBoxSensorList.get(2))) {
+			if(checkBoxSensorArray[2][0] != checkBoxSensorList.get(2).getArrayValue(0)){
+				flashActiveArray[2] =! flashActiveArray[2];
+				System.out.println("SENSOR2"+checkBoxSensorList.get(2).getArrayValue(0));
+				sendArduinoFlash(myPort);
+			} else if(checkBoxSensorArray[2][1] != checkBoxSensorList.get(2).getArrayValue(1)){
+				wiActiveArray[2] =! wiActiveArray[2];
+				System.out.println("SENSOR0"+checkBoxSensorList.get(2).getArrayValue(1));
+				sendArduinoWi(myPort);
+			}
+			checkBoxSensorArray[2] = checkBoxSensorList.get(2).getArrayValue();
+		} else if (theEvent.isFrom(checkBoxSensorList.get(3))) {
+			if(checkBoxSensorArray[3][0] != checkBoxSensorList.get(3).getArrayValue(0)){
+				flashActiveArray[3] =! flashActiveArray[3];
+				System.out.println("SENSOR3"+checkBoxSensorList.get(3).getArrayValue(0));
+				sendArduinoFlash(myPort);
+			} else if(checkBoxSensorArray[3][1] != checkBoxSensorList.get(3).getArrayValue(1)){
+				wiActiveArray[3] =! wiActiveArray[3];
+				System.out.println("SENSOR0"+checkBoxSensorList.get(3).getArrayValue(1));
+				sendArduinoWi(myPort);
+			}
+			checkBoxSensorArray[3] = checkBoxSensorList.get(3).getArrayValue();
+		} else if (theEvent.isFrom(checkBoxSensorList.get(4))) {
+			if(checkBoxSensorArray[4][0] != checkBoxSensorList.get(4).getArrayValue(0)){
+				flashActiveArray[4] =! flashActiveArray[4];
+				System.out.println("SENSOR4"+checkBoxSensorList.get(4).getArrayValue(0));
+				sendArduinoFlash(myPort);
+			} else if(checkBoxSensorArray[4][1] != checkBoxSensorList.get(4).getArrayValue(1)){
+				wiActiveArray[4] =! wiActiveArray[4];
+				System.out.println("SENSOR0"+checkBoxSensorList.get(4).getArrayValue(1));
+				sendArduinoWi(myPort);
+			}
+			checkBoxSensorArray[4] = checkBoxSensorList.get(4).getArrayValue();
+		}
+		
+		if(theEvent.getGroup().getName() == "checkBox") {
 		    print("got an event from "+theEvent.getName()+"\t");
 		    //System.out.println(theEvent.getGroup().getArrayValue().length);
 		    if(checkbox_array[0] != theEvent.getGroup().getArrayValue(0)) {
@@ -1092,12 +1221,53 @@ public class ProcessingMain extends PApplet {
 		    	System.out.println("BUTTON8");
 		    }
 		    
-		//}
-		    println("\t "+theEvent.getValue());
-		    System.out.println("ACTIVE_ARRAY: "+activeArray[0]+" "+activeArray[1]);
-		    checkbox_array = checkbox.getArrayValue();
-		    scp.clearSysA();
-		    scp.clearSysB();
+		}
+		//println("\t "+theEvent.getValue());
+		//System.out.println("ACTIVE_ARRAY: "+activeArray[0]+" "+activeArray[1]);
+		checkbox_array = checkbox.getArrayValue();
+		scp.clearSysA();
+		scp.clearSysB();
+	
+		//System.out.println(theEvent.getGroup().getName());
+		
+	
+	}
+	
+	public void sendArduinoFlash(Serial myPort){
+		System.out.println("UPDATE FLASH TO ARDUINO");
+		String flash = "UPDATE-FLASH:";
+		for(int i=0; i<flashActiveArray.length; i++){
+			if(flashActiveArray[i]==true){
+				flash += "true,";
+			}else{
+				flash += "false,";
+			}
+		}
+		flash += '\n';
+		myPort.write(flash);
+		System.out.println(flash);
+	}
+	
+	public void sendArduinoWi(Serial myPort){
+		System.out.println("UPDATE WI TO ARDUINO");
+		String wi = "UPDATE-WI:";
+		for(int i=0; i<wiActiveArray.length; i++){
+			if(wiActiveArray[i]==true){
+				wi += "true,";
+			}else{
+				wi += "false,";
+			}
+		}
+		wi += '\n';
+		myPort.write(wi);
+		System.out.println(wi);
+	}
+	
+	public void sendArduinoSetup(Serial myPort){
+		System.out.println("UPDATE SETUP TO ARDUINO");
+		String setup = "UPDATE-SETUP:SETUP\n";
+		myPort.write(setup);
+		System.out.println(setup);
 	}
 
 		// function buttonA will receive changes from 
@@ -1109,6 +1279,10 @@ public class ProcessingMain extends PApplet {
 		  int[] id = {Integer.parseInt(cp5.get(Textfield.class,"ID-1").getText()),
 				      Integer.parseInt(cp5.get(Textfield.class,"ID-2").getText())};
 		  scp.setID(id);
+	}
+	
+	public void SETUP(int theValue) {
+		sendArduinoSetup(myPort);
 	}
 
 }

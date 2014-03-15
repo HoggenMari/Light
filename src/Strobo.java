@@ -3,7 +3,7 @@ import processing.core.PConstants;
 import processing.core.PGraphics;
 
 
-public class Strobo {
+public class Strobo implements Effect{
 	
 	private Layer nozzleLayer;
 	private PGraphics pg;

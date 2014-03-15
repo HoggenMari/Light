@@ -2,7 +2,7 @@ import processing.core.PConstants;
 import processing.core.PGraphics;
 
 
-public class Pendulum {
+public class Pendulum implements Effect{
 	
 	double speed = 1;
 	int timer = 30;
@@ -169,6 +169,12 @@ public class Pendulum {
 	
 	public boolean isDead(){
 		return dead;
+	}
+
+	@Override
+	public void draw() {
+		// TODO Auto-generated method stub
+		drawDTubePendulum();
 	}
 
 }

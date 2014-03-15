@@ -12,6 +12,7 @@ public class HLayer extends Layer{
 		// TODO Auto-generated constructor stub
 	}
 	
+	
 	public PGraphics getLayer() {
 		int totalWidth = 0;
 		for(Nozzle n : nozzlePath) {
