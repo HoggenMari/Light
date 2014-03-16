@@ -1,5 +1,7 @@
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import processing.core.PApplet;
 import processing.core.PConstants;
@@ -7,7 +9,7 @@ import processing.core.PConstants;
 
 public class ColorFadeList extends Thread {
 	
-	ArrayList<ColorFade> colorFadeList = new ArrayList<ColorFade>();
+	public CopyOnWriteArrayList<ColorFade> colorFadeList = new CopyOnWriteArrayList<ColorFade>();
 	private PApplet p;
 	
 	public ColorFadeList(PApplet p) {
@@ -107,7 +109,17 @@ public class ColorFadeList extends Thread {
 			}
 		}
 		
-		for(Iterator<ColorFade> cfIterator = colorFadeList.iterator(); cfIterator.hasNext();){
+		for(ColorFade cf : colorFadeList){
+			if(cf.loop) {
+				//System.out.println("GO1 "+cf.brightnessLoop+" "+cf.brightnessLoopMax);
+			if(cf.hueLoop >= cf.hueLoopMax || cf.saturationLoop >= cf.saturationLoopMax || cf.brightnessLoop >= cf.brightnessLoopMax) {
+				colorFadeList.remove(cf);
+				//System.out.println("GO2");
+
+			}
+			}
+		}
+		/*for(Iterator<ColorFade> cfIterator = colorFadeList.iterator(); cfIterator.hasNext();){
 			ColorFade cf = cfIterator.next();
 		
 			if(cf.loop) {
@@ -119,6 +131,6 @@ public class ColorFadeList extends Thread {
 			}
 			}
 		//System.out.println("FERTIG: "+p.millis());
-		}
+		}*/
 	}
 }

@@ -175,6 +175,8 @@ public class Pendulum implements Effect{
 	public void draw() {
 		// TODO Auto-generated method stub
 		drawDTubePendulum();
+		//drawTubePendulum();
+		//drawHorizontal();
 	}
 
 }

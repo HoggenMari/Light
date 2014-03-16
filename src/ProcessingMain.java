@@ -156,6 +156,8 @@ public class ProcessingMain extends PApplet {
     private ArrayList<Effect> effectList = new ArrayList<Effect>();
     
     private ArrayList<Node> nodeList = new ArrayList<Node>();
+
+	private ArrayList<Lamp> lampList = new ArrayList<Lamp>();
     
 	//Initiate as Application
 	public static void main(String args[]) {
@@ -318,7 +320,7 @@ public class ProcessingMain extends PApplet {
 	for(Iterator<Pendulum> pTIterator = pendulumList .iterator(); pTIterator.hasNext();){
 		  Pendulum p = pTIterator.next();
 		  
-		  p.drawDTubePendulum();
+		  p.drawVertical();
 		  
 		  if(p.isDead()){
 			  //System.out.println("DEAD");
@@ -333,6 +335,26 @@ public class ProcessingMain extends PApplet {
 	  }
 	}
 	
+	//DRAW SIMPLETUBE
+		public void drawLamp(){
+		for(Iterator<Lamp> lampIterator = lampList  .iterator(); lampIterator.hasNext();){
+			  Lamp l = lampIterator.next();
+			  
+			  l.draw();
+			  
+			  if(l.isDead()){
+				  //System.out.println("DEAD");
+				  lampIterator.remove();
+			  }
+		  }
+		  
+		  while(lampList.size()<0){
+			  nozzlePath = createNodePath(nodeList.get((int)random(0,7)));
+			  HLayer nLayer = new HLayer(this, scp, nozzlePath);
+			  lampList.add(new Lamp(this, nLayer, cfList, (int) random(100,5000)));
+		  }
+		}
+		
 	//SETUP PUSH
 	public void setupPush(){
 		pushColor = new ColorFade(this, 360, 100, 100);
@@ -589,6 +611,7 @@ public class ProcessingMain extends PApplet {
 
 	public void draw() {
 		
+		System.out.println(cfList.colorFadeList.size());
 		//colorMode(HSB,360,100,100);
 		//background(lampFade.hue,lampFade.saturation,lampFade.brightness);
 		
@@ -610,15 +633,18 @@ public class ProcessingMain extends PApplet {
 		}
 		
 		for(Sensor s : sensorList){
-			System.out.println("SENSOR: "+s.getID()+" STATE: "+s.getState());
+			//System.out.println("SENSOR: "+s.getID()+" STATE: "+s.getState());
 			if(s.getState()){
 				if(activeArray[6]){
 				nozzlePath = createNodePath(nodeList.get(s.getID()-1));
 				HLayer nLayer = new HLayer(this, scp, nozzlePath);
 				effectList.add(new Pendulum(nLayer));
 				s.setState(false);
-				}else if(activeArray[2]){
-					//
+				}else if(activeArray[3]){
+				nozzlePath = createNodePath(nodeList.get(s.getID()-1));
+				HLayer nLayer = new HLayer(this, scp, nozzlePath);
+				lampList.add(new Lamp(this, nLayer, cfList, (int)random(300,3000)));
+				s.setState(false);
 				}else{
 				nozzlePath = createNodePath(nodeList.get(s.getID()-1));
 				HLayer nLayer = new HLayer(this, scp, nozzlePath);
@@ -644,7 +670,7 @@ public class ProcessingMain extends PApplet {
 			  drawShine();
 		  }
 		  if(activeArray[3]){
-			  NodeLamp();
+			  drawLamp();
 		  }
 		  if(activeArray[4]){
 			  openFlower();
@@ -657,6 +683,9 @@ public class ProcessingMain extends PApplet {
 		  }
 		  
 		  //drawYellowBlue();
+		  
+		  
+		  //drawLamp();
 		  
 		  if(frameCount%100==0){
 		  System.out.println(frameRate);
