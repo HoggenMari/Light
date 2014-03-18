@@ -5,6 +5,7 @@
  */
 
 
+import java.awt.Color;
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -158,12 +159,16 @@ public class ProcessingMain extends PApplet {
     private ArrayList<Node> nodeList = new ArrayList<Node>();
 
 	private ArrayList<Lamp> lampList = new ArrayList<Lamp>();
+
+	private ColorFade backGround;
+	
+	private int[] Farbe = new int[3]; 
     
 	//Initiate as Application
 	public static void main(String args[]) {
 	    PApplet.main(new String[] { "--present", "ProcessingMain" });
 	  }
-
+	
 	public void setup() {
 		
 		size(1200,750);
@@ -292,6 +297,8 @@ public class ProcessingMain extends PApplet {
 		setupFlower();
 		setupSimpleTube();
 		setupPush();
+		setupBackGroundContrast();
+		setupCompTube();
 		
 		cfList.start();
 		
@@ -336,7 +343,7 @@ public class ProcessingMain extends PApplet {
 	}
 	
 	//DRAW SIMPLETUBE
-		public void drawLamp(){
+	public void drawLamp(){
 		for(Iterator<Lamp> lampIterator = lampList  .iterator(); lampIterator.hasNext();){
 			  Lamp l = lampIterator.next();
 			  
@@ -348,10 +355,10 @@ public class ProcessingMain extends PApplet {
 			  }
 		  }
 		  
-		  while(lampList.size()<0){
+		  while(lampList.size()<5){
 			  nozzlePath = createNodePath(nodeList.get((int)random(0,7)));
 			  HLayer nLayer = new HLayer(this, scp, nozzlePath);
-			  lampList.add(new Lamp(this, nLayer, cfList, (int) random(100,5000)));
+			  lampList.add(new Lamp(this, nLayer, cfList, (int) random(1000,1000)));
 		  }
 		}
 		
@@ -523,7 +530,7 @@ public class ProcessingMain extends PApplet {
 		sTube.hueFade(h+50, 1000);
 		
 		sTube2 = new ColorFade(this, 0, 100, 50);
-		sTube2.brightnessFade(40, 1000);
+		sTube2.alphaFade(40, 1000);
 		
 		colorTubeList.start();
 		
@@ -544,12 +551,51 @@ public class ProcessingMain extends PApplet {
 		  }
 	  }
 	  
-	  while(sTubeList.size()<2){
+	  while(sTubeList.size()<1){
 		  nozzlePath = createRandomPath(0,8,58,65);
 		  NozzleLayer nLayer = new NozzleLayer(this, scp, nozzlePath);
 		  sTubeList.add(new SimpleTube(this, nLayer, colorTubeList.get((int)random(0,2)), (int)random(20,100), 1+Math.random()*0.5));
 	  }
 	}
+	
+	//SETUP COMP SIMPLETUBE
+		public void setupCompTube(){
+			float[] hsb = Color.RGBtoHSB(abs(Farbe[0]-255), abs(Farbe[1]-255), abs(Farbe[2]-255), null);
+			float hue = hsb[0]*360;          // .58333
+			float saturation = hsb[1]*100;   // .66667
+			float brightness = hsb[2]*100;   // .6
+			
+			sTube = new ColorFade(this, (int)hue, (int)saturation, (int)brightness);
+			//sTube.hueFade((int)hue+50, 1000);
+			
+			//sTube = new ColorFade(this, (int)hue, (int)saturation, (int)brightness);
+			//sTube.hueFade(h+50, 1000);
+			
+			
+			cfList.addColorFade(sTube);
+			//cfList.addColorFade(sTube2);
+		}
+		
+		//DRAW COMP SIMPLETUBE
+		public void drawCompSimpleTube(){
+		for(Iterator<SimpleTube> sTIterator = sTubeList.iterator(); sTIterator.hasNext();){
+			  SimpleTube sT = sTIterator.next();
+			  
+			  sT.draw();
+			  
+			  if(sT.isDead()){
+				  //System.out.println("DEAD");
+				  sTIterator.remove();
+			  }
+		  }
+		  
+		  while(sTubeList.size()<1){
+			  //nozzlePath = createRandomPath(0,8,58,65);
+			  nozzlePath = createPath(7,6,5,4,3,2,1,0);
+			  NozzleLayer nLayer = new NozzleLayer(this, scp, nozzlePath);
+			  sTubeList.add(new SimpleTube(this, nLayer, sTube, (int)random(50,150), 1+Math.random()*0.5));
+		  }
+		}
 	
 	//SETUP HUEBACKGROUND
 	public void setupHueBackground(){
@@ -569,6 +615,116 @@ public class ProcessingMain extends PApplet {
 			pg.rect(0, 0, pg.width, pg.height);
 			pg.endDraw();
 		}
+	}
+	
+	public void setupBackGroundContrast(){
+		Farbe[0] = (int) random(0,255);
+		Farbe[1] = (int) random(0,255);
+		Farbe[2] = (int) random(0,255);
+		float[] hsb = Color.RGBtoHSB(Farbe[0], Farbe[1], Farbe[2], null);
+		float hue = hsb[0]*360;          // .58333
+		float saturation = hsb[1]*100;   // .66667
+		float brightness = hsb[2]*100;   // .6
+		System.out.println(hue+" "+saturation+" "+brightness+" ");
+		backGround = new ColorFade(this, (int)hue, (int)saturation, (int)brightness);
+		backGround.hueFade((int)hue+30, 3000);
+		backGround.brightnessFade(50, 3000);
+		cfList.addColorFade(backGround);
+	}
+	
+	public void drawBackGroundContrast(){
+		
+		for(Nozzle n : scp.nozzleList){
+			PGraphics pg = n.sysA;
+			pg.beginDraw();
+			pg.colorMode(HSB, 360, 100, 100);
+			pg.noStroke();
+			pg.fill(backGround.hue+(int)(0.5*n.id), backGround.saturation, backGround.brightness);
+			pg.rect(0, 0, pg.width, pg.height);
+			pg.endDraw();
+		}
+		
+		/*nozzlePath = createNodePath(node1);
+		NozzleLayer nLayer = new NozzleLayer(this, scp, nozzlePath);
+		PGraphics pg = nLayer.getLayer();
+		pg.beginDraw();
+		pg.colorMode(HSB, 360, 100, 100);
+		pg.noStroke();
+		pg.fill(backGround.hue, backGround.saturation, backGround.brightness);
+		pg.rect(0, 0, pg.width, pg.height);
+		pg.endDraw();
+		
+		nLayer.add();
+		nozzlePath = createNodePath(node2);
+		nLayer = new NozzleLayer(this, scp, nozzlePath);
+		pg = nLayer.getLayer();
+		pg.beginDraw();
+		pg.colorMode(HSB, 360, 100, 100);
+		pg.noStroke();
+		pg.fill(backGround.hue+5, backGround.saturation, backGround.brightness);
+		pg.rect(0, 0, pg.width, pg.height);
+		pg.endDraw();
+		nLayer.add();
+		
+		nLayer.add();
+		nozzlePath = createNodePath(node3);
+		nLayer = new NozzleLayer(this, scp, nozzlePath);
+		pg = nLayer.getLayer();
+		pg.beginDraw();
+		pg.colorMode(HSB, 360, 100, 100);
+		pg.noStroke();
+		pg.fill(backGround.hue+10, backGround.saturation, backGround.brightness);
+		pg.rect(0, 0, pg.width, pg.height);
+		pg.endDraw();
+		nLayer.add();
+		
+		nLayer.add();
+		nozzlePath = createNodePath(node4);
+		nLayer = new NozzleLayer(this, scp, nozzlePath);
+		pg = nLayer.getLayer();
+		pg.beginDraw();
+		pg.colorMode(HSB, 360, 100, 100);
+		pg.noStroke();
+		pg.fill(backGround.hue+15, backGround.saturation, backGround.brightness);
+		pg.rect(0, 0, pg.width, pg.height);
+		pg.endDraw();
+		nLayer.add();
+		
+		nLayer.add();
+		nozzlePath = createNodePath(node5);
+		nLayer = new NozzleLayer(this, scp, nozzlePath);
+		pg = nLayer.getLayer();
+		pg.beginDraw();
+		pg.colorMode(HSB, 360, 100, 100);
+		pg.noStroke();
+		pg.fill(backGround.hue+20, backGround.saturation, backGround.brightness);
+		pg.rect(0, 0, pg.width, pg.height);
+		pg.endDraw();
+		nLayer.add();
+		
+		nLayer.add();
+		nozzlePath = createNodePath(node6);
+		nLayer = new NozzleLayer(this, scp, nozzlePath);
+		pg = nLayer.getLayer();
+		pg.beginDraw();
+		pg.colorMode(HSB, 360, 100, 100);
+		pg.noStroke();
+		pg.fill(backGround.hue+25, backGround.saturation, backGround.brightness);
+		pg.rect(0, 0, pg.width, pg.height);
+		pg.endDraw();
+		nLayer.add();
+		
+		nLayer.add();
+		nozzlePath = createNodePath(node7);
+		nLayer = new NozzleLayer(this, scp, nozzlePath);
+		pg = nLayer.getLayer();
+		pg.beginDraw();
+		pg.colorMode(HSB, 360, 100, 100);
+		pg.noStroke();
+		pg.fill(backGround.hue+30, backGround.saturation, backGround.brightness);
+		pg.rect(0, 0, pg.width, pg.height);
+		pg.endDraw();
+		nLayer.add();*/
 	}
 	
 	//SETUP LAMP
@@ -611,7 +767,7 @@ public class ProcessingMain extends PApplet {
 
 	public void draw() {
 		
-		System.out.println(cfList.colorFadeList.size());
+		//System.out.println(cfList.colorFadeList.size());
 		//colorMode(HSB,360,100,100);
 		//background(lampFade.hue,lampFade.saturation,lampFade.brightness);
 		
@@ -654,14 +810,27 @@ public class ProcessingMain extends PApplet {
 			}
 		}
 	
-		  
-		scp.clearSysA();
+
+		//if(frameCount%50<250){
+		scp.dimm(30);
+		//}else{
+		//scp.clearSysA();
+		//}
+		if(frameCount%200==0){
+			setupBackGroundContrast();
+			setupCompTube();
+		}
+		drawBackGroundContrast();
+
+		
+		//scp.clearSysA();
 
 		  if(activeArray[5]){
 			  drawHueBackground();
 		  }
 		  if(activeArray[0]){
-			  drawSimpleTube();
+			  //drawSimpleTube();
+			  drawCompSimpleTube();
 		  }
 		  if(activeArray[1]){
 			  drawPathosLight();
@@ -683,8 +852,7 @@ public class ProcessingMain extends PApplet {
 		  }
 		  
 		  //drawYellowBlue();
-		  
-		  
+		  		  
 		  //drawLamp();
 		  
 		  if(frameCount%100==0){

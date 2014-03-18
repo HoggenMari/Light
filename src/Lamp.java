@@ -22,9 +22,9 @@ public class Lamp implements Effect{
 		this.cfList = cfList;
 		layerGraphics = lampLayer.getLayer();
 		int h = 0;
-		lampFader = new ColorFade(p, h, 100, 0);
+		lampFader = new ColorFade(p, h, 100, 100, 0);
 		lampFader.hueFade(h+50, speed, 2);
-		lampFader.brightnessFade(100, speed, 2);
+		lampFader.alphaFade(255, speed, 2);
 		cfList.addColorFade(lampFader);
 		timer = p.millis();
 		//System.out.println("FINISHED LAMP SETUP");
@@ -34,9 +34,10 @@ public class Lamp implements Effect{
 	public void draw(){
 		//System.out.println("DRAWLAM2P");
 		layerGraphics.beginDraw();
+		layerGraphics.clear();
 		layerGraphics.colorMode(PConstants.HSB,360,100,100);
 		layerGraphics.noStroke();
-		layerGraphics.fill(lampFader.hue, lampFader.saturation, lampFader.brightness);
+		layerGraphics.fill(lampFader.hue, lampFader.saturation, lampFader.brightness, lampFader.alpha);
 		layerGraphics.rect(0, 0, layerGraphics.width, layerGraphics.height);
 		layerGraphics.endDraw();
 		lampLayer.add();

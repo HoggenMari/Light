@@ -46,6 +46,7 @@ public class ColorFadeList extends Thread {
 			int saturationPassedTime = timer - cf.saturationSavedTime;
 			int brightnessPassedTime = timer - cf.brightnessSavedTime;
 			int huePassedTime = timer - cf.hueSavedTime;
+			int alphaPassedTime = timer - cf.alphaSavedTime;
 			if(cf.activeSaturation && cf.saturationLoop<cf.saturationLoopMax) {
 			if (saturationPassedTime >= cf.saturationTotalTime) {
 				//System.out.println("SAURATIONTIME "+p.millis());
@@ -107,12 +108,32 @@ public class ColorFadeList extends Thread {
 					}
 			}
 			}
+			if(cf.activeAlpha && cf.alphaLoop<cf.alphaLoopMax) {
+				if (alphaPassedTime >= cf.alphaTotalTime) {
+					//System.out.println("ACTIVEHUE: "+p.millis());
+					p.colorMode(PConstants.HSB, 360, 100, 100);
+				    cf.alpha = cf.alpha + cf.alphaAdd;
+				    //p.background(hue, saturation, brightness);
+					cf.alphaSavedTime = p.millis(); // Save the current time to restart the timer!
+				}
+				if(cf.alpha == cf.alphaEnd) {
+					cf.alphaEnd = cf.alphaStart;
+					cf.alphaStart = cf.alpha;
+					if(cf.alphaEnd < cf.alpha) {
+						cf.alphaAdd = -1;
+						cf.alphaLoop += 1;
+					}else{ 
+						cf.alphaAdd = 1;
+						cf.alphaLoop += 1;
+					}
+			}
+			}
 		}
 		
 		for(ColorFade cf : colorFadeList){
 			if(cf.loop) {
 				//System.out.println("GO1 "+cf.brightnessLoop+" "+cf.brightnessLoopMax);
-			if(cf.hueLoop >= cf.hueLoopMax || cf.saturationLoop >= cf.saturationLoopMax || cf.brightnessLoop >= cf.brightnessLoopMax) {
+			if(cf.hueLoop >= cf.hueLoopMax || cf.saturationLoop >= cf.saturationLoopMax || cf.brightnessLoop >= cf.brightnessLoopMax || cf.alphaLoop >= cf.alphaLoopMax) {
 				colorFadeList.remove(cf);
 				//System.out.println("GO2");
 

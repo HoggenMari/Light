@@ -7,6 +7,7 @@ public class ColorFade {
 	int hue;
 	int saturation;
 	int brightness;
+	int alpha;
 	boolean running = false;
 	
 	boolean loop = false;
@@ -38,6 +39,15 @@ public class ColorFade {
 	int hueLoopMax = Integer.MAX_VALUE;
 	boolean activeHue = false;
 	
+	int alphaSavedTime;
+	int alphaTotalTime;
+	int alphaEnd;
+	int alphaStart;
+	int alphaAdd;
+	int alphaLoop = 0;
+	int alphaLoopMax = Integer.MAX_VALUE;
+	boolean activeAlpha = false;
+	
 	public ColorFade(PApplet p, int hueStart, int saturationStart, int brightnessStart) {
 		this.p = p;
 		this.hue = hueStart;
@@ -46,7 +56,20 @@ public class ColorFade {
 		this.saturationStart = saturationStart;
 		this.brightness = brightnessStart;
 		this.brightnessStart = brightnessStart;
-		
+		this.alpha = 255;
+		this.alphaStart = 255;
+	}
+	
+	public ColorFade(PApplet p, int hueStart, int saturationStart, int brightnessStart, int alphaStart) {
+		this.p = p;
+		this.hue = hueStart;
+		this.hueStart = hueStart;
+		this.saturation = saturationStart;
+		this.saturationStart = saturationStart;
+		this.brightness = brightnessStart;
+		this.brightnessStart = brightnessStart;
+		this.alpha = alphaStart;
+		this.alphaStart = alphaStart;
 	}
 	
 	public void hueFade(int hueEnd, int duration) {
@@ -116,6 +139,9 @@ public class ColorFade {
 	public void brightnessFade(int brightnessEnd, int duration) {
 		this.brightnessEnd = brightnessEnd;
 		int diff = Math.abs(brightness-brightnessEnd);
+		if(diff==0){
+			diff +=1;
+		}
 		this.brightnessTotalTime = duration/(int)diff;
 		if(brightnessEnd < brightness) {
 			brightnessAdd = -1;
@@ -131,6 +157,9 @@ public class ColorFade {
 		this.brightnessEnd = brightnessEnd;
 		this.brightnessLoopMax = brightnessLoopMax;
 		int diff = Math.abs(brightness-brightnessEnd);
+		if(diff==0){
+			diff +=1;
+		}
 		this.brightnessTotalTime = duration/(int)diff;
 		if(brightnessEnd < brightness) {
 			brightnessAdd = -1;
@@ -139,5 +168,39 @@ public class ColorFade {
 		}
 		//System.out.println(diff+" "+brightnessTotalTime);	
 		activeBrightness = true;
+	}
+	
+	public void alphaFade(int alphaEnd, int duration) {
+		this.alphaEnd = alphaEnd;
+		int diff = Math.abs(alpha-alphaEnd);
+		if(diff==0){
+			diff +=1;
+		}
+		this.alphaTotalTime = duration/(int)diff;
+		if(alphaEnd < alpha) {
+			alphaAdd = -1;
+		}else{ 
+			alphaAdd = 1;
+		}
+		//System.out.println(diff+" "+brightnessTotalTime);	
+		activeAlpha = true;
+	}
+	
+	public void alphaFade(int alphaEnd, int duration, int alphaLoopMax) {
+		loop = true;
+		this.alphaEnd = alphaEnd;
+		this.alphaLoopMax = alphaLoopMax;
+		int diff = Math.abs(alpha-alphaEnd);
+		if(diff==0){
+			diff +=1;
+		}
+		this.alphaTotalTime = duration/(int)diff;
+		if(alphaEnd < alpha) {
+			alphaAdd = -1;
+		}else{ 
+			alphaAdd = 1;
+		}
+		//System.out.println(diff+" "+brightnessTotalTime);	
+		activeAlpha = true;
 	}
 }

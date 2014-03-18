@@ -30,7 +30,17 @@ public class SimpleTube {
 		pg.clear();
 		pg.noStroke();
 		double alpha = 255.0/length;
-		for(int i=0; i<length; i++){
+		pg.fill(cf.hue, cf.saturation, cf.brightness, (int) 20);
+		pg.rect((int)x, 0, 1, 5);
+		pg.fill(cf.hue, cf.saturation, cf.brightness, (int) 50);
+		pg.rect((int)x-1, 0, 1, 5);
+		pg.fill(cf.hue, cf.saturation, cf.brightness, (int) 80);
+		pg.rect((int)x-2, 0, 1, 5);
+		pg.fill(cf.hue, cf.saturation, cf.brightness, (int) 140);
+		pg.rect((int)x-3, 0, 1, 5);
+		pg.fill(cf.hue, cf.saturation, cf.brightness, (int) 200);
+		pg.rect((int)x-4, 0, 1, 5);
+		for(int i=5; i<length; i+=1){
 			pg.fill(cf.hue, cf.saturation, cf.brightness, (int) (255-alpha*i));
 			pg.rect((int)x-i, 0, 1, 5);
 		}
