@@ -137,6 +137,8 @@ public class ColorFade {
 	}
 	
 	public void brightnessFade(int brightnessEnd, int duration) {
+		brightnessLoop = 0;
+		brightnessLoopMax = Integer.MAX_VALUE;
 		this.brightnessEnd = brightnessEnd;
 		int diff = Math.abs(brightness-brightnessEnd);
 		if(diff==0){
@@ -203,4 +205,5 @@ public class ColorFade {
 		//System.out.println(diff+" "+brightnessTotalTime);	
 		activeAlpha = true;
 	}
+	
 }

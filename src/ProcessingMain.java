@@ -154,7 +154,7 @@ public class ProcessingMain extends PApplet {
     private boolean flashActiveArray[] = {true,true,true,true,true};
     private boolean wiActiveArray[] = {true,true,true,true,true};
     
-    private ArrayList<Effect> effectList = new ArrayList<Effect>();
+    private ArrayList<ArrayList<Effect>> effectList = new ArrayList<ArrayList<Effect>>();
     
     private ArrayList<Node> nodeList = new ArrayList<Node>();
 
@@ -162,7 +162,9 @@ public class ProcessingMain extends PApplet {
 
 	private ColorFade backGround;
 	
-	private int[] Farbe = new int[3]; 
+	private int[] Farbe = new int[3];
+
+	private TubeAnimation tubeAnimation; 
     
 	//Initiate as Application
 	public static void main(String args[]) {
@@ -291,21 +293,29 @@ public class ProcessingMain extends PApplet {
 		
 		
 		setupPathosLight();
-		setupYellowBlue();
-		setupHueBackground();		
-		setUpLamp();
-		setupFlower();
-		setupSimpleTube();
-		setupPush();
-		setupBackGroundContrast();
-		setupCompTube();
+		//setupYellowBlue();
+		//setupHueBackground();		
+		//setUpLamp();
+		//setupFlower();
+		//setupSimpleTube();
+		//setupPush();
+		//setupBackGroundContrast();
+		//setupCompTube();
 		
 		//frameRate(10);
 		cfList.start();
 		
-		nozzlePath = createPath(4,3,2,1,0);
+		nozzlePath = scp.createPath(4,3,2,1,0);
 		HLayer nLayer = new HLayer(this, scp, nozzlePath);
 		stroboList.add(new Strobo(this, nLayer, 25));
+		
+		for(int i=0; i<7; i++){
+			effectList.add(new ArrayList<Effect>());
+		}
+		
+		tubeAnimation = new TubeAnimation(this, scp, cfList);
+		tubeAnimation.setupMode2();
+		
 		
 	}
 		
@@ -336,8 +346,8 @@ public class ProcessingMain extends PApplet {
 		  }
 	  }
 	  
-	  while(pendulumList.size()<1){
-		  nozzlePath = createPath(4,3,2,1,0);
+	  while(pendulumList.size()<0){
+		  nozzlePath = scp.createPath(4,3,2,1,0);
 		  //nozzlePath = createRowPath(0,65);
 		  HLayer nLayer = new HLayer(this, scp, nozzlePath);
 		  pendulumList.add(new Pendulum(nLayer));
@@ -358,7 +368,7 @@ public class ProcessingMain extends PApplet {
 		  }
 		  
 		  while(lampList.size()<5){
-			  nozzlePath = createNodePath(nodeList.get((int)random(0,7)));
+			  nozzlePath = scp.createNodePath(nodeList.get((int)random(0,7)));
 			  HLayer nLayer = new HLayer(this, scp, nozzlePath);
 			  lampList.add(new Lamp(this, nLayer, cfList, (int) random(1000,1000)));
 		  }
@@ -469,7 +479,7 @@ public class ProcessingMain extends PApplet {
 		cfFlower = new ColorFade(this, 220, 100, 100);
 		cfFlower.hueFade(180, 2000);
 		cfList.addColorFade(cfFlower);
-		nozzlePath = createPath(7,6,5,4,3,2,1,0);
+		nozzlePath = scp.createPath(7,6,5,4,3,2,1,0);
 		flowerLayer = new NozzleLayer(this, scp, nozzlePath);
 		flowerLayerGraphics = flowerLayer.getLayer();
 	}
@@ -519,7 +529,7 @@ public class ProcessingMain extends PApplet {
 		  }
 
 		  while(horizontalMoveList.size()<0){
-			  nozzlePath = createPath(7,6,5,4,3,2,1,0);
+			  nozzlePath = scp.createPath(7,6,5,4,3,2,1,0);
 			  //nozzlePath = createRandomPath();
 			  horizontalMoveList.add(new Shine(this, nozzlePath));  
 			  horizontalMoveList.add(new Glitter(this, nozzlePath)); 
@@ -554,7 +564,7 @@ public class ProcessingMain extends PApplet {
 	  }
 	  
 	  while(sTubeList.size()<1){
-		  nozzlePath = createRowPath(0,65);
+		  nozzlePath = scp.createRowPath(0,65);
 		  //nozzlePath = createRandomPath(0,8,58,65);
 		  NozzleLayer nLayer = new NozzleLayer(this, scp, nozzlePath);
 		  sTubeList.add(new SimpleTube(this, nLayer, colorTubeList.get((int)random(0,2)), (int)random(20,100), 1+Math.random()*0.5));
@@ -569,7 +579,7 @@ public class ProcessingMain extends PApplet {
 			float brightness = hsb[2]*100;   // .6
 			
 			sTube = new ColorFade(this, (int)hue, (int)saturation, (int)brightness);
-			//sTube.hueFade((int)hue+50, 1000);
+			sTube.saturationFade((int)saturation-80, 1000);
 			
 			sTube2 = new ColorFade(this, (int)hue, (int)10, (int)brightness);
 			//sTube.hueFade(h+50, 1000);
@@ -594,12 +604,13 @@ public class ProcessingMain extends PApplet {
 		  
 		  while(sTubeList.size()<1){
 			  //nozzlePath = createRandomPath(0,8,58,65);
-			  nozzlePath = createPath(7,6,5,4,3,2,1,0);
+			  //nozzlePath = createPath(7,6,5,4,3,2,1,0);
+			  nozzlePath = scp.createNodePath(node1);
 			  NozzleLayer nLayer = new NozzleLayer(this, scp, nozzlePath);
-			  sTubeList.add(new SimpleTube(this, nLayer, sTube, (int)random(50,150), 1+Math.random()*0.5));
-			  nozzlePath = createPath(0,1,2,3,4,5,6,7);
+			  sTubeList.add(new SimpleTube(this, nLayer, sTube, (int)random(5,80), 1+Math.random()*0.5));
+			  /*nozzlePath = createPath(0,1,2,3,4,5,6,7);
 			  nLayer = new NozzleLayer(this, scp, nozzlePath);
-			  sTubeList.add(new SimpleTube(this, nLayer, sTube2, (int)random(50,150), 1+Math.random()*0.5));
+			  sTubeList.add(new SimpleTube(this, nLayer, sTube2, (int)random(50,150), 1+Math.random()*0.5));*/
 		  }
 		}
 	
@@ -639,9 +650,8 @@ public class ProcessingMain extends PApplet {
 	}
 	
 	public void drawBackGroundContrast(){
-		
 		for(Nozzle n : scp.nozzleList){
-			PGraphics pg = n.sysB;
+			PGraphics pg = n.sysA;
 			pg.beginDraw();
 			pg.colorMode(HSB, 360, 100, 100);
 			pg.noStroke();
@@ -649,93 +659,11 @@ public class ProcessingMain extends PApplet {
 			pg.rect(0, 0, pg.width, pg.height);
 			pg.endDraw();
 		}
-		
-		/*nozzlePath = createNodePath(node1);
-		NozzleLayer nLayer = new NozzleLayer(this, scp, nozzlePath);
-		PGraphics pg = nLayer.getLayer();
-		pg.beginDraw();
-		pg.colorMode(HSB, 360, 100, 100);
-		pg.noStroke();
-		pg.fill(backGround.hue, backGround.saturation, backGround.brightness);
-		pg.rect(0, 0, pg.width, pg.height);
-		pg.endDraw();
-		
-		nLayer.add();
-		nozzlePath = createNodePath(node2);
-		nLayer = new NozzleLayer(this, scp, nozzlePath);
-		pg = nLayer.getLayer();
-		pg.beginDraw();
-		pg.colorMode(HSB, 360, 100, 100);
-		pg.noStroke();
-		pg.fill(backGround.hue+5, backGround.saturation, backGround.brightness);
-		pg.rect(0, 0, pg.width, pg.height);
-		pg.endDraw();
-		nLayer.add();
-		
-		nLayer.add();
-		nozzlePath = createNodePath(node3);
-		nLayer = new NozzleLayer(this, scp, nozzlePath);
-		pg = nLayer.getLayer();
-		pg.beginDraw();
-		pg.colorMode(HSB, 360, 100, 100);
-		pg.noStroke();
-		pg.fill(backGround.hue+10, backGround.saturation, backGround.brightness);
-		pg.rect(0, 0, pg.width, pg.height);
-		pg.endDraw();
-		nLayer.add();
-		
-		nLayer.add();
-		nozzlePath = createNodePath(node4);
-		nLayer = new NozzleLayer(this, scp, nozzlePath);
-		pg = nLayer.getLayer();
-		pg.beginDraw();
-		pg.colorMode(HSB, 360, 100, 100);
-		pg.noStroke();
-		pg.fill(backGround.hue+15, backGround.saturation, backGround.brightness);
-		pg.rect(0, 0, pg.width, pg.height);
-		pg.endDraw();
-		nLayer.add();
-		
-		nLayer.add();
-		nozzlePath = createNodePath(node5);
-		nLayer = new NozzleLayer(this, scp, nozzlePath);
-		pg = nLayer.getLayer();
-		pg.beginDraw();
-		pg.colorMode(HSB, 360, 100, 100);
-		pg.noStroke();
-		pg.fill(backGround.hue+20, backGround.saturation, backGround.brightness);
-		pg.rect(0, 0, pg.width, pg.height);
-		pg.endDraw();
-		nLayer.add();
-		
-		nLayer.add();
-		nozzlePath = createNodePath(node6);
-		nLayer = new NozzleLayer(this, scp, nozzlePath);
-		pg = nLayer.getLayer();
-		pg.beginDraw();
-		pg.colorMode(HSB, 360, 100, 100);
-		pg.noStroke();
-		pg.fill(backGround.hue+25, backGround.saturation, backGround.brightness);
-		pg.rect(0, 0, pg.width, pg.height);
-		pg.endDraw();
-		nLayer.add();
-		
-		nLayer.add();
-		nozzlePath = createNodePath(node7);
-		nLayer = new NozzleLayer(this, scp, nozzlePath);
-		pg = nLayer.getLayer();
-		pg.beginDraw();
-		pg.colorMode(HSB, 360, 100, 100);
-		pg.noStroke();
-		pg.fill(backGround.hue+30, backGround.saturation, backGround.brightness);
-		pg.rect(0, 0, pg.width, pg.height);
-		pg.endDraw();
-		nLayer.add();*/
 	}
 	
 	//SETUP LAMP
 	public void setUpLamp() {
-		nozzlePath = createPath(7,6,5,4,3,2,1,0);
+		nozzlePath = scp.createPath(7,6,5,4,3,2,1,0);
 		lampLayer = new NozzleLayer(this, scp, nozzlePath);
 		layerGraphics = lampLayer.getLayer();
 		int h = 0;
@@ -777,7 +705,8 @@ public class ProcessingMain extends PApplet {
 		//colorMode(HSB,360,100,100);
 		//background(lampFade.hue,lampFade.saturation,lampFade.brightness);
 		
-		if(abs(millis()-flashTimer)>=20 && flashActive){
+		//FLASH
+		/*if(abs(millis()-flashTimer)>=20 && flashActive){
 			int minValue = flashArray[0];  
 			int minPos = 0;
 			  for(int i=1;i<flashArray.length;i++){  
@@ -792,25 +721,34 @@ public class ProcessingMain extends PApplet {
 			flashActive = false;
 			System.out.println("FLASH mit "+(minPos+1)+" "+minValue);
 			sensorList.get(minPos).setFlash();
-		}
+		}*/
 		
 		for(Sensor s : sensorList){
 			//System.out.println("SENSOR: "+s.getID()+" STATE: "+s.getState());
 			if(s.getState()){
 				if(activeArray[6]){
-				nozzlePath = createNodePath(nodeList.get(s.getID()-1));
+				if(effectList.get(s.getID()-1).isEmpty()){
+				nozzlePath = scp.createNodePath(nodeList.get(s.getID()-1));
 				HLayer nLayer = new HLayer(this, scp, nozzlePath);
-				effectList.add(new Pendulum(nLayer));
+				effectList.get(s.getID()-1).add(new Pendulum(nLayer));
+				}
 				s.setState(false);
 				}else if(activeArray[3]){
-				nozzlePath = createNodePath(nodeList.get(s.getID()-1));
+				nozzlePath = scp.createNodePath(nodeList.get(s.getID()-1));
 				HLayer nLayer = new HLayer(this, scp, nozzlePath);
 				lampList.add(new Lamp(this, nLayer, cfList, (int)random(300,3000)));
 				s.setState(false);
-				}else{
-				nozzlePath = createNodePath(nodeList.get(s.getID()-1));
+				}
+				/*else{
+				nozzlePath = scp.createNodePath(nodeList.get(s.getID()-1));
 				HLayer nLayer = new HLayer(this, scp, nozzlePath);
-				effectList.add(new Strobo(this, nLayer, 25));
+				effectList.get(s.getID()-1).add(new Strobo(this, nLayer, 25));
+				s.setState(false);
+				}*/
+				else{
+				nozzlePath = scp.createNodePath(nodeList.get(s.getID()-1));	
+				HLayer nLayer = new HLayer(this, scp, nozzlePath);
+				effectList.get(s.getID()-1).add(new Stars(this, nLayer));
 				s.setState(false);
 				}
 			}
@@ -818,16 +756,18 @@ public class ProcessingMain extends PApplet {
 	
 
 		//if(frameCount%50<250){
-		scp.dimm(30);
+		//scp.dimm(30);
 		//}else{
-		//scp.clearSysA();
+		scp.clearSysA();
 		//}
-		if(frameCount%200==0){
-			setupBackGroundContrast();
-			setupCompTube();
-		}
-		drawBackGroundContrast();
+		//if(frameCount%200==0){
+		//	setupBackGroundContrast();
+		//	setupCompTube();
+		//}
+		//drawBackGroundContrast();
 
+		//scp.clearSysA();
+		//tubeAnimation.draw();
 		
 		//scp.clearSysA();
 
@@ -835,10 +775,11 @@ public class ProcessingMain extends PApplet {
 			  drawHueBackground();
 		  }
 		  if(activeArray[0]){
-			  drawSimpleTube();
-			  //drawCompSimpleTube();
+			  //drawSimpleTube();
+			  drawCompSimpleTube();
 		  }
 		  if(activeArray[1]){
+			  scp.clearSysA();
 			  drawPathosLight();
 		  }
 		  if(activeArray[2]){
@@ -992,8 +933,8 @@ public class ProcessingMain extends PApplet {
 		  		  
 		  //Draw on GUI  
 		  
-		  
-		  for(Iterator<Effect> effectIterator = effectList.iterator(); effectIterator.hasNext();){
+		  for(int i=0; i<effectList.size(); i++){
+		  for(Iterator<Effect> effectIterator = effectList.get(i).iterator(); effectIterator.hasNext();){
 			  Effect e = effectIterator.next();
 			  
 			  e.draw();
@@ -1002,6 +943,7 @@ public class ProcessingMain extends PApplet {
 				  //System.out.println("DEAD");
 				  effectIterator.remove();
 			  }
+		  }
 		  }
 		  
 		  
@@ -1086,66 +1028,6 @@ public class ProcessingMain extends PApplet {
 		  color = color((int)random(0,20), 100, 100);
 		  horizontalShineList.add(new HorizontalShine(this, nozzlePath, color, (int) random(2,2)));  
 	  }*/
-	}
-	
-	public LinkedList<Nozzle> createRandomPath(int r1_start, int r1_end, int r2_start, int r2_end) {
-	LinkedList<Nozzle> randomPath = new LinkedList<Nozzle>();
-	do{
-      int r1=0;
-	  int r2=0;
-	  do{
-	    r1 = (int)random(r1_start,r1_end);
-	    r2 = (int)random(r2_start,r2_end);
-	    //System.out.println("randomPath.size: "+randomPath.size());
-	  }while(r1==r2 | r1>r2);
-	  randomPath = scp.breadthFirstSearch(scp.nozzleList.get(r1), scp.nozzleList.get(r2));
-	}while(randomPath.size()<5);
-	return randomPath;
-	}
-	
-	public LinkedList<Nozzle> createClosedPath() {
-		LinkedList<Nozzle> randomPath = new LinkedList<Nozzle>();
-		do{
-	      int r1=0;
-		  int r2=0;
-		  do{
-		    r1 = (int)random(0,16);
-		    r2 = (int)random(0,65);
-		    //System.out.println("randomPath.size: "+randomPath.size());
-		  }while(r1==r2 | r1>r2);
-		  randomPath = scp.breadthFirstSearch(scp.nozzleList.get(r1), scp.nozzleList.get(r2));
-		}while(randomPath.size()<5);
-		return randomPath;
-	}
-	
-	public LinkedList<Nozzle> createPath(int...i) {
-		LinkedList<Nozzle> path = new LinkedList<Nozzle>();
-		for(int f : i){
-		path.add(scp.nozzleList.get(f));
-		}
-		return path;
-	}
-	
-	public LinkedList<Nozzle> createRowPath(int i, int j) {
-		LinkedList<Nozzle> path = new LinkedList<Nozzle>();
-		if(i>j){
-			for(int z=i; z>j; z--){
-				path.add(scp.nozzleList.get(z));
-			}
-		}else{
-			for(int z=i; z<j; z++){
-				path.add(scp.nozzleList.get(z));
-			}
-		}
-		return path;
-	}
-	
-	public LinkedList<Nozzle> createNodePath(Node node){
-		LinkedList<Nozzle> path = new LinkedList<Nozzle>();
-		for(Nozzle n : node.nozzleList){
-			path.add(n);
-		}
-		return path;
 	}
 	
 	public void setupYellowBlue() {
@@ -1276,22 +1158,6 @@ public class ProcessingMain extends PApplet {
 					int id = Integer.parseInt(spl2[0]);
 					spl2 = split(spl2[1], ',');
 					int value = Integer.parseInt(spl2[0]);
-					/*if(horizontalMoveList.size()<1){
-						nozzlePath = createPath(7,6,5,4,3,2,1,0);
-						//nozzlePath = createRandomPath();
-						horizontalMoveList.add(new Shine(this, nozzlePath));  
-						horizontalMoveList.add(new Glitter(this, nozzlePath)); 
-					}*/
-					/*if(stroboList.size()<1){
-						nozzlePath = createPath(7,6,5,4,3,2,1,0);
-						HLayer nLayer = new HLayer(this, scp, nozzlePath);
-						stroboList.add(new Strobo(this, nLayer, 25));  
-					}
-					if(pendulumList.size()<1){
-						nozzlePath = createPath(4,3,2,1,0);
-						HLayer nLayer = new HLayer(this, scp, nozzlePath);
-						pendulumList.add(new Pendulum(nLayer));
-					}*/
 					//System.out.println("FLASH mit "+id+" value: "+value);
 					flashArray [id-1]=value;
 					flashActive = true;
@@ -1315,22 +1181,6 @@ public class ProcessingMain extends PApplet {
 					}
 					System.out.println("OUTPUT: "+output);
 					sensorList.get(id-1).setWi(posX, posY); 
-					/*if(horizontalMoveList.size()<1){
-					nozzlePath = createPath(7,6,5,4,3,2,1,0);
-					  //nozzlePath = createRandomPath();
-					  horizontalMoveList.add(new Shine(this, nozzlePath));  
-					  horizontalMoveList.add(new Glitter(this, nozzlePath)); 
-					}*/
-					/*if(stroboList.size()<1){
-						nozzlePath = createPath(7,6,5,4,3,2,1,0);
-						HLayer nLayer = new HLayer(this, scp, nozzlePath);
-						stroboList.add(new Strobo(this, nLayer, 25));  
-					}
-					if(pendulumList.size()<1){
-						nozzlePath = createPath(4,3,2,1,0);
-						HLayer nLayer = new HLayer(this, scp, nozzlePath);
-						pendulumList.add(new Pendulum(nLayer));
-					}*/
 				}
 				
 			}
@@ -1347,7 +1197,6 @@ public class ProcessingMain extends PApplet {
 			return defaultVal;
 		}
 	}
-	
 	
 	@SuppressWarnings("deprecation")
 	public void controlEvent(ControlEvent theEvent) {

@@ -1,3 +1,4 @@
+import java.awt.Container;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
@@ -119,6 +120,8 @@ public class Pavillon extends Thread {
 		};
 	
 	ArrayList<Nozzle> nozzleList = new ArrayList<Nozzle>();
+	ArrayList<Node> nodeList = new ArrayList<Node>();
+
 	private InetAddress dest;
 	private MulticastSocket socket;
 	private PApplet p;
@@ -227,6 +230,7 @@ public class Pavillon extends Thread {
 	
 	public void add(Node... nodes){
 		for(Node node : nodes){
+			nodeList.add(node);
 		  for(int i=0; i<node.nozzleList.size(); i++){
 		    nozzleList.add(node.nozzleList.get(i));
 		  }
@@ -389,4 +393,52 @@ public class Pavillon extends Thread {
 			pg.endDraw();
 		}
 	}
+
+
+	//NozzlePath
+	public LinkedList<Nozzle> createRandomPath(int r1_start, int r1_end, int r2_start, int r2_end) {
+	LinkedList<Nozzle> randomPath = new LinkedList<Nozzle>();
+	do{
+      int r1=0;
+	  int r2=0;
+	  do{
+	    r1 = (int) (Math.random()*Math.abs(r1_start-r1_end)+r1_start);//(int)random(r1_start,r1_end);
+	    r2 = (int) (Math.random()*Math.abs(r2_start-r2_end)+r2_start);
+	    //System.out.println("randomPath.size: "+randomPath.size());
+	  }while(r1==r2 | r1>r2);
+	  randomPath = breadthFirstSearch(nozzleList.get(r1), nozzleList.get(r2));
+	}while(randomPath.size()<5);
+	return randomPath;
+	}
+	
+	public LinkedList<Nozzle> createPath(int...i) {
+		LinkedList<Nozzle> path = new LinkedList<Nozzle>();
+		for(int f : i){
+		path.add(nozzleList.get(f));
+		}
+		return path;
+	}
+	
+	public LinkedList<Nozzle> createRowPath(int i, int j) {
+		LinkedList<Nozzle> path = new LinkedList<Nozzle>();
+		if(i>j){
+			for(int z=i; z>j; z--){
+				path.add(nozzleList.get(z));
+			}
+		}else{
+			for(int z=i; z<j; z++){
+				path.add(nozzleList.get(z));
+			}
+		}
+		return path;
+	}
+	
+	public LinkedList<Nozzle> createNodePath(Node node){
+		LinkedList<Nozzle> path = new LinkedList<Nozzle>();
+		for(Nozzle n : node.nozzleList){
+			path.add(n);
+		}
+		return path;
+	}
+
 }

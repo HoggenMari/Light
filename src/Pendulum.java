@@ -13,10 +13,14 @@ public class Pendulum implements Effect{
 	private PGraphics pg;
 	private boolean dead = false;
 	private boolean value = false;
+	private int hue1;
+	private int hue2;
 	
 	public Pendulum(Layer nozzleLayer){
 		this.nozzleLayer = nozzleLayer;
 		pg = nozzleLayer.getLayer();
+		hue1 = (int) (Math.random()*360);
+		hue2 = Math.abs(hue1-180);
 	}
 	
 	public void drawHorizontal(){
@@ -135,12 +139,12 @@ public class Pendulum implements Effect{
 		pg.noStroke();
 		if(value){
 		for(int i=0; i<pg.width-x; i++){
-		pg.fill(60-i,100,100,timer*3);
+		pg.fill(hue1-i,100,100,timer*3);
 		pg.rect(0+x+i, y, 1, width);
 		}
 		}else{
 		for(int i=0; i<pg.width-x; i++){
-		pg.fill(280+i,100,100,timer*3);
+		pg.fill(hue2+i,100,100,timer*3);
 		pg.rect(i, y, 1, width);
 		}	
 		}
@@ -166,6 +170,47 @@ public class Pendulum implements Effect{
 			dead = true;
 		}
 	}
+	
+	
+	public void draw2DTubePendulum(){
+		pg.beginDraw();
+		pg.clear();
+		pg.colorMode(PConstants.HSB, 360, 100, 100,100);
+		pg.noStroke();
+		if(value){
+		for(int i=0; i<pg.width-x; i++){
+		pg.fill(hue1-i,100,100,timer*3);
+		pg.rect(0+x+i, y, 1, width);
+		}
+		}else{
+		for(int i=0; i<pg.width-x; i++){
+		pg.fill(hue2+i,100,100,timer*3);
+		pg.rect(i, y, 1, width);
+		}	
+		}
+		nozzleLayer.add();
+		speed = speed + 0.3;
+		
+		x = x + (int)speed;
+
+		  // if we've hit the floor... 
+		  if (x > pg.width) {
+		    // set the position to be on the floor
+		    x = pg.width; 
+		    // and make the y speed 90% of what it was, 
+		    // but in the opposite direction
+		    speed = speed * -1;
+		    System.out.println("GO1");
+		    value = !value;
+			timer--;
+
+		  } 
+		
+		if(timer==0){
+			dead = true;
+		}
+	}
+	
 	
 	public boolean isDead(){
 		return dead;

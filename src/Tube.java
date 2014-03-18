@@ -3,7 +3,7 @@ import processing.core.PConstants;
 import processing.core.PGraphics;
 
 
-public class SimpleTube {
+public class Tube {
 
 	private PApplet p;
 	private PGraphics pg;
@@ -13,11 +13,13 @@ public class SimpleTube {
 	private NozzleLayer nozzleLayer;
 	private boolean dead;
 	private double speed=0;
-
-	public SimpleTube(PApplet p, NozzleLayer nozzleLayer, ColorFade cf, int length, double speed) {
+	private int hsb[];
+	
+	public Tube(PApplet p, NozzleLayer nozzleLayer, int hsb[], int length, double speed) {
 		this.p = p;
 		this.nozzleLayer = nozzleLayer;
 		this.cf = cf;
+		this.hsb = hsb;
 		this.length = length;
 		this.speed  = speed;
 		pg = nozzleLayer.getLayer();
@@ -30,18 +32,18 @@ public class SimpleTube {
 		pg.clear();
 		pg.noStroke();
 		double alpha = 255.0/length;
-		pg.fill(cf.hue, cf.saturation, cf.brightness, (int) 20);
+		pg.fill(hsb[0], hsb[1], hsb[3], (int) 20);
 		pg.rect((int)x, 0, 1, 5);
-		pg.fill(cf.hue, cf.saturation, cf.brightness, (int) 50);
+		pg.fill(hsb[0], hsb[1], hsb[3], (int) 50);
 		pg.rect((int)x-1, 0, 1, 5);
-		pg.fill(cf.hue, cf.saturation, cf.brightness, (int) 80);
+		pg.fill(hsb[0], hsb[2], hsb[3], (int) 80);
 		pg.rect((int)x-2, 0, 1, 5);
-		pg.fill(cf.hue, cf.saturation, cf.brightness, (int) 140);
+		pg.fill(hsb[0], hsb[3], hsb[3], (int) 140);
 		pg.rect((int)x-3, 0, 1, 5);
-		pg.fill(cf.hue, cf.saturation, cf.brightness, (int) 200);
+		pg.fill(hsb[0], hsb[4], hsb[3], (int) 200);
 		pg.rect((int)x-4, 0, 1, 5);
 		for(int i=5; i<length; i+=1){
-			pg.fill(cf.hue, cf.saturation, cf.brightness, (int) (255-alpha*i));
+			pg.fill(hsb[0], hsb[1], hsb[2], (int) (255-alpha*i));
 			pg.rect((int)x-i, 0, 1, 5);
 		}
 		pg.endDraw();
