@@ -40,7 +40,7 @@ public class SimpleTube {
 		pg.rect((int)x-3, 0, 1, 5);
 		pg.fill(cf.hue, cf.saturation, cf.brightness, (int) 200);
 		pg.rect((int)x-4, 0, 1, 5);
-		for(int i=5; i<length; i+=1){
+		for(int i=5; i<length; i+=2){
 			pg.fill(cf.hue, cf.saturation, cf.brightness, (int) (255-alpha*i));
 			pg.rect((int)x-i, 0, 1, 5);
 		}

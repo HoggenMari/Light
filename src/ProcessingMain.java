@@ -300,6 +300,7 @@ public class ProcessingMain extends PApplet {
 		setupBackGroundContrast();
 		setupCompTube();
 		
+		//frameRate(10);
 		cfList.start();
 		
 		nozzlePath = createPath(4,3,2,1,0);
@@ -327,7 +328,7 @@ public class ProcessingMain extends PApplet {
 	for(Iterator<Pendulum> pTIterator = pendulumList .iterator(); pTIterator.hasNext();){
 		  Pendulum p = pTIterator.next();
 		  
-		  p.drawVertical();
+		  p.draw();
 		  
 		  if(p.isDead()){
 			  //System.out.println("DEAD");
@@ -335,8 +336,9 @@ public class ProcessingMain extends PApplet {
 		  }
 	  }
 	  
-	  while(pendulumList.size()<0){
+	  while(pendulumList.size()<1){
 		  nozzlePath = createPath(4,3,2,1,0);
+		  //nozzlePath = createRowPath(0,65);
 		  HLayer nLayer = new HLayer(this, scp, nozzlePath);
 		  pendulumList.add(new Pendulum(nLayer));
 	  }
@@ -440,7 +442,7 @@ public class ProcessingMain extends PApplet {
 			alphaUP = false;
 		}
 		//if(frameCount%10==0){
-		if(!alphaUP && alpha<=20){
+		if(!alphaUP && alpha<=80){
 			alphaUP = true;
 			alpha=20;
 		if(up){
@@ -552,7 +554,8 @@ public class ProcessingMain extends PApplet {
 	  }
 	  
 	  while(sTubeList.size()<1){
-		  nozzlePath = createRandomPath(0,8,58,65);
+		  nozzlePath = createRowPath(0,65);
+		  //nozzlePath = createRandomPath(0,8,58,65);
 		  NozzleLayer nLayer = new NozzleLayer(this, scp, nozzlePath);
 		  sTubeList.add(new SimpleTube(this, nLayer, colorTubeList.get((int)random(0,2)), (int)random(20,100), 1+Math.random()*0.5));
 	  }
@@ -568,12 +571,12 @@ public class ProcessingMain extends PApplet {
 			sTube = new ColorFade(this, (int)hue, (int)saturation, (int)brightness);
 			//sTube.hueFade((int)hue+50, 1000);
 			
-			//sTube = new ColorFade(this, (int)hue, (int)saturation, (int)brightness);
+			sTube2 = new ColorFade(this, (int)hue, (int)10, (int)brightness);
 			//sTube.hueFade(h+50, 1000);
 			
 			
 			cfList.addColorFade(sTube);
-			//cfList.addColorFade(sTube2);
+			cfList.addColorFade(sTube2);
 		}
 		
 		//DRAW COMP SIMPLETUBE
@@ -594,6 +597,9 @@ public class ProcessingMain extends PApplet {
 			  nozzlePath = createPath(7,6,5,4,3,2,1,0);
 			  NozzleLayer nLayer = new NozzleLayer(this, scp, nozzlePath);
 			  sTubeList.add(new SimpleTube(this, nLayer, sTube, (int)random(50,150), 1+Math.random()*0.5));
+			  nozzlePath = createPath(0,1,2,3,4,5,6,7);
+			  nLayer = new NozzleLayer(this, scp, nozzlePath);
+			  sTubeList.add(new SimpleTube(this, nLayer, sTube2, (int)random(50,150), 1+Math.random()*0.5));
 		  }
 		}
 	
@@ -635,7 +641,7 @@ public class ProcessingMain extends PApplet {
 	public void drawBackGroundContrast(){
 		
 		for(Nozzle n : scp.nozzleList){
-			PGraphics pg = n.sysA;
+			PGraphics pg = n.sysB;
 			pg.beginDraw();
 			pg.colorMode(HSB, 360, 100, 100);
 			pg.noStroke();
@@ -829,8 +835,8 @@ public class ProcessingMain extends PApplet {
 			  drawHueBackground();
 		  }
 		  if(activeArray[0]){
-			  //drawSimpleTube();
-			  drawCompSimpleTube();
+			  drawSimpleTube();
+			  //drawCompSimpleTube();
 		  }
 		  if(activeArray[1]){
 			  drawPathosLight();
@@ -1116,6 +1122,20 @@ public class ProcessingMain extends PApplet {
 		LinkedList<Nozzle> path = new LinkedList<Nozzle>();
 		for(int f : i){
 		path.add(scp.nozzleList.get(f));
+		}
+		return path;
+	}
+	
+	public LinkedList<Nozzle> createRowPath(int i, int j) {
+		LinkedList<Nozzle> path = new LinkedList<Nozzle>();
+		if(i>j){
+			for(int z=i; z>j; z--){
+				path.add(scp.nozzleList.get(z));
+			}
+		}else{
+			for(int z=i; z<j; z++){
+				path.add(scp.nozzleList.get(z));
+			}
 		}
 		return path;
 	}
