@@ -177,7 +177,7 @@ public class ProcessingMain extends PApplet {
 	
 		initArduino();
 		  
-		//frameRate(10);
+		//frameRate(20);
 		
 		//Init GUI with Textfields, Buttons
 		cp5 = new ControlP5(this);
@@ -314,7 +314,7 @@ public class ProcessingMain extends PApplet {
 		}
 		
 		tubeAnimation = new TubeAnimation(this, scp, cfList);
-		tubeAnimation.setupMode2();
+		tubeAnimation.setupMode1();
 		
 		
 	}
@@ -488,11 +488,11 @@ public class ProcessingMain extends PApplet {
 	public void setupPathosLight() {
 		//create DiscoDots
 		for(Nozzle n : scp.nozzleList) {
-			discoDotList.add(new discoDot(this, n));
+			discoDotList.add(new discoDot(this, n, cfList));
 		}
 		//create LampManager
-		rlm = new RandomLampManager(this, scp, 3, 12);
-		rlm2 = new RandomLampManager(this, scp, 3, 12);
+		//rlm = new RandomLampManager(this, scp, 3, 12);
+		//rlm2 = new RandomLampManager(this, scp, 3, 12);
 	}
 	
 	//DRAW PATHOSLIGHT
@@ -501,8 +501,8 @@ public class ProcessingMain extends PApplet {
 		//scp.clearSysA();
 		//scp.dimm(80);
 		//LampManager
-				rlm.draw();
-				rlm2.draw();
+				//rlm.draw();
+				//rlm2.draw();
 		
 		//DiscoDots
 		int timer = (int) random(10,10);
@@ -706,7 +706,7 @@ public class ProcessingMain extends PApplet {
 		//background(lampFade.hue,lampFade.saturation,lampFade.brightness);
 		
 		//FLASH
-		/*if(abs(millis()-flashTimer)>=20 && flashActive){
+		if(abs(millis()-flashTimer)>=100 && flashActive){
 			int minValue = flashArray[0];  
 			int minPos = 0;
 			  for(int i=1;i<flashArray.length;i++){  
@@ -721,7 +721,7 @@ public class ProcessingMain extends PApplet {
 			flashActive = false;
 			System.out.println("FLASH mit "+(minPos+1)+" "+minValue);
 			sensorList.get(minPos).setFlash();
-		}*/
+		}
 		
 		for(Sensor s : sensorList){
 			//System.out.println("SENSOR: "+s.getID()+" STATE: "+s.getState());
@@ -756,9 +756,9 @@ public class ProcessingMain extends PApplet {
 	
 
 		//if(frameCount%50<250){
-		//scp.dimm(30);
+		scp.dimm(30);
 		//}else{
-		scp.clearSysA();
+		//scp.clearSysA();
 		//}
 		//if(frameCount%200==0){
 		//	setupBackGroundContrast();
@@ -767,7 +767,7 @@ public class ProcessingMain extends PApplet {
 		//drawBackGroundContrast();
 
 		//scp.clearSysA();
-		//tubeAnimation.draw();
+		tubeAnimation.draw();
 		
 		//scp.clearSysA();
 

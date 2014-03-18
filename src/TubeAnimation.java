@@ -33,12 +33,12 @@ public class TubeAnimation {
 	}
 	
 	public void setupMode1(){
-		glow = new ColorFade(p, 0, 0, 100);
-		glow.brightnessFade(30, 2000);
+		glow = new ColorFade(p, 270, 80, 100);
+		glow.brightnessFade(0, 2000);
 		cfList.addColorFade(glow);
 		
-		backGround = new ColorFade(p, 260, 100, 70);
-		backGround.brightnessFade(40, 2000);
+		backGround = new ColorFade(p, 260, 100, 40);
+		backGround.brightnessFade(20, 2000);
 		cfList.addColorFade(backGround);
 	}
 	
@@ -57,7 +57,7 @@ public class TubeAnimation {
 		backGround();
 		tube();
 		
-		//glow();
+		glow();
 		
 		if(p.frameCount%300==0){
 			colorChange = true;
@@ -117,7 +117,7 @@ public class TubeAnimation {
 			for(int j=0; j<scp.nodeList.get(i).nozzleList.size(); j++){
 				LinkedList<Nozzle> nozzlePath = scp.createNodePath(scp.nodeList.get(i));
 				NozzleLayer nLayer = new NozzleLayer(p, scp, nozzlePath);
-				PGraphics pg = scp.nodeList.get(i).nozzleList.get(j).sysB;
+				PGraphics pg = scp.nodeList.get(i).nozzleList.get(j).sysA;
 				pg.beginDraw();
 				pg.colorMode(PConstants.HSB, 360, 100, 100);
 				pg.noStroke();
@@ -141,7 +141,7 @@ public class TubeAnimation {
 				pg.noStroke();
 				int invert=0;
 				if(i%2==0){
-					invert = 130;
+					invert = 100;
 				}
 				pg.fill(glow.hue, glow.saturation, Math.abs(invert-glow.brightness));
 				pg.rect(0, 0, pg.width, pg.height);

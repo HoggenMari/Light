@@ -202,7 +202,12 @@ public class Pendulum implements Effect{
 		    speed = speed * -1;
 		    System.out.println("GO1");
 		    value = !value;
-			timer--;
+			if(timer>6){
+		    timer=timer-3;
+			}else{
+				timer--;
+			}
+			
 
 		  } 
 		
@@ -219,7 +224,7 @@ public class Pendulum implements Effect{
 	@Override
 	public void draw() {
 		// TODO Auto-generated method stub
-		drawDTubePendulum();
+		draw2DTubePendulum();
 		//drawTubePendulum();
 		//drawHorizontal();
 	}
