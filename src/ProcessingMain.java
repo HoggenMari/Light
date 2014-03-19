@@ -5,6 +5,9 @@
  */
 
 
+import ijeoma.motion.Motion;
+import ijeoma.motion.tween.Tween;
+
 import java.awt.Color;
 import java.util.AbstractList;
 import java.util.ArrayList;
@@ -165,6 +168,17 @@ public class ProcessingMain extends PApplet {
 	private int[] Farbe = new int[3];
 
 	private TubeAnimation tubeAnimation; 
+	
+	
+	
+	/*
+	 * TUBE ANIMATION VARIABLES
+	 */
+	int background_color;
+	Tween t1;
+
+	private ArrayList<UpDown> upDown = new ArrayList<UpDown>();
+	private ColorFade upDownCl;
     
 	//Initiate as Application
 	public static void main(String args[]) {
@@ -293,14 +307,14 @@ public class ProcessingMain extends PApplet {
 		
 		
 		setupPathosLight();
-		//setupYellowBlue();
-		//setupHueBackground();		
-		//setUpLamp();
-		//setupFlower();
-		//setupSimpleTube();
-		//setupPush();
-		//setupBackGroundContrast();
-		//setupCompTube();
+		setupYellowBlue();
+		setupHueBackground();		
+		setUpLamp();
+		setupFlower();
+		setupSimpleTube();
+		setupPush();
+		setupBackGroundContrast();
+		setupCompTube();
 		
 		//frameRate(10);
 		cfList.start();
@@ -314,11 +328,20 @@ public class ProcessingMain extends PApplet {
 		}
 		
 		tubeAnimation = new TubeAnimation(this, scp, cfList);
-		tubeAnimation.setupMode1();
+		tubeAnimation.setupMode2();
 		
+		Motion.setup(this);
+		
+		upDownCl = new ColorFade(this, 0, 100, 100);
+		upDownCl.hueFade(360, 100000);
+		cfList.addColorFade(upDownCl);
+		for(int i=0; i<7; i++){
+		upDown.add(new UpDown(this, scp.nodeList.get(i), upDownCl, 100));
+		}
 		
 	}
 		
+	
 	//SETUP ARDUINO
 	public void initArduino() {
 		for (int i = 0; i < Serial.list().length; i++) {
@@ -326,14 +349,14 @@ public class ProcessingMain extends PApplet {
 		}
 
 		try {
-			myPort = new Serial(this, "/dev/tty.usbmodemfa121", 14400);
+			myPort = new Serial(this, "/dev/tty.usbmodemfd121", 14400);
 			myPort.clear();
 		} catch (Exception e) {
 			System.out.println("Serial konnte nicht initialisiert werden");
 		}
 	}
 	
-	//DRAW SIMPLETUBE
+	//DRAW PENDULUM
 	public void drawPendulum(){
 	for(Iterator<Pendulum> pTIterator = pendulumList .iterator(); pTIterator.hasNext();){
 		  Pendulum p = pTIterator.next();
@@ -538,16 +561,16 @@ public class ProcessingMain extends PApplet {
 	
 	//SETUP SIMPLETUBE
 	public void setupSimpleTube(){
-		sTube = new ColorFade(this, 0, 100, 100);
+		sTube = new ColorFade(this, h, 100, 100);
 		sTube.hueFade(h+50, 1000);
 		
 		sTube2 = new ColorFade(this, 0, 100, 50);
 		sTube2.alphaFade(40, 1000);
 		
-		colorTubeList.start();
+		//colorTubeList.start();
 		
-		colorTubeList.addColorFade(sTube);
-		colorTubeList.addColorFade(sTube2);
+		cfList.addColorFade(sTube);
+		cfList.addColorFade(sTube2);
 	}
 	
 	//DRAW SIMPLETUBE
@@ -567,7 +590,7 @@ public class ProcessingMain extends PApplet {
 		  nozzlePath = scp.createRowPath(0,65);
 		  //nozzlePath = createRandomPath(0,8,58,65);
 		  NozzleLayer nLayer = new NozzleLayer(this, scp, nozzlePath);
-		  sTubeList.add(new SimpleTube(this, nLayer, colorTubeList.get((int)random(0,2)), (int)random(20,100), 1+Math.random()*0.5));
+		  sTubeList.add(new SimpleTube(this, nLayer, sTube, (int)random(20,100), 1+Math.random()*0.5));
 	  }
 	}
 	
@@ -756,7 +779,11 @@ public class ProcessingMain extends PApplet {
 	
 
 		//if(frameCount%50<250){
-		scp.dimm(30);
+		scp.dimm(80);
+		
+		for(UpDown u : upDown){
+		u.draw();
+		}
 		//}else{
 		//scp.clearSysA();
 		//}
@@ -767,7 +794,7 @@ public class ProcessingMain extends PApplet {
 		//drawBackGroundContrast();
 
 		//scp.clearSysA();
-		tubeAnimation.draw();
+		//tubeAnimation.draw2();
 		
 		//scp.clearSysA();
 
@@ -956,7 +983,8 @@ public class ProcessingMain extends PApplet {
 		  
 		  colorMode(RGB);
 		  background(255);
-		  		  
+		  
+		  
 		  node1.drawOnGui(10, 50);
 		  node2.drawOnGui(150, 50);
 		  node3.drawOnGui(300, 50);
@@ -1350,5 +1378,6 @@ public class ProcessingMain extends PApplet {
 	public void SETUP(int theValue) {
 		sendArduinoSetup(myPort);
 	}
+	
 
 }

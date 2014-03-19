@@ -13,13 +13,13 @@ public class Tube {
 	private NozzleLayer nozzleLayer;
 	private boolean dead;
 	private double speed=0;
-	private int hsb[];
+	private int color;
 	
-	public Tube(PApplet p, NozzleLayer nozzleLayer, int hsb[], int length, double speed) {
+	public Tube(PApplet p, NozzleLayer nozzleLayer, int color, int length, double speed) {
 		this.p = p;
 		this.nozzleLayer = nozzleLayer;
 		this.cf = cf;
-		this.hsb = hsb;
+		this.color = color;
 		this.length = length;
 		this.speed  = speed;
 		pg = nozzleLayer.getLayer();
@@ -32,18 +32,18 @@ public class Tube {
 		pg.clear();
 		pg.noStroke();
 		double alpha = 255.0/length;
-		pg.fill(hsb[0], hsb[1], hsb[3], (int) 20);
+		pg.fill(color, 20);
 		pg.rect((int)x, 0, 1, 5);
-		pg.fill(hsb[0], hsb[1], hsb[3], (int) 50);
+		pg.fill(color, 50);
 		pg.rect((int)x-1, 0, 1, 5);
-		pg.fill(hsb[0], hsb[2], hsb[3], (int) 80);
+		pg.fill(color, 80);
 		pg.rect((int)x-2, 0, 1, 5);
-		pg.fill(hsb[0], hsb[3], hsb[3], (int) 140);
+		pg.fill(color, 100);
 		pg.rect((int)x-3, 0, 1, 5);
-		pg.fill(hsb[0], hsb[4], hsb[3], (int) 200);
+		pg.fill(color, 200);
 		pg.rect((int)x-4, 0, 1, 5);
 		for(int i=5; i<length; i+=1){
-			pg.fill(hsb[0], hsb[1], hsb[2], (int) (255-alpha*i));
+			pg.fill(color, (int) (255-alpha*i));
 			pg.rect((int)x-i, 0, 1, 5);
 		}
 		pg.endDraw();

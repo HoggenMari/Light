@@ -1,3 +1,7 @@
+import ijeoma.motion.Motion;
+import ijeoma.motion.tween.Tween;
+
+import java.awt.Color;
 import java.awt.Component;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -10,7 +14,7 @@ import processing.core.PGraphics;
 
 public class TubeAnimation {
 	
-	private ArrayList<ArrayList<SimpleTube>> sTubeList = new ArrayList<ArrayList<SimpleTube>>();
+	private ArrayList<Tube> sTubeList = new ArrayList<Tube>();
 	private ArrayList<Effect> effectList = new ArrayList<Effect>();
 	private PApplet p;
 	private Pavillon scp;
@@ -20,16 +24,17 @@ public class TubeAnimation {
 	private int hue = 0, saturation = 90, brightness = 100;
 	private boolean colorChange = false;
 	private boolean in = false;
+	private float hsb[] = new float[3];
 
+	Tween t;
+	int background_color, active_color;
 
 	public TubeAnimation(PApplet p, Pavillon scp, ColorFadeList cfList){
 		this.p = p;
 		this.scp = scp;
 		this.cfList = cfList;
 		
-		for(int i=0; i<7; i++){
-			sTubeList.add(new ArrayList<SimpleTube>());
-		}
+		
 	}
 	
 	public void setupMode1(){
@@ -40,6 +45,26 @@ public class TubeAnimation {
 		backGround = new ColorFade(p, 260, 100, 40);
 		backGround.brightnessFade(20, 2000);
 		cfList.addColorFade(backGround);
+		
+		
+		background_color = p.color(p.random(0,0),p.random(100,100),p.random(100, 100));
+		float red = background_color >> 16 & 0xFF;
+		float green = background_color >> 8 & 0xFF;
+		float blue = background_color & 0xFF;
+		System.out.println(red+" "+green+" "+blue);
+		float red_com = Math.abs(red - 255);
+		float green_com = Math.abs(green - 255);
+		float blue_com = Math.abs(blue - 255);
+		System.out.println(red_com+" "+green_com+" "+blue_com);
+		Color.RGBtoHSB((int)red_com, (int)green_com, (int)blue_com, hsb);
+		System.out.println(hsb[0]+" "+hsb[1]+" "+hsb[2]);
+		active_color = p.color(hsb[0]*360,hsb[1]*100,hsb[2]*100);
+				
+		Motion.setup(p);
+		
+		t = new Tween(300)
+	    .addColor(this, "background_color", p.color(60, 0, 120))
+	    .play(); 
 	}
 	
 	public void setupMode2(){
@@ -50,9 +75,41 @@ public class TubeAnimation {
 		backGround = new ColorFade(p, 260, 100, 100);
 		backGround.saturationFade(70, 5000);
 		cfList.addColorFade(backGround);
+		
+		
+		
+		background_color = p.color(p.random(0,0),p.random(100,100),p.random(100, 100));
+		float red = background_color >> 16 & 0xFF;
+		float green = background_color >> 8 & 0xFF;
+		float blue = background_color & 0xFF;
+		System.out.println(red+" "+green+" "+blue);
+		float red_com = Math.abs(red - 255);
+		float green_com = Math.abs(green - 255);
+		float blue_com = Math.abs(blue - 255);
+		System.out.println(red_com+" "+green_com+" "+blue_com);
+		Color.RGBtoHSB((int)red_com, (int)green_com, (int)blue_com, hsb);
+		System.out.println(hsb[0]+" "+hsb[1]+" "+hsb[2]);
+		active_color = p.color(hsb[0]*360,hsb[1]*100,hsb[2]*100);
+		
+		
+		
+		Motion.setup(p);
+		
+		t = new Tween(300)
+	    .addColor(this, "background_color", p.color(60, 0, 120))
+	    .addColor(this, "active_color", p.color(60, 0, 120))
+	    .play(); 
+		
 	}
 	
 	public void draw(){
+		
+		if(!t.isPlaying()){
+			t.getColor("background_color").setEnd(p.color((int)p.random(0,360), (int)p.random(70,100), (int)p.random(50,80)));
+			t.play();
+		}
+		
+	
 		
 		backGround();
 		tube();
@@ -67,31 +124,84 @@ public class TubeAnimation {
 		//colorChange();
 	}
 	
+	
+	public void draw2(){
+		
+		if(!t.isPlaying()){
+			
+			int newColor = p.color((int)p.random(0,360), (int)p.random(70,100), (int)p.random(50,80));
+			
+			float red = newColor >> 16 & 0xFF;
+			float green = newColor >> 8 & 0xFF;
+			float blue = newColor & 0xFF;
+			System.out.println(red+" "+green+" "+blue);
+			float red_com = Math.abs(red - 255);
+			float green_com = Math.abs(green - 255);
+			float blue_com = Math.abs(blue - 255);
+			System.out.println(red_com+" "+green_com+" "+blue_com);
+			Color.RGBtoHSB((int)red_com, (int)green_com, (int)blue_com, hsb);
+			System.out.println(hsb[0]+" "+hsb[1]+" "+hsb[2]);
+			active_color = p.color(hsb[0]*360,hsb[1]*100,hsb[2]*100);
+			
+			
+			
+			t.getColor("background_color").setEnd(p.color((int)p.random(0,360), (int)p.random(70,100), (int)p.random(50,80)));
+			t.getColor("active_color").setEnd(p.color((int)p.random(0,360), (int)p.random(70,100), (int)p.random(50,80)));
+			t.play();
+		}
+		
+	
+		
+		backGround();
+		tube();
+		
+		glow();
+		
+		if(p.frameCount%300==0){
+			colorChange = true;
+			//hue = (int) p.random(0,360);
+		}
+		
+		//colorChange();
+	}
+
+
+	
 	private void tube(){
 		
-		for(int i=0; i<sTubeList.size(); i++){
-		for(Iterator<SimpleTube> sTIterator = sTubeList.get(i).iterator(); sTIterator.hasNext();){
-			  SimpleTube sT = sTIterator.next();
+
+		System.out.println(sTubeList.size());
+		
+		  for(Iterator<Tube> sTIterator = sTubeList.iterator(); sTIterator.hasNext();){
+			  Tube sT = sTIterator.next();
 			  sT.draw();
 			  if(sT.isDead()){
 				  //System.out.println("DEAD");
 				  sTIterator.remove();
 			  }
 		}
-		}
 		
-		int TubesGesamt = 0;
-		for(int i=0; i<sTubeList.size(); i++){
-			TubesGesamt =+ sTubeList.get(i).size();
-		}
 		
-		while(TubesGesamt<1){	
-			ColorFade sTube = new ColorFade(p, (int) ((int)hue+(p.random(-50,50))), (int)saturation, (int)brightness);
-			sTube.hueFade((int)hue+20, 3000);
-			cfList.addColorFade(sTube);
+		
+		while(sTubeList.size()<3){	
+			
+			
+			
+			float red = background_color >> 16 & 0xFF;
+			float green = background_color >> 8 & 0xFF;
+			float blue = background_color & 0xFF;
+			System.out.println(red+" "+green+" "+blue);
+			float red_com = Math.abs(red - 255);
+			float green_com = Math.abs(green - 255);
+			float blue_com = Math.abs(blue - 255);
+			System.out.println(red_com+" "+green_com+" "+blue_com);
+			Color.RGBtoHSB((int)red_com, (int)green_com, (int)blue_com, hsb);
+			System.out.println(hsb[0]+" "+hsb[1]+" "+hsb[2]);
+			active_color = p.color(hsb[0]*360,hsb[1]*100,hsb[2]*100);
+			
+			
 			
 			int zf = (int)p.random(0,7);
-			if(sTubeList.get(zf).size()==0){
 			LinkedList<Nozzle> nozzlePath = scp.createNodePath(scp.nodeList.get(zf));
 			if(p.frameCount%1==1){
 			nozzlePath = scp.createRandomPath(8*zf,8*zf+8,58,65);
@@ -99,16 +209,12 @@ public class TubeAnimation {
 			nozzlePath = scp.createNodePath(scp.nodeList.get(zf));
 			}
 			NozzleLayer nLayer = new NozzleLayer(p, scp, nozzlePath);
-			sTubeList.get(zf).add(new SimpleTube(p, nLayer, sTube, (int)p.random(50,80), 1+Math.random()*0.5));
+			sTubeList.add(new Tube(p, nLayer, active_color, (int)p.random(50,80), 1+Math.random()*0.5));
 			}
-			
-			TubesGesamt = 0;
-			for(int i=0; i<sTubeList.size(); i++){
-				TubesGesamt =+ sTubeList.get(i).size();
-			}
+		
 			
 			
-		}
+		
 	}
 
 	private void backGround(){
@@ -118,10 +224,11 @@ public class TubeAnimation {
 				LinkedList<Nozzle> nozzlePath = scp.createNodePath(scp.nodeList.get(i));
 				NozzleLayer nLayer = new NozzleLayer(p, scp, nozzlePath);
 				PGraphics pg = scp.nodeList.get(i).nozzleList.get(j).sysA;
+				pg.colorMode(PConstants.RGB);
 				pg.beginDraw();
 				pg.colorMode(PConstants.HSB, 360, 100, 100);
 				pg.noStroke();
-				pg.fill(backGround.hue, backGround.saturation, backGround.brightness);
+				pg.fill(background_color);
 				pg.rect(0, 0, pg.width, pg.height);
 				pg.endDraw();
 			}
