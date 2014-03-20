@@ -1,6 +1,8 @@
 import java.util.ArrayList;
 
 import processing.core.PApplet;
+import processing.core.PConstants;
+import processing.core.PGraphics;
 
 public class Node {
 	private PApplet p;
@@ -24,4 +26,58 @@ public class Node {
 			
 		}
 	}
+	
+	public void clearSysA(){
+		for(Nozzle n: nozzleList){
+			PGraphics pg = n.sysA;
+			pg.beginDraw();
+			pg.background(0);
+			pg.endDraw();
+		}
+	}
+	
+	public void clearSysB(){
+		for(Nozzle n: nozzleList){
+			PGraphics pg = n.sysB;
+			pg.beginDraw();
+			pg.background(0);
+			pg.endDraw();
+		}
+	}
+	
+	public void clear(){
+		clearSysA();
+		clearSysB();
+	}
+	
+	
+	public void dimmSysA(int alpha){
+		for(Nozzle n: nozzleList){
+			PGraphics pg = n.sysA;
+			pg.beginDraw();
+			pg.colorMode(PConstants.HSB);
+			pg.fill(0, 0, 0, alpha);
+			pg.noStroke();
+			pg.rect(0, 0, pg.width, pg.height);
+			pg.endDraw();
+		}
+	}
+	
+	public void dimmSysB(int alpha){
+		for(Nozzle n: nozzleList){
+			PGraphics pg = n.sysB;
+			pg.beginDraw();
+			pg.colorMode(PConstants.HSB);
+			pg.fill(0, 0, 0, alpha);
+			pg.noStroke();
+			pg.rect(0, 0, pg.width, pg.height);
+			pg.endDraw();
+		}
+	}
+	
+	public void dimm(int alpha){
+		dimmSysA(alpha);
+		dimmSysB(alpha);
+	}
+	
 }

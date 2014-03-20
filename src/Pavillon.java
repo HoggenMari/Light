@@ -237,8 +237,12 @@ public class Pavillon extends Thread {
 		}
 	}
 	
+	
 	public void start () {
 	    // Set running equal to true
+		if(running){
+			super.stop();
+		}
 	    running = true;
 	    // Print messages
 	    //System.out.println("Starting thread (will execute every " + wait + " milliseconds.)"); 
@@ -440,5 +444,14 @@ public class Pavillon extends Thread {
 		}
 		return path;
 	}
+	
+	public LinkedList<Nozzle> createReverseNodePath(Node node){
+		LinkedList<Nozzle> path = new LinkedList<Nozzle>();
+		for(int i=node.nozzleList.size()-1; i>=0; i--){
+			path.add(node.nozzleList.get(i));
+		}
+		return path;
+	}
+	
 
 }

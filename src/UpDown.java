@@ -321,7 +321,7 @@ public class UpDown {
 				down = true;
 			}
 			
-			if(alpha==-15){
+			if(alpha<0){
 				alpha = 0;
 			}
 			

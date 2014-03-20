@@ -47,6 +47,7 @@ public class ColorFade {
 	int alphaLoop = 0;
 	int alphaLoopMax = Integer.MAX_VALUE;
 	boolean activeAlpha = false;
+	private boolean dead;
 	
 	public ColorFade(PApplet p, int hueStart, int saturationStart, int brightnessStart) {
 		this.p = p;
@@ -206,4 +207,11 @@ public class ColorFade {
 		activeAlpha = true;
 	}
 	
+	public void setDead(){
+		dead = true;
+	}
+	
+	public boolean isDead(){
+		return dead;
+	}
 }

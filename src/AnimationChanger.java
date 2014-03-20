@@ -1,5 +1,3 @@
-import ijeoma.motion.Motion;
-import ijeoma.motion.tween.Tween;
 import processing.core.PApplet;
 
 
@@ -10,7 +8,6 @@ public class AnimationChanger {
 	private Pavillon scp;
 	private boolean up = false;
 	boolean finished = false;
-	private Object t;
 	
 	public AnimationChanger(PApplet p, Pavillon scp){
 		this.p = p;
@@ -32,7 +29,7 @@ public class AnimationChanger {
 			finished = true;
 		}
 		
-		System.out.println(dimm);
+		//System.out.println(dimm);
 	
 		scp.dimm(dimm);
 	

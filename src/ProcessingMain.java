@@ -20,6 +20,7 @@ import controlP5.ControlEvent;
 import controlP5.ControlP5;
 import controlP5.ControllerGroup;
 import controlP5.Textfield;
+import controlP5.Textlabel;
 import processing.core.*;
 import processing.serial.*;
 
@@ -48,8 +49,8 @@ public class ProcessingMain extends PApplet {
 	//Variables for GUI
 	ControlP5 cp5;
 	private CheckBox checkbox;
-	float checkbox_array[] = {0,0,0,0,0,0,0,0,0};
-	boolean activeArray [] = {false, false, false, false, false, false, false, false, false};
+	float checkbox_array[] = {0,0,0,0,0,0,0,0,0,0,0};
+	boolean activeArray [] = {false, false, false, false, false, false, false, false, false, false, false};
 	
 	//Arduino Communication
 	static final String ARDUINO_DEVICE = "/dev/tty.usbmodemda121";
@@ -237,6 +238,16 @@ public class ProcessingMain extends PApplet {
 	private boolean animationChanger;
 
 	private ArrayList<AnimationChanger> animationChanger1 = new ArrayList<AnimationChanger>();
+
+	private ArrayList<Firework> fWList = new ArrayList<Firework>();
+
+	private ArrayList<InteractionChanger> interactionChanger;
+
+	private ColorFade cfYellow2;
+
+	private boolean yelBlu;
+
+	private int yelBlutimer;
     
 	//Initiate as Application
 	public static void main(String args[]) {
@@ -245,11 +256,13 @@ public class ProcessingMain extends PApplet {
 	
 	public void setup() {
 		
+		System.out.println(System.getProperty("java.library.path"));
+		
 		size(1200,750);
 	
 		initArduino();
 		  
-		//frameRate(20);
+		frameRate(36);
 		
 		//Init GUI with Textfields, Buttons
 		cp5 = new ControlP5(this);
@@ -286,6 +299,7 @@ public class ProcessingMain extends PApplet {
 		   .setText(Integer.toString(CONTROLLER_ID[1]));
 		;
 		
+		
 		cp5.addButton("OK")
 		   .setPosition(170,10)
 		   .setSize(20,15)
@@ -301,7 +315,7 @@ public class ProcessingMain extends PApplet {
 				.setColorLabel(color(0,0,255)).setSize(15, 15).setItemsPerRow(7)
 				.setSpacingColumn(45).setSpacingRow(20).addItem("Tube", 0)
 				.addItem("Pathos", 50).addItem("Shine", 100).addItem("Lamp", 150)
-				.addItem("Flower", 200).addItem("HueFade", 250).addItem("Pendulum", 300).addItem("Push", 350).addItem("UPDOWN", 400);		
+				.addItem("Flower", 200).addItem("HueFade", 250).addItem("Pendulum", 300).addItem("Push", 350).addItem("UPDOWN", 400).addItem("FIREWORK", 450).addItem("YELLOWCOLD", 500);		
 
 		pg = createGraphics(12, 5);
 		pg2 = createGraphics(12, 5);
@@ -394,6 +408,9 @@ public class ProcessingMain extends PApplet {
 		
 		Motion.setup(this);
 		
+		interactionChanger = new ArrayList<InteractionChanger>();
+		
+		
 	}
 		
 	
@@ -412,7 +429,7 @@ public class ProcessingMain extends PApplet {
 	}
 	
 	//DRAW PENDULUM
-	public void drawPendulum(){
+	/*public void drawPendulum(){
 	for(Iterator<Pendulum> pTIterator = pendulumList .iterator(); pTIterator.hasNext();){
 		  Pendulum p = pTIterator.next();
 		  
@@ -430,7 +447,7 @@ public class ProcessingMain extends PApplet {
 		  HLayer nLayer = new HLayer(this, scp, nozzlePath);
 		  pendulumList.add(new Pendulum(nLayer));
 	  }
-	}
+	}*/
 	
 	//DRAW SIMPLETUBE
 	public void drawLamp(){
@@ -802,7 +819,7 @@ public class ProcessingMain extends PApplet {
 	public void draw() {
 		
 		//System.out.println(cfList.colorFadeList.size());
-		//colorMode(HSB,360,100,100);
+		colorMode(HSB,360,100,100);
 		//background(lampFade.hue,lampFade.saturation,lampFade.brightness);
 		
 		//FLASH
@@ -830,7 +847,9 @@ public class ProcessingMain extends PApplet {
 				if(effectList.get(s.getID()-1).isEmpty()){
 				nozzlePath = scp.createNodePath(nodeList.get(s.getID()-1));
 				HLayer nLayer = new HLayer(this, scp, nozzlePath);
-				effectList.get(s.getID()-1).add(new Pendulum(nLayer));
+				Effect e = new Pendulum(scp, nLayer);
+				interactionChanger.add(new InteractionChanger(this, nodeList.get(s.getID()-1),e,200));
+				effectList.get(s.getID()-1).add(e);
 				}
 				s.setState(false);
 				}else if(activeArray[3]){
@@ -845,16 +864,27 @@ public class ProcessingMain extends PApplet {
 				effectList.get(s.getID()-1).add(new Strobo(this, nLayer, 25));
 				s.setState(false);
 				}*/
+				else if(activeArray[9]){
+				if(effectList.get(s.getID()-1).isEmpty()){
+				Effect e = new Firework(this, scp, nodeList.get(s.getID()-1), cfList); 
+				interactionChanger.add(new InteractionChanger(this, nodeList.get(s.getID()-1), e, (int) random(100,255)));
+				//animationChanger1.add(new AnimationChanger(this, scp));
+				effectList.get(s.getID()-1).add(e);
+				}
+				s.setState(false);
+				}	
 				else{
 				animationChanger1.add(new AnimationChanger(this, scp));
 				nozzlePath = scp.createNodePath(nodeList.get(s.getID()-1));	
-				HLayer nLayer = new HLayer(this, scp, nozzlePath);
-				effectList.get(s.getID()-1).add(new Stars(this, nLayer));
+				NozzleLayer nozzleLayer = new NozzleLayer(this, scp, nozzlePath);
+				effectList.get(s.getID()-1).add(new Stars(this, nozzleLayer, color(0,0,100)));
 				s.setState(false);
 				}
 			}
 		}
 	
+		
+		
 
 		//if(frameCount%50<250){
 		//scp.dimm(80);
@@ -881,12 +911,17 @@ public class ProcessingMain extends PApplet {
 		//drawTubeAnimation();
 		
 		//scp.clearSysA();
+		
+		//scp.dimm(20);
 
 		  if(activeArray[5]){
 			  drawHueBackground();
 		  }
 		  if(activeArray[8]){
 			  drawUpDownAnimation();
+		  }
+		  if(activeArray[10]){
+			  drawYellowBlue();
 		  }
 		  if(activeArray[0]){
 			  scp.dimm(80);
@@ -907,20 +942,19 @@ public class ProcessingMain extends PApplet {
 			  openFlower();
 		  }
 		  if(activeArray[6]){
-			  scp.dimm(30);
-			  drawPendulum();
+			  //scp.dimm(30);
+			  //drawPendulum();
 		  }
 		  if(activeArray[7]){
 			  drawPush();
 		  }
 		  
-		  //drawYellowBlue();
+		  
+		  //yellowCold();
 		  		  
 		  //drawLamp();
 		  
-		  if(frameCount%100==0){
-		  System.out.println(frameRate);
-		  }	 
+		  	 
 		  
 		  
 		  //if(frameCount%300==0){
@@ -932,6 +966,10 @@ public class ProcessingMain extends PApplet {
 			  aC.draw();
 		  }
 		  }
+		  
+
+		  
+		  
 		  /*for(Sensor s : sensorList){
 			  System.out.println(s.toString());
 		  }*/
@@ -949,7 +987,7 @@ public class ProcessingMain extends PApplet {
 		  
 		  
 		  
-		  
+
 		  
 		  
 		  layerGraphics.beginDraw();
@@ -1052,11 +1090,27 @@ public class ProcessingMain extends PApplet {
 		  }else{
 			  x=0;
 		  }*/
+		  
+		  
+		  //drawYellowBlue();
 		 		 
 		  
 		  //nLayer.add();
 		  		  
 		  //Draw on GUI  
+		  
+		  for(int i=0; i<interactionChanger.size(); i++){
+			  for(Iterator<InteractionChanger> interactionIterator = interactionChanger.iterator(); interactionIterator.hasNext();){
+				  InteractionChanger iC = interactionIterator.next();
+				  
+				  iC.draw();
+				  
+				  if(iC.isDead()){
+					  //System.out.println("DEAD");
+					  interactionIterator.remove();
+				  }
+			  }
+		 }
 		  
 		  for(int i=0; i<effectList.size(); i++){
 		  for(Iterator<Effect> effectIterator = effectList.get(i).iterator(); effectIterator.hasNext();){
@@ -1095,9 +1149,13 @@ public class ProcessingMain extends PApplet {
 			  s.drawOnGui();
 		  }
 		  
+		  
+		  
 		  fill(0);
+		  text("FrameRate: "+frameRate, 720, 20);
 		  text("Created by Marius Hoggenmüller on 04.02.14. Copyright (c) 2014 Marius Hoggenmüller, LMU Munich. All rights reserved.", 10, 740);
-
+		  
+		  
 	}
 	
 	
@@ -1157,24 +1215,69 @@ public class ProcessingMain extends PApplet {
 	}
 	
 	public void setupYellowBlue() {
-		cfYellow = new ColorFade(this, 270, 100, 100);
-		cfYellow.saturationFade(0, 5000);
-		cfYellow.brightnessFade(30, 2000);
+		yelBlutimer = 0;
+		cfYellow = new ColorFade(this, 270, 70, 100);
+		cfYellow.saturationFade(0, 5000, 2);
+		cfYellow.brightnessFade(40, 5000, 2);
+		cfYellow.hueFade(30, 10000, 1);
 		cfList.addColorFade(cfYellow);
+		
+		yelBlu = true;
+		/*cfYellow2 = new ColorFade(this, 30, 100, 100);
+		cfYellow2.saturationFade(0, 5000);
+		cfYellow2.brightnessFade(40, 5000);
+		cfYellow2.hueFade(270, 10000);
+		cfList.addColorFade(cfYellow2);*/
+
 	}
 	
 	public void drawYellowBlue() {
 		for(Nozzle nozzle : scp.nozzleList) {
-			PGraphics pg = nozzle.sysB;
+			PGraphics pg = nozzle.sysA;
 			pg.beginDraw();
+			PGraphics pg2 = nozzle.sysB;
+			pg.beginDraw();
+			pg2.beginDraw();
 			for(int iy=0; iy<pg.height; iy++){
 				pg.colorMode(HSB, 360, 100, 100);	
-				pg.fill(cfYellow.hue-5*iy,cfYellow.saturation,cfYellow.brightness);
+				pg.fill(cfYellow.hue-5*iy,cfYellow.saturation,cfYellow.brightness-5*iy, 50);
 				pg.noStroke();
+				pg2.noStroke();
 				pg.rect(0, iy, pg.width, 1);
 		   }
+			pg2.colorMode(HSB, 360, 100, 100);
+			pg2.fill(Math.abs(cfYellow.hue-270)+30,cfYellow.saturation,cfYellow.brightness, 10);
+			pg2.rect(0, 0, pg2.width, 1);
+
+			pg2.endDraw();
 			pg.endDraw();
+			
+			//System.out.println("Hue1: "+(Math.abs(cfYellow.hue-270)+30)+" Sat1: "+(Math.abs(cfYellow.saturation-100))+" Bright: "+(Math.abs(cfYellow.brightness-100)+40));
 		}
+		
+		if(cfYellow.isDead()){
+			yelBlutimer++;
+			if(yelBlutimer>200){
+			if(yelBlu){
+			cfYellow = new ColorFade(this, 30, 70, 100);
+			cfYellow.saturationFade(0, 5000, 2);
+			cfYellow.brightnessFade(40, 5000, 2);
+			cfYellow.hueFade(270, 10000, 1);
+			cfList.addColorFade(cfYellow);
+			yelBlu = !yelBlu;
+			}else{
+			cfYellow = new ColorFade(this, 270, 70, 100);
+			cfYellow.saturationFade(0, 5000, 2);
+			cfYellow.brightnessFade(40, 5000, 2);
+			cfYellow.hueFade(30, 10000, 1);
+			cfList.addColorFade(cfYellow);
+			yelBlu = !yelBlu;	
+			}
+			yelBlutimer=0;
+			}
+			
+		}
+		
 		//scp.setColor(cfYellow.hue, cfYellow.saturation, cfYellow.brightness);
 	}
 	
@@ -1265,7 +1368,7 @@ public class ProcessingMain extends PApplet {
 		  }
 		  
 		 }
-	  scp.dimm(100);
+	  //scp.dimm(100);
 	}
 
 	//ARDUINO SERIAL EVENT
@@ -1414,6 +1517,12 @@ public class ProcessingMain extends PApplet {
 		    } else if(checkbox_array[8] != theEvent.getGroup().getArrayValue(8)) {
 		    	activeArray[8] =! activeArray[8];
 		    	System.out.println("BUTTON9");
+		    } else if(checkbox_array[9] != theEvent.getGroup().getArrayValue(9)) {
+		    	activeArray[9] =! activeArray[9];
+		    	System.out.println("BUTTON10");
+		    } else if(checkbox_array[10] != theEvent.getGroup().getArrayValue(10)) {
+		    	activeArray[10] =! activeArray[10];
+		    	System.out.println("BUTTON11");
 		    }
 		    
 		}

@@ -130,16 +130,17 @@ public class ColorFadeList extends Thread {
 			}
 		}
 		
-		/*for(ColorFade cf : colorFadeList){
+		for(ColorFade cf : colorFadeList){
 			if(cf.loop) {
 				//System.out.println("GO1 "+cf.brightnessLoop+" "+cf.brightnessLoopMax);
 			if(cf.hueLoop >= cf.hueLoopMax || cf.saturationLoop >= cf.saturationLoopMax || cf.brightnessLoop >= cf.brightnessLoopMax || cf.alphaLoop >= cf.alphaLoopMax) {
 				colorFadeList.remove(cf);
 				//System.out.println("GO2");
-
+				cf.setDead();
+				System.out.println("REMOVE");
 			}
 			}
-		}*/
+		}
 		/*for(Iterator<ColorFade> cfIterator = colorFadeList.iterator(); cfIterator.hasNext();){
 			ColorFade cf = cfIterator.next();
 		

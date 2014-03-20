@@ -15,12 +15,16 @@ public class Pendulum implements Effect{
 	private boolean value = false;
 	private int hue1;
 	private int hue2;
+	private boolean start = false;
+	private Pavillon scp;
+	private boolean fadeBack;
 	
-	public Pendulum(Layer nozzleLayer){
+	public Pendulum(Pavillon scp, Layer nozzleLayer){
+		this.scp= scp;
 		this.nozzleLayer = nozzleLayer;
 		pg = nozzleLayer.getLayer();
-		hue1 = (int) (Math.random()*360);
-		hue2 = Math.abs(hue1-180);
+		hue1 = 270;
+		hue2 = 30;
 	}
 	
 	public void drawHorizontal(){
@@ -138,18 +142,20 @@ public class Pendulum implements Effect{
 		pg.colorMode(PConstants.HSB, 360, 100, 100,100);
 		pg.noStroke();
 		if(value){
+		System.out.println("VALUE");
 		for(int i=0; i<pg.width-x; i++){
-		pg.fill(hue1-i,100,100,timer*3);
+		pg.fill(hue1-i,80,100,timer*3);
 		pg.rect(0+x+i, y, 1, width);
 		}
 		}else{
+		System.out.println("NOTVALUE");
 		for(int i=0; i<pg.width-x; i++){
-		pg.fill(hue2+i,100,100,timer*3);
+		pg.fill(hue2-i,80,100,timer*3);
 		pg.rect(i, y, 1, width);
 		}	
 		}
 		nozzleLayer.add();
-		speed = speed + 0.3;
+		speed = speed + 0.2;
 		
 		x = x + (int)speed;
 
@@ -166,7 +172,10 @@ public class Pendulum implements Effect{
 
 		  } 
 		
-		if(timer==0){
+		  if(timer<=8){
+			  fadeBack = true;
+		  }
+		if(timer<=0){
 			dead = true;
 		}
 	}
@@ -179,17 +188,17 @@ public class Pendulum implements Effect{
 		pg.noStroke();
 		if(value){
 		for(int i=0; i<pg.width-x; i++){
-		pg.fill(hue1-i,100,100,timer*3);
+		pg.fill(hue1+i,100,100,timer*3);
 		pg.rect(0+x+i, y, 1, width);
 		}
 		}else{
 		for(int i=0; i<pg.width-x; i++){
-		pg.fill(hue2+i,100,100,timer*3);
+		pg.fill(hue2-i,100,100,timer*3);
 		pg.rect(i, y, 1, width);
 		}	
 		}
 		nozzleLayer.add();
-		speed = speed + 0.3;
+		speed = speed + 0.2;
 		
 		x = x + (int)speed;
 
@@ -210,23 +219,46 @@ public class Pendulum implements Effect{
 			
 
 		  } 
+		  
+			System.out.println("Timer "+timer);
+
 		
-		if(timer==0){
+		if(timer<=0){
 			dead = true;
 		}
 	}
 	
 	
 	public boolean isDead(){
+		System.out.println("isDead "+dead);
+		System.out.println("Start  "+start);
 		return dead;
 	}
 
 	@Override
 	public void draw() {
+		System.out.println("DRAW");
+
+		if(start){
+		System.out.println("DRAW");
 		// TODO Auto-generated method stub
-		draw2DTubePendulum();
-		//drawTubePendulum();
+		//draw2DTubePendulum();
+		drawDTubePendulum();
 		//drawHorizontal();
+		}
+	}
+
+	@Override
+	public void start() {
+		// TODO Auto-generated method stub
+		start = true;
+		
+	}
+
+	@Override
+	public boolean fadeBack() {
+		// TODO Auto-generated method stub
+		return fadeBack;
 	}
 
 }

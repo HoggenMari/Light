@@ -51,4 +51,16 @@ public class Strobo implements Effect{
 		return dead;
 	}
 
+	@Override
+	public void start() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public boolean fadeBack() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
 }

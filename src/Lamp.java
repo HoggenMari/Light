@@ -50,4 +50,16 @@ public class Lamp implements Effect{
 	public boolean isDead(){
 		return dead;
 	}
+
+	@Override
+	public void start() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public boolean fadeBack() {
+		// TODO Auto-generated method stub
+		return false;
+	}
 }

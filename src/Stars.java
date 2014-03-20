@@ -13,18 +13,20 @@ public class Stars implements Effect {
 	private PApplet p;
 	private LinkedList<Nozzle> path;
 	private boolean dead = false;
-	private Layer nozzleLayer;
+	private NozzleLayer nozzleLayer;
 	private PGraphics pg;
 	private ArrayList<GlitterParticle> glitterList;
+	private int color;
 
-	public Stars(PApplet p, Layer nozzleLayer) {
+	public Stars(PApplet p, NozzleLayer nozzleLayer, int color) {
 		this.p = p;
 		this.nozzleLayer = nozzleLayer;
+		this.color = color;
 		pg = nozzleLayer.getLayer();
 		glitterList = new ArrayList<GlitterParticle>();
 		
 		for(int i=0; i<30; i++){
-			glitterList.add(new GlitterParticle(p,100));
+			glitterList.add(new GlitterParticle(p,pg.width));
 		}
 
 	}
@@ -37,7 +39,7 @@ public class Stars implements Effect {
 		pg.colorMode(PConstants.HSB, 360, 100, 100);
 		for(Iterator<GlitterParticle> glitterIterator = glitterList.iterator(); glitterIterator.hasNext();){
 			GlitterParticle glitter = glitterIterator.next();
-			pg.stroke(0, 0, 100, glitter.lifetime);
+			pg.stroke(color, glitter.lifetime);
 			pg.strokeWeight(1);
 			glitter.update();	  
 			if(glitter.lifetime>0){
@@ -75,6 +77,18 @@ public class Stars implements Effect {
 			lifetime --;
 			x++;
 		}
+	}
+
+	@Override
+	public void start() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public boolean fadeBack() {
+		// TODO Auto-generated method stub
+		return false;
 	}
 
 }
