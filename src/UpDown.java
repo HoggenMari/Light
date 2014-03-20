@@ -10,9 +10,12 @@ public class UpDown {
 	PApplet p;
 	Node n;
 	ArrayList<UpDownParticle> particleList = new ArrayList<UpDownParticle>();
-	private ColorFade cf;
-	private int timer, speed;
-	
+	ColorFade cf;
+	int timer, speed;
+	private boolean upDownSpeedBol = false;
+	private int UP_DOWN_MIN_SPEED = 10;
+	private int UP_DOWN_MAX_SPEED = 200;
+
 	public UpDown(PApplet p, Node n){
 		this.p = p;
 		this.n = n;
@@ -36,6 +39,19 @@ public class UpDown {
 	
 	public void draw(){
 		
+		/*if(p.frameCount%10==0){
+		if(upDownSpeedBol){
+			speed--;
+		}else{
+			speed++;
+		}
+		if(speed==UP_DOWN_MIN_SPEED){
+			upDownSpeedBol = false;
+		}
+		if(speed>=UP_DOWN_MAX_SPEED){
+			upDownSpeedBol = true;
+		}
+		}*/
 		
 		for(int i=0; i<n.nozzleList.size(); i++){
 			PGraphics pg = n.nozzleList.get(i).sysA;
@@ -97,16 +113,37 @@ public class UpDown {
 				}
 			
 			pg.endDraw();
+			
+			
+			PGraphics pg2 = n.nozzleList.get(i).sysB;
+			pg2.beginDraw();
+			pg2.colorMode(PConstants.HSB,360,100,100);
+			if(particleList.get(i).down){
+				particleList.get(i).alpha -= 5;
+			}else{
+				particleList.get(i).alpha += 5;
+			}
+			//System.out.println(particleList.get(i).alpha);
+			pg2.fill(255,particleList.get(i).alpha);
+			pg2.noStroke();
+			pg2.rect(0, 0, pg2.width, pg2.height);
+			pg2.endDraw();
+			
 		}
 		int current = p.millis();
-		if(current-timer>speed){
+		if(current-timer>speed){	
+			
+			
+			
 		for(int i=0; i<particleList.size(); i++){
 				//if(p.frameCount%3==0){
 				particleList.get(i).update();
+	
+		
 		}
 		timer = current;
 		}
-		
+	
 	}
 	
 	
@@ -250,7 +287,7 @@ public class UpDown {
 				pg.fill(255,200);
 				pg.rect(0, 0, pg.width, 1);	
 			}*/
-			if(p.frameCount%1==0){
+			if(p.frameCount%5==0){
 			particleList.get(i).update();
 			}
 			pg.endDraw();
@@ -262,12 +299,13 @@ public class UpDown {
 	
 	class UpDownParticle {
 		
-		int y;
+		int y, alpha;
 		boolean down = false;
 		
 		public UpDownParticle(int y){
 			this.y = y;
 			down = true;
+			alpha = 255;
 		}
 		
 		public void update(){
@@ -282,6 +320,11 @@ public class UpDown {
 			if(y>=15){
 				down = true;
 			}
+			
+			if(alpha==-15){
+				alpha = 0;
+			}
+			
 		}
 	}
 	

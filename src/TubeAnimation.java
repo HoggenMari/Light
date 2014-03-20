@@ -129,24 +129,25 @@ public class TubeAnimation {
 		
 		if(!t.isPlaying()){
 			
-			int newColor = p.color((int)p.random(0,360), (int)p.random(70,100), (int)p.random(50,80));
+			p.colorMode(p.HSB, 360, 100, 100);
+			int newColor = p.color((int)p.random((int)p.random(0,0),(int)p.random(0,0)), (int)p.random(0,0), (int)p.random(0,0));
 			
 			float red = newColor >> 16 & 0xFF;
 			float green = newColor >> 8 & 0xFF;
 			float blue = newColor & 0xFF;
-			System.out.println(red+" "+green+" "+blue);
+			System.out.println("GO FOR NEW COLOR "+red+" "+green+" "+blue);
 			float red_com = Math.abs(red - 255);
 			float green_com = Math.abs(green - 255);
 			float blue_com = Math.abs(blue - 255);
 			System.out.println(red_com+" "+green_com+" "+blue_com);
 			Color.RGBtoHSB((int)red_com, (int)green_com, (int)blue_com, hsb);
 			System.out.println(hsb[0]+" "+hsb[1]+" "+hsb[2]);
-			active_color = p.color(hsb[0]*360,hsb[1]*100,hsb[2]*100);
+			//active_color = p.color(hsb[0]*360,hsb[1]*100,hsb[2]*100);
 			
 			
 			
-			t.getColor("background_color").setEnd(p.color((int)p.random(0,360), (int)p.random(70,100), (int)p.random(50,80)));
-			t.getColor("active_color").setEnd(p.color((int)p.random(0,360), (int)p.random(70,100), (int)p.random(50,80)));
+			t.getColor("background_color").setEnd(newColor);
+			t.getColor("active_color").setEnd(p.color(hsb[0]*360, hsb[1]*100, hsb[2]*100));
 			t.play();
 		}
 		
@@ -187,7 +188,7 @@ public class TubeAnimation {
 			
 			
 			
-			float red = background_color >> 16 & 0xFF;
+			/*float red = background_color >> 16 & 0xFF;
 			float green = background_color >> 8 & 0xFF;
 			float blue = background_color & 0xFF;
 			System.out.println(red+" "+green+" "+blue);
@@ -197,7 +198,7 @@ public class TubeAnimation {
 			System.out.println(red_com+" "+green_com+" "+blue_com);
 			Color.RGBtoHSB((int)red_com, (int)green_com, (int)blue_com, hsb);
 			System.out.println(hsb[0]+" "+hsb[1]+" "+hsb[2]);
-			active_color = p.color(hsb[0]*360,hsb[1]*100,hsb[2]*100);
+			active_color = p.color(hsb[0]*360,hsb[1]*100,hsb[2]*100);*/
 			
 			
 			

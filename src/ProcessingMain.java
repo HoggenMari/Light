@@ -48,8 +48,8 @@ public class ProcessingMain extends PApplet {
 	//Variables for GUI
 	ControlP5 cp5;
 	private CheckBox checkbox;
-	float checkbox_array[] = {0,0,0,0,0,0,0,0};
-	boolean activeArray [] = {false, false, false, false, false, false, false, false};
+	float checkbox_array[] = {0,0,0,0,0,0,0,0,0};
+	boolean activeArray [] = {false, false, false, false, false, false, false, false, false};
 	
 	//Arduino Communication
 	static final String ARDUINO_DEVICE = "/dev/tty.usbmodemda121";
@@ -177,8 +177,66 @@ public class ProcessingMain extends PApplet {
 	int background_color;
 	Tween t1;
 
+	//TUBE ANIMATION SETUP
+	public void setupTubeAnimation(){
+		Motion.setup(this);
+
+		  t1 = new Tween(100)
+		  .addColor(this, "background_color", color(60, 0, 0))
+		  .play();
+	}
+	
+	//TUBE ANIMATION DRAW
+	public void drawTubeAnimation(){
+		for(Nozzle n : scp.nozzleList){
+			PGraphics pg = n.sysA;
+			pg.beginDraw();
+			pg.colorMode(HSB, 360, 100, 100);
+			pg.noStroke();
+			pg.fill(background_color);
+			pg.rect(0, 0, pg.width, pg.height);
+			pg.endDraw();
+		}
+		
+		if(!t1.isPlaying()){
+			int hue = (int) random(0,360);
+			int saturation = (int) random(0,100);
+			int brightness = (int) random(0,100);
+			t1.getColor("background_color").setEnd(color(hue, saturation, brightness));
+			t1.play();
+		}
+	}
+	
+	Tube tube;
+	int dimm = 0;
+	
+	//ANIMATION CHANGER
+	public void AnimationChanger(){
+		nozzlePath = scp.createRowPath(0,65);
+		  //nozzlePath = createRandomPath(0,8,58,65);
+		  NozzleLayer nLayer = new NozzleLayer(this, scp, nozzlePath);
+		tube = new Tube(this, nLayer, color(0,0,0), 1000, 1);
+	}
+	
+	public void drawAnimationChanger(){
+		System.out.println("ANIMATION-CHANGER");
+		
+		scp.dimm(dimm);
+		dimm++;
+	}
+	
+	/*
+	 * UPDOWN-ANIMATION
+	 */
 	private ArrayList<UpDown> upDown = new ArrayList<UpDown>();
 	private ColorFade upDownCl;
+	private boolean upDownSpeedBol = false;
+	private int UP_DOWN_MAX_SPEED = 150;
+	private int UP_DOWN_MIN_SPEED = 50;
+
+	private boolean animationChanger;
+
+	private ArrayList<AnimationChanger> animationChanger1 = new ArrayList<AnimationChanger>();
     
 	//Initiate as Application
 	public static void main(String args[]) {
@@ -243,7 +301,7 @@ public class ProcessingMain extends PApplet {
 				.setColorLabel(color(0,0,255)).setSize(15, 15).setItemsPerRow(7)
 				.setSpacingColumn(45).setSpacingRow(20).addItem("Tube", 0)
 				.addItem("Pathos", 50).addItem("Shine", 100).addItem("Lamp", 150)
-				.addItem("Flower", 200).addItem("HueFade", 250).addItem("Pendulum", 300).addItem("Push", 350);		
+				.addItem("Flower", 200).addItem("HueFade", 250).addItem("Pendulum", 300).addItem("Push", 350).addItem("UPDOWN", 400);		
 
 		pg = createGraphics(12, 5);
 		pg2 = createGraphics(12, 5);
@@ -293,6 +351,8 @@ public class ProcessingMain extends PApplet {
 		}
 				
 		
+		AnimationChanger();
+		
 		
 		counter2=0;
 								
@@ -315,6 +375,8 @@ public class ProcessingMain extends PApplet {
 		setupPush();
 		setupBackGroundContrast();
 		setupCompTube();
+		setupUpDownAnimation();
+		setupTubeAnimation();
 		
 		//frameRate(10);
 		cfList.start();
@@ -331,13 +393,6 @@ public class ProcessingMain extends PApplet {
 		tubeAnimation.setupMode2();
 		
 		Motion.setup(this);
-		
-		upDownCl = new ColorFade(this, 0, 100, 100);
-		upDownCl.hueFade(360, 100000);
-		cfList.addColorFade(upDownCl);
-		for(int i=0; i<7; i++){
-		upDown.add(new UpDown(this, scp.nodeList.get(i), upDownCl, 100));
-		}
 		
 	}
 		
@@ -538,6 +593,28 @@ public class ProcessingMain extends PApplet {
 		
 	}
 		
+	
+	//SETUP UPDOWN ANIMATION
+	public void setupUpDownAnimation() {
+		upDownCl = new ColorFade(this, 0, 100, 100);
+		upDownCl.hueFade(360, 100000);
+		cfList.addColorFade(upDownCl);
+		for(int i=0; i<7; i++){
+		upDown.add(new UpDown(this, scp.nodeList.get(i), upDownCl, 100));
+		}
+	}
+	//DRAW UPDOWN ANIMATION
+	public void drawUpDownAnimation() {
+		scp.clearSysB();
+		scp.dimm(30);
+		
+		for(UpDown u : upDown){
+			u.draw();
+			//System.out.println(u.speed);
+			
+		}
+	}
+	
 	//DRAW SHINE
 	public void drawShine() {
 		for(Iterator<HorizontalMove> hMIterator = horizontalMoveList.iterator(); hMIterator.hasNext();){
@@ -769,6 +846,7 @@ public class ProcessingMain extends PApplet {
 				s.setState(false);
 				}*/
 				else{
+				animationChanger1.add(new AnimationChanger(this, scp));
 				nozzlePath = scp.createNodePath(nodeList.get(s.getID()-1));	
 				HLayer nLayer = new HLayer(this, scp, nozzlePath);
 				effectList.get(s.getID()-1).add(new Stars(this, nLayer));
@@ -779,11 +857,16 @@ public class ProcessingMain extends PApplet {
 	
 
 		//if(frameCount%50<250){
-		scp.dimm(80);
+		//scp.dimm(80);
 		
-		for(UpDown u : upDown){
-		u.draw();
-		}
+		//scp.clearSysB();
+
+		
+		//for(UpDown u : upDown){
+		//u.draw();
+		//}
+		
+		
 		//}else{
 		//scp.clearSysA();
 		//}
@@ -793,17 +876,22 @@ public class ProcessingMain extends PApplet {
 		//}
 		//drawBackGroundContrast();
 
-		//scp.clearSysA();
 		//tubeAnimation.draw2();
+		
+		//drawTubeAnimation();
 		
 		//scp.clearSysA();
 
 		  if(activeArray[5]){
 			  drawHueBackground();
 		  }
+		  if(activeArray[8]){
+			  drawUpDownAnimation();
+		  }
 		  if(activeArray[0]){
-			  //drawSimpleTube();
-			  drawCompSimpleTube();
+			  scp.dimm(80);
+			  drawSimpleTube();
+			  //drawCompSimpleTube();
 		  }
 		  if(activeArray[1]){
 			  scp.clearSysA();
@@ -819,6 +907,7 @@ public class ProcessingMain extends PApplet {
 			  openFlower();
 		  }
 		  if(activeArray[6]){
+			  scp.dimm(30);
 			  drawPendulum();
 		  }
 		  if(activeArray[7]){
@@ -832,8 +921,17 @@ public class ProcessingMain extends PApplet {
 		  if(frameCount%100==0){
 		  System.out.println(frameRate);
 		  }	 
-		 
 		  
+		  
+		  //if(frameCount%300==0){
+		  //	  animationChanger1.add(new AnimationChanger(this, scp));
+		  //}
+		 
+		  for(AnimationChanger aC : animationChanger1){
+		  if(!aC.finished){
+			  aC.draw();
+		  }
+		  }
 		  /*for(Sensor s : sensorList){
 			  System.out.println(s.toString());
 		  }*/
@@ -1313,6 +1411,9 @@ public class ProcessingMain extends PApplet {
 		    } else if(checkbox_array[7] != theEvent.getGroup().getArrayValue(7)) {
 		    	activeArray[7] =! activeArray[7];
 		    	System.out.println("BUTTON8");
+		    } else if(checkbox_array[8] != theEvent.getGroup().getArrayValue(8)) {
+		    	activeArray[8] =! activeArray[8];
+		    	System.out.println("BUTTON9");
 		    }
 		    
 		}
@@ -1377,6 +1478,10 @@ public class ProcessingMain extends PApplet {
 	
 	public void SETUP(int theValue) {
 		sendArduinoSetup(myPort);
+	}
+	
+	public void mousePressed(){
+		  animationChanger1.add(new AnimationChanger(this, scp));
 	}
 	
 
