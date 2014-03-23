@@ -306,7 +306,7 @@ public class Firework implements Effect{
 		public UpDownEffect(PApplet p, PGraphics pg, ColorFadeList cfl, int speed){
 			this.p = p;
 			this.pg = pg;
-			this.speed = speed;
+			this.speed = 1000;
 			y = 0;
 			timer = p.millis();
 			

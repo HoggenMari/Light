@@ -20,7 +20,7 @@ public class InteractionChanger {
 	
 	public void draw(){
 		
-		System.out.println("InteractionChanger "+dimm+" "+e.fadeBack());
+		//System.out.println("InteractionChanger "+dimm+" "+e.fadeBack());
 		if(!up & dimm<=dimmEnd){
 		dimm+=3;
 		}else if(up){

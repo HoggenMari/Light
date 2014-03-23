@@ -19,6 +19,7 @@ public class NozzleLayer {
 		this.nozzlePath = nozzlePath;
 	}
 	
+	
 	public PGraphics getLayer() {
 		for(Nozzle n : nozzlePath) {
 			totalWidth += n.sysA.width;
@@ -26,6 +27,7 @@ public class NozzleLayer {
 		pg = p.createGraphics(totalWidth,5);
 		return pg;
 	}
+
 	
 	
 	public void add() {

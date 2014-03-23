@@ -29,7 +29,7 @@ public class UpDown {
 		this.p = p;
 		this.n = n;
 		this.cf = cf;
-		this.speed = speed;
+		this.speed = 200;
 		timer = p.millis();
 		
 		for(int i=0; i<n.nozzleList.size(); i++){
@@ -58,7 +58,12 @@ public class UpDown {
 			pg.beginDraw();
 			pg.colorMode(PConstants.HSB, 360, 100, 100);
 			pg.noStroke();
-			pg.fill(cf.hue-5*i, cf.saturation, cf.brightness,255);
+			
+			for(int j=0; j<255; j++){
+				pg.fill(cf.hue-5*i, cf.saturation, cf.brightness,255-j);
+				pg.rect(0, particleList.get(i).y+j, pg.width, 1);	
+			}
+			/*pg.fill(cf.hue-5*i, cf.saturation, cf.brightness,255);
 			pg.rect(0, particleList.get(i).y, pg.width, 1);
 			pg.fill(cf.hue-5*i, cf.saturation, cf.brightness,100);
 			pg.rect(0, particleList.get(i).y+1, pg.width, 1);
@@ -75,9 +80,9 @@ public class UpDown {
 			pg.fill(cf.hue-5*i, cf.saturation, cf.brightness,10);
 			pg.rect(0, particleList.get(i).y+7, pg.width, 1);
 			pg.fill(cf.hue-5*i, cf.saturation, cf.brightness,5);
-			pg.rect(0, particleList.get(i).y+8, pg.width, 1);
+			pg.rect(0, particleList.get(i).y+8, pg.width, 1);*/
 
-			pg.fill(cf.hue-5*i, cf.saturation, cf.brightness,200);
+			/*pg.fill(cf.hue-5*i, cf.saturation, cf.brightness,200);
 			pg.rect(0, particleList.get(i).y-1, pg.width, 1);
 			pg.fill(cf.hue-5*i, cf.saturation, cf.brightness,180);
 			pg.rect(0, particleList.get(i).y-2, pg.width, 1);
@@ -100,7 +105,7 @@ public class UpDown {
 			pg.fill(cf.hue-5*i, cf.saturation, cf.brightness,10);
 			pg.rect(0, particleList.get(i).y-11, pg.width, 1);
 			pg.fill(cf.hue-5*i, cf.saturation, cf.brightness,5);
-			pg.rect(0, particleList.get(i).y-12, pg.width, 1);
+			pg.rect(0, particleList.get(i).y-12, pg.width, 1);*/
 			
 			
 			if(particleList.get(i).y>5){
@@ -314,10 +319,10 @@ public class UpDown {
 			}else{
 				y++;
 			}
-			if(y==-15){
+			if(y==-250){
 				down = false;
 			}
-			if(y>=15){
+			if(y>=250){
 				down = true;
 			}
 			

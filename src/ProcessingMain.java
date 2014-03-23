@@ -21,6 +21,7 @@ import controlP5.ControlP5;
 import controlP5.ControllerGroup;
 import controlP5.Textfield;
 import controlP5.Textlabel;
+import de.looksgood.ani.Ani;
 import processing.core.*;
 import processing.serial.*;
 
@@ -49,11 +50,11 @@ public class ProcessingMain extends PApplet {
 	//Variables for GUI
 	ControlP5 cp5;
 	private CheckBox checkbox;
-	float checkbox_array[] = {0,0,0,0,0,0,0,0,0,0,0};
-	boolean activeArray [] = {false, false, false, false, false, false, false, false, false, false, false};
+	float checkbox_array[] = {0,0,0,0,0,0,0,0,0,0,0,0};
+	boolean activeArray [] = {false, false, false, false, false, false, false, false, false, false, false, false};
 	
 	//Arduino Communication
-	static final String ARDUINO_DEVICE = "/dev/tty.usbmodemda121";
+	static String ARDUINO_DEVICE = "/dev/tty.usbmodemfa121";
 	static int lf = 10; // Linefeed in ASCII
 	String myString = null; // Serial Output String
 	Serial myPort; // Serial port you are using
@@ -172,6 +173,16 @@ public class ProcessingMain extends PApplet {
 	
 	
 	
+	
+	
+	float Xx = 256;
+	float Yy = 256;
+	int diameter = 50;
+	
+	
+	
+	
+	
 	/*
 	 * TUBE ANIMATION VARIABLES
 	 */
@@ -248,6 +259,42 @@ public class ProcessingMain extends PApplet {
 	private boolean yelBlu;
 
 	private int yelBlutimer;
+
+	private ColorFade c1;
+
+	private ColorFade t2;
+
+	private ColorFade t3;
+
+	private ColorFade t4;
+
+	private ColorFade t5;
+
+	private ColorFade c2;
+
+	private ColorFade c3;
+
+	private ColorFade c4;
+
+	private ColorFade c5;
+
+	private int hueBreath;
+
+	private int speedBreath;
+
+	private ColorFade cb1;
+
+	private ColorFade cb2;
+
+	private ColorFade cb3;
+
+	private ColorFade cb4;
+
+	private ColorFade cb5;
+
+	private int hueBBreath;
+
+	private FineTube FineTube;
     
 	//Initiate as Application
 	public static void main(String args[]) {
@@ -262,7 +309,7 @@ public class ProcessingMain extends PApplet {
 	
 		initArduino();
 		  
-		frameRate(36);
+		//frameRate(10);
 		
 		//Init GUI with Textfields, Buttons
 		cp5 = new ControlP5(this);
@@ -315,7 +362,9 @@ public class ProcessingMain extends PApplet {
 				.setColorLabel(color(0,0,255)).setSize(15, 15).setItemsPerRow(7)
 				.setSpacingColumn(45).setSpacingRow(20).addItem("Tube", 0)
 				.addItem("Pathos", 50).addItem("Shine", 100).addItem("Lamp", 150)
-				.addItem("Flower", 200).addItem("HueFade", 250).addItem("Pendulum", 300).addItem("Push", 350).addItem("UPDOWN", 400).addItem("FIREWORK", 450).addItem("YELLOWCOLD", 500);		
+				.addItem("Flower", 200).addItem("HueFade", 250).addItem("Pendulum", 300)
+				.addItem("Push", 350).addItem("UPDOWN", 400).addItem("FIREWORK", 450)
+				.addItem("YELLOWCOLD", 500).addItem("BREATH", 550);		
 
 		pg = createGraphics(12, 5);
 		pg2 = createGraphics(12, 5);
@@ -388,9 +437,11 @@ public class ProcessingMain extends PApplet {
 		setupSimpleTube();
 		setupPush();
 		setupBackGroundContrast();
-		setupCompTube();
+		//setupCompTube();
 		setupUpDownAnimation();
 		setupTubeAnimation();
+		setupBreath();
+		setupBreath2();
 		
 		//frameRate(10);
 		cfList.start();
@@ -410,7 +461,14 @@ public class ProcessingMain extends PApplet {
 		
 		interactionChanger = new ArrayList<InteractionChanger>();
 		
+		  Ani.init(this);
 		
+		  Ani.to(this, (float) 1.0, "Xx", mouseX, Ani.QUINT_IN);
+		  Ani.to(this, (float) 1.0, "Yy", mouseY, Ani.QUINT_IN);
+		  
+		  nozzlePath = scp.createNodePath(nodeList.get(0));
+		  NozzleLayer nozzleLayer = new NozzleLayer(this, scp, nozzlePath);
+		  FineTube = new FineTube(this, nozzleLayer, c1);
 	}
 		
 	
@@ -418,10 +476,13 @@ public class ProcessingMain extends PApplet {
 	public void initArduino() {
 		for (int i = 0; i < Serial.list().length; i++) {
 			System.out.println("Device " + i + " " + Serial.list()[i]);
+			if(Serial.list()[i].contains("/dev/tty.usbmodem")){
+			ARDUINO_DEVICE = Serial.list()[i];
+			}
 		}
 
 		try {
-			myPort = new Serial(this, "/dev/tty.usbmodemfd121", 14400);
+			myPort = new Serial(this, ARDUINO_DEVICE, 14400);
 			myPort.clear();
 		} catch (Exception e) {
 			System.out.println("Serial konnte nicht initialisiert werden");
@@ -653,18 +714,223 @@ public class ProcessingMain extends PApplet {
 		  }
 	}
 	
+	public void setupBreath2(){
+		
+		hueBreath = 240;
+		hueBBreath = 0;
+		speedBreath = 1000;
+		
+		c1 = new ColorFade(this, hueBreath, 255, 255);
+		c2 = new ColorFade(this, hueBreath, 255, 150);
+		c3 = new ColorFade(this, hueBreath, 255, 100);
+		c4 = new ColorFade(this, hueBreath, 255, 70);
+		c5 = new ColorFade(this, hueBreath, 255, 55);
+		
+		c1.brightnessFade(55, 5000, 2);
+		c2.brightnessFade(55, 5000, 2);
+		c3.brightnessFade(55, 5000, 2);
+		c4.brightnessFade(55, 5000, 2);
+		c5.brightnessFade(55, 5000, 2);
+		
+		cfList.addColorFade(c1);
+		cfList.addColorFade(c2);
+		cfList.addColorFade(c3);
+		cfList.addColorFade(c4);
+		cfList.addColorFade(c5);
+		
+		
+		cb1 = new ColorFade(this, hueBBreath, 200, 150);
+
+		cb1.brightnessFade(40, 5000, 2);
+		
+		cfList.addColorFade(cb1);
+
+		
+		
+
+	}
+	
+	public void drawBreath2(){
+		for(int i=0; i<scp.nozzleList.size(); i++) {
+			PGraphics pg = scp.nozzleList.get(i).sysA;
+			PGraphics pg2 = scp.nozzleList.get(i).sysB;
+			pg.beginDraw();
+			pg.background(0);
+
+				pg.colorMode(HSB, 360, 255, 255);	
+				pg.noStroke();
+				pg.fill(c1.hue+i/2,c1.saturation,c1.brightness);
+				pg.rect(0, 4, pg.width, 1);
+				pg.fill(c2.hue+i/2,c2.saturation,c2.brightness);
+				pg.rect(0, 3, pg.width, 1);
+				pg.fill(c3.hue+i/2,c3.saturation,c3.brightness);
+				pg.rect(0, 2, pg.width, 1);
+				pg.fill(c4.hue+i/2,c4.saturation,c4.brightness);
+				pg.rect(0, 1, pg.width, 1);
+				pg.fill(c5.hue+i/2,c5.saturation,c5.brightness);
+				pg.rect(0, 0, pg.width, 1);
+		   
+			
+			//pg2.colorMode(HSB, 360, 100, 100,100);
+			//pg2.fill(Math.abs(cfYellow.hue-270)+30,cfYellow.saturation,cfYellow.brightness, 70);
+			//pg2.rect(0, 0, pg2.width, 1);
+
+			//pg2.endDraw();
+			pg.endDraw();
+			
+			pg2.beginDraw();
+			pg2.colorMode(HSB, 360, 255, 255);
+			pg2.noStroke();
+			pg2.fill(cb1.hue+i, cb1.saturation, cb1.brightness);
+			pg2.rect(0,0,pg2.width,pg2.height);
+			pg2.endDraw();
+			
+			
+			
+			//System.out.println("Hue1: "+(Math.abs(cfYellow.hue-270)+30)+" Sat1: "+(Math.abs(cfYellow.saturation-100))+" Bright: "+(Math.abs(cfYellow.brightness-100)+40));
+		}
+		
+		if(c1.isDead()){
+			
+			hueBreath++;
+			hueBBreath++;
+			
+			System.out.println("HueBreath: "+hueBreath+" HueBBreath: "+hueBBreath);
+			
+			
+			c1 = new ColorFade(this, hueBreath, 255, 255);
+			c2 = new ColorFade(this, hueBreath, 255, 150);
+			c3 = new ColorFade(this, hueBreath, 255, 100);
+			c4 = new ColorFade(this, hueBreath, 255, 70);
+			c5 = new ColorFade(this, hueBreath, 255, 55);
+			
+			c1.brightnessFade(55, 5000, 2);
+			c2.brightnessFade(55, 5000, 2);
+			c3.brightnessFade(55, 5000, 2);
+			c4.brightnessFade(55, 5000, 2);
+			c5.brightnessFade(55, 5000, 2);
+			
+			cfList.addColorFade(c1);
+			cfList.addColorFade(c2);
+			cfList.addColorFade(c3);
+			cfList.addColorFade(c4);
+			cfList.addColorFade(c5);
+
+			
+			
+			
+			cb1 = new ColorFade(this, hueBBreath, 200, 150);
+			
+			cb1.brightnessFade(40, 5000, 2);
+			
+			cfList.addColorFade(cb1);
+			
+			
+			
+		}
+	}
+	
+	public void setupBreath(){
+		
+		hueBreath = 35;
+		speedBreath = 5000;
+		
+		c1 = new ColorFade(this, hueBreath, 220, 255);
+		c2 = new ColorFade(this, hueBreath, 220, 150);
+		c3 = new ColorFade(this, hueBreath, 220, 100);
+		c4 = new ColorFade(this, hueBreath, 220, 70);
+		c5 = new ColorFade(this, hueBreath, 220, 55);
+		
+		c1.brightnessFade(80, 5000, 2);
+		c2.brightnessFade(80, 5000, 2);
+		c3.brightnessFade(80, 5000, 2);
+		c4.brightnessFade(80, 5000, 2);
+		c5.brightnessFade(80, 5000, 2);
+		
+		cfList.addColorFade(c1);
+		cfList.addColorFade(c2);
+		cfList.addColorFade(c3);
+		cfList.addColorFade(c4);
+		cfList.addColorFade(c5);
+
+	}
+	
+	public void drawBreath(){
+		for(Nozzle nozzle : scp.nozzleList) {
+			PGraphics pg = nozzle.sysA;
+			pg.beginDraw();
+			pg.background(0);
+
+				pg.colorMode(HSB, 360, 255, 255);	
+				pg.noStroke();
+				pg.fill(c1.hue,c1.saturation,c1.brightness);
+				pg.rect(0, 4, pg.width, 1);
+				pg.fill(c2.hue,c2.saturation,c2.brightness);
+				pg.rect(0, 3, pg.width, 1);
+				pg.fill(c3.hue,c3.saturation,c3.brightness);
+				pg.rect(0, 2, pg.width, 1);
+				pg.fill(c4.hue,c4.saturation,c4.brightness);
+				pg.rect(0, 1, pg.width, 1);
+				pg.fill(c5.hue,c5.saturation,c5.brightness);
+				pg.rect(0, 0, pg.width, 1);
+		   
+			
+			//pg2.colorMode(HSB, 360, 100, 100,100);
+			//pg2.fill(Math.abs(cfYellow.hue-270)+30,cfYellow.saturation,cfYellow.brightness, 70);
+			//pg2.rect(0, 0, pg2.width, 1);
+
+			//pg2.endDraw();
+			pg.endDraw();
+			
+			//System.out.println("Hue1: "+(Math.abs(cfYellow.hue-270)+30)+" Sat1: "+(Math.abs(cfYellow.saturation-100))+" Bright: "+(Math.abs(cfYellow.brightness-100)+40));
+		}
+		
+		if(c1.isDead()){
+			
+			hueBreath++;
+			if(speedBreath>2000){
+			speedBreath-=100;
+			}else{
+				speedBreath=5000;
+			}
+			
+			System.out.println("SPEEDBREATH: "+speedBreath);
+			
+			
+			c1 = new ColorFade(this, hueBreath, 220, 255);
+			c2 = new ColorFade(this, hueBreath, 220, 150);
+			c3 = new ColorFade(this, hueBreath, 220, 100);
+			c4 = new ColorFade(this, hueBreath, 220, 70);
+			c5 = new ColorFade(this, hueBreath, 220, 55);
+			
+			c1.brightnessFade(55, speedBreath, 2);
+			c2.brightnessFade(55, speedBreath, 2);
+			c3.brightnessFade(55, speedBreath, 2);
+			c4.brightnessFade(55, speedBreath, 2);
+			c5.brightnessFade(55, speedBreath, 2);
+			
+			cfList.addColorFade(c1);
+			cfList.addColorFade(c2);
+			cfList.addColorFade(c3);
+			cfList.addColorFade(c4);
+			cfList.addColorFade(c5);
+			
+		}
+	}
+	
 	//SETUP SIMPLETUBE
 	public void setupSimpleTube(){
-		sTube = new ColorFade(this, h, 100, 100);
-		sTube.hueFade(h+50, 1000);
+		colorMode(HSB,360,255,255);
+		sTube = new ColorFade(this, 270, 200, 0);
+		//sTube.hueFade(h+50, 1000);
 		
-		sTube2 = new ColorFade(this, 0, 100, 50);
-		sTube2.alphaFade(40, 1000);
+		//sTube2 = new ColorFade(this, 0, 100, 50);
+		//sTube2.alphaFade(40, 1000);
 		
 		//colorTubeList.start();
 		
 		cfList.addColorFade(sTube);
-		cfList.addColorFade(sTube2);
+		//cfList.addColorFade(sTube2);
 	}
 	
 	//DRAW SIMPLETUBE
@@ -681,10 +947,11 @@ public class ProcessingMain extends PApplet {
 	  }
 	  
 	  while(sTubeList.size()<1){
-		  nozzlePath = scp.createRowPath(0,65);
+		  //nozzlePath = scp.createRowPath(0,65);
+		  nozzlePath = scp.createNodePath(node1);
 		  //nozzlePath = createRandomPath(0,8,58,65);
 		  NozzleLayer nLayer = new NozzleLayer(this, scp, nozzlePath);
-		  sTubeList.add(new SimpleTube(this, nLayer, sTube, (int)random(20,100), 1+Math.random()*0.5));
+		  sTubeList.add(new SimpleTube(this, nLayer, sTube, (int)random(20,100), 1));
 	  }
 	}
 	
@@ -818,6 +1085,8 @@ public class ProcessingMain extends PApplet {
 
 	public void draw() {
 		
+		//sensorList.get(4).setState(false);
+		
 		//System.out.println(cfList.colorFadeList.size());
 		colorMode(HSB,360,100,100);
 		//background(lampFade.hue,lampFade.saturation,lampFade.brightness);
@@ -874,17 +1143,44 @@ public class ProcessingMain extends PApplet {
 				s.setState(false);
 				}	
 				else{
-				animationChanger1.add(new AnimationChanger(this, scp));
+				//animationChanger1.add(new AnimationChanger(this, scp));
 				nozzlePath = scp.createNodePath(nodeList.get(s.getID()-1));	
 				NozzleLayer nozzleLayer = new NozzleLayer(this, scp, nozzlePath);
 				effectList.get(s.getID()-1).add(new Stars(this, nozzleLayer, color(0,0,100)));
 				s.setState(false);
 				}
+				
+				//else{
+				//nozzlePath = scp.createNodePath(nodeList.get(s.getID()-1));
+				//NozzleLayer nozzleLayer = new NozzleLayer(this, scp, nozzlePath);
+				//effectList.get(s.getID()-1).add(new TopGlow(this, nozzleLayer, 2, 255));
+				//s.setState(false);
+				//}
+				
+				//else{
+				//nozzlePath = scp.createNodePath(nodeList.get(s.getID()-1));
+				//NozzleLayer nozzleLayer = new NozzleLayer(this, scp, nozzlePath);
+				//effectList.get(s.getID()-1).add(new Blob(this, nozzleLayer, cb1, cfList));
+				//s.setState(false);
+				//}
+				
+				//else{
+				//nozzlePath = scp.createNodePath(nodeList.get(s.getID()-1));
+				//NozzleLayer nozzleLayer = new NozzleLayer(this, scp, nozzlePath);
+				//int nId = (s.getID()-1)*8;
+				//System.out.println("NID: "+nId);
+				//effectList.get(s.getID()-1).add(new Blob2(this, nozzleLayer, nId, cb1, cfList));
+				//s.setState(false);	
+				//}
 			}
 		}
 	
+		//scp.clearSysA();
+		//drawBreath2();
 		
 		
+		drawBreath2();
+		//scp.setColor(220, 30, 50);
 
 		//if(frameCount%50<250){
 		//scp.dimm(80);
@@ -913,6 +1209,9 @@ public class ProcessingMain extends PApplet {
 		//scp.clearSysA();
 		
 		//scp.dimm(20);
+		
+		//scp.setColor(290, 73, 75);
+		//scp.dimm(80);
 
 		  if(activeArray[5]){
 			  drawHueBackground();
@@ -924,7 +1223,7 @@ public class ProcessingMain extends PApplet {
 			  drawYellowBlue();
 		  }
 		  if(activeArray[0]){
-			  scp.dimm(80);
+			  //scp.dimm(80);
 			  drawSimpleTube();
 			  //drawCompSimpleTube();
 		  }
@@ -948,6 +1247,9 @@ public class ProcessingMain extends PApplet {
 		  if(activeArray[7]){
 			  drawPush();
 		  }
+		  if(activeArray[11]){
+			  drawBreath();
+		  }
 		  
 		  
 		  //yellowCold();
@@ -967,6 +1269,15 @@ public class ProcessingMain extends PApplet {
 		  }
 		  }
 		  
+		  
+		  //scp.dimm(20);
+		  
+		  if(FineTube.isDead()){
+			nozzlePath = scp.createNodePath(nodeList.get(0));
+			NozzleLayer nozzleLayer = new NozzleLayer(this, scp, nozzlePath);
+			FineTube = new FineTube(this,nozzleLayer,cb1);
+		  }
+			FineTube.draw();
 
 		  
 		  
@@ -1156,6 +1467,10 @@ public class ProcessingMain extends PApplet {
 		  text("Created by Marius HoggenmŸller on 04.02.14. Copyright (c) 2014 Marius HoggenmŸller, LMU Munich. All rights reserved.", 10, 740);
 		  
 		  
+		  //background(255);
+		  //fill(0);
+		  //ellipse((float) Xx,Yy,diameter,diameter);
+		  
 	}
 	
 	
@@ -1218,7 +1533,7 @@ public class ProcessingMain extends PApplet {
 		yelBlutimer = 0;
 		cfYellow = new ColorFade(this, 270, 70, 100);
 		cfYellow.saturationFade(0, 5000, 2);
-		cfYellow.brightnessFade(40, 5000, 2);
+		cfYellow.brightnessFade(100, 5000, 2);
 		cfYellow.hueFade(30, 10000, 1);
 		cfList.addColorFade(cfYellow);
 		
@@ -1231,22 +1546,28 @@ public class ProcessingMain extends PApplet {
 
 	}
 	
+	public void drawYelloBlue2() {
+		
+	}
+	
 	public void drawYellowBlue() {
 		for(Nozzle nozzle : scp.nozzleList) {
 			PGraphics pg = nozzle.sysA;
 			pg.beginDraw();
 			PGraphics pg2 = nozzle.sysB;
 			pg.beginDraw();
+			pg.background(0);
+			pg2.background(0);
 			pg2.beginDraw();
 			for(int iy=0; iy<pg.height; iy++){
-				pg.colorMode(HSB, 360, 100, 100);	
-				pg.fill(cfYellow.hue-5*iy,cfYellow.saturation,cfYellow.brightness-5*iy, 50);
+				pg.colorMode(HSB, 360, 100, 100,100);	
+				pg.fill(cfYellow.hue-5*iy,cfYellow.saturation,cfYellow.brightness-5*iy, 70);
 				pg.noStroke();
 				pg2.noStroke();
 				pg.rect(0, iy, pg.width, 1);
 		   }
-			pg2.colorMode(HSB, 360, 100, 100);
-			pg2.fill(Math.abs(cfYellow.hue-270)+30,cfYellow.saturation,cfYellow.brightness, 10);
+			pg2.colorMode(HSB, 360, 100, 100,100);
+			pg2.fill(Math.abs(cfYellow.hue-270)+30,cfYellow.saturation,cfYellow.brightness, 70);
 			pg2.rect(0, 0, pg2.width, 1);
 
 			pg2.endDraw();
@@ -1261,14 +1582,14 @@ public class ProcessingMain extends PApplet {
 			if(yelBlu){
 			cfYellow = new ColorFade(this, 30, 70, 100);
 			cfYellow.saturationFade(0, 5000, 2);
-			cfYellow.brightnessFade(40, 5000, 2);
+			cfYellow.brightnessFade(100, 5000, 2);
 			cfYellow.hueFade(270, 10000, 1);
 			cfList.addColorFade(cfYellow);
 			yelBlu = !yelBlu;
 			}else{
 			cfYellow = new ColorFade(this, 270, 70, 100);
 			cfYellow.saturationFade(0, 5000, 2);
-			cfYellow.brightnessFade(40, 5000, 2);
+			cfYellow.brightnessFade(100, 5000, 2);
 			cfYellow.hueFade(30, 10000, 1);
 			cfList.addColorFade(cfYellow);
 			yelBlu = !yelBlu;	
@@ -1438,6 +1759,7 @@ public class ProcessingMain extends PApplet {
 			} else if(checkBoxSensorArray[0][1] != checkBoxSensorList.get(0).getArrayValue(1)){
 				wiActiveArray[0] =! wiActiveArray[0];
 				System.out.println("SENSOR0"+checkBoxSensorList.get(0).getArrayValue(1));
+				//sensorList.get(0).setState(false);
 				sendArduinoWi(myPort);
 			}
 			checkBoxSensorArray[0] = checkBoxSensorList.get(0).getArrayValue();
@@ -1449,6 +1771,7 @@ public class ProcessingMain extends PApplet {
 			} else if(checkBoxSensorArray[1][1] != checkBoxSensorList.get(1).getArrayValue(1)){
 				wiActiveArray[1] =! wiActiveArray[1];
 				System.out.println("SENSOR0"+checkBoxSensorList.get(1).getArrayValue(1));
+				//sensorList.get(1).setState(false);
 				sendArduinoWi(myPort);
 			}
 			checkBoxSensorArray[1] = checkBoxSensorList.get(1).getArrayValue();
@@ -1460,6 +1783,7 @@ public class ProcessingMain extends PApplet {
 			} else if(checkBoxSensorArray[2][1] != checkBoxSensorList.get(2).getArrayValue(1)){
 				wiActiveArray[2] =! wiActiveArray[2];
 				System.out.println("SENSOR0"+checkBoxSensorList.get(2).getArrayValue(1));
+				//sensorList.get(2).setState(false);
 				sendArduinoWi(myPort);
 			}
 			checkBoxSensorArray[2] = checkBoxSensorList.get(2).getArrayValue();
@@ -1471,6 +1795,7 @@ public class ProcessingMain extends PApplet {
 			} else if(checkBoxSensorArray[3][1] != checkBoxSensorList.get(3).getArrayValue(1)){
 				wiActiveArray[3] =! wiActiveArray[3];
 				System.out.println("SENSOR0"+checkBoxSensorList.get(3).getArrayValue(1));
+				//sensorList.get(3).setState(false);
 				sendArduinoWi(myPort);
 			}
 			checkBoxSensorArray[3] = checkBoxSensorList.get(3).getArrayValue();
@@ -1482,6 +1807,7 @@ public class ProcessingMain extends PApplet {
 			} else if(checkBoxSensorArray[4][1] != checkBoxSensorList.get(4).getArrayValue(1)){
 				wiActiveArray[4] =! wiActiveArray[4];
 				System.out.println("SENSOR0"+checkBoxSensorList.get(4).getArrayValue(1));
+				//sensorList.get(4).setState(false);
 				sendArduinoWi(myPort);
 			}
 			checkBoxSensorArray[4] = checkBoxSensorList.get(4).getArrayValue();
@@ -1523,6 +1849,9 @@ public class ProcessingMain extends PApplet {
 		    } else if(checkbox_array[10] != theEvent.getGroup().getArrayValue(10)) {
 		    	activeArray[10] =! activeArray[10];
 		    	System.out.println("BUTTON11");
+		    } else if(checkbox_array[11] != theEvent.getGroup().getArrayValue(11)) {
+		    	activeArray[11] =! activeArray[11];
+		    	System.out.println("BUTTON12");
 		    }
 		    
 		}
@@ -1593,5 +1922,7 @@ public class ProcessingMain extends PApplet {
 		  animationChanger1.add(new AnimationChanger(this, scp));
 	}
 	
+	
+
 
 }
