@@ -9,6 +9,7 @@ public class NozzleLayer {
 	
 	protected LinkedList<Nozzle> nozzlePath;
 	protected PGraphics pg;
+	protected PGraphics pg2;
 	protected int totalWidth;
 	protected PApplet p;
 	protected Pavillon scp;
@@ -47,8 +48,8 @@ public class NozzleLayer {
 		for(Nozzle n : nozzlePath) {
 			totalWidth += n.sysB.width;
 		}
-		pg = p.createGraphics(totalWidth,1);
-		return pg;
+		pg2 = p.createGraphics(totalWidth,1);
+		return pg2;
 	}
 	
 	
@@ -58,7 +59,7 @@ public class NozzleLayer {
 		for(int i=nozzlePath.size()-1; i>-1; i--) {
 			Nozzle n = nozzlePath.get(i);
 			PGraphics p = scp.nozzleList.get(n.id).sysB;
-			PImage img = pg.get(currentX, 0, currentX+p.width, 1);
+			PImage img = pg2.get(currentX, 0, currentX+p.width, 1);
 			p.beginDraw();
 			p.image(img,0,0);
 			p.endDraw();

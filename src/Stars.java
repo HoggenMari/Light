@@ -17,17 +17,25 @@ public class Stars implements Effect {
 	private PGraphics pg;
 	private ArrayList<GlitterParticle> glitterList;
 	private int color;
+	private ColorFadeList cfl;
+	private ColorFade cf1;
 
-	public Stars(PApplet p, NozzleLayer nozzleLayer, int color) {
+	public Stars(PApplet p, NozzleLayer nozzleLayer, int color, ColorFadeList cfl) {
 		this.p = p;
 		this.nozzleLayer = nozzleLayer;
 		this.color = color;
+		this.cfl = cfl;
 		pg = nozzleLayer.getLayer();
 		glitterList = new ArrayList<GlitterParticle>();
 		
 		for(int i=0; i<30; i++){
 			glitterList.add(new GlitterParticle(p,pg.width));
 		}
+		
+		cf1 = new ColorFade(p, color, 120, 255, 50);
+		cf1.alphaFade(255, 3000, 2);
+		cf1.saturationFade(0, 1000, 1);
+		cfl.addColorFade(cf1);
 
 	}
 
@@ -36,15 +44,14 @@ public class Stars implements Effect {
 		pg.beginDraw();
 		pg.clear();
 		pg.noStroke();
-		pg.colorMode(PConstants.HSB, 360, 100, 100);
+		pg.colorMode(PConstants.HSB, 360, 255, 255, 255);
 		for(Iterator<GlitterParticle> glitterIterator = glitterList.iterator(); glitterIterator.hasNext();){
 			GlitterParticle glitter = glitterIterator.next();
-			pg.stroke(color, glitter.lifetime);
+			pg.stroke(cf1.hue, cf1.saturation, cf1.brightness, glitter.lifetime);
 			pg.strokeWeight(1);
 			glitter.update();	  
-			if(glitter.lifetime>0){
-				pg.point(p.random(glitter.x-20, glitter.x), p.random(0, pg.height));
-			} else {
+			pg.point(p.random(glitter.x-20, glitter.x), p.random(0, pg.height));
+			if(glitter.lifetime<0){
 				//System.out.println("DEAD");
 				glitterIterator.remove();
 			}

@@ -117,7 +117,7 @@ public class Firework implements Effect{
 				//scp.dimm(80);
 				while(starList .isEmpty()){
 					int color = p.color((int)p.random(0, 360), (int)p.random(0,40), (int)p.random(70,90));
-					starList.add(new Stars(p, nLayerA2, color));
+					starList.add(new Stars(p, nLayerA2, 270, cfl));
 				}
 				for(Iterator<Stars> zIterator = starList.iterator(); zIterator.hasNext();){
 					Stars e = zIterator.next();

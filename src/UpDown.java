@@ -19,26 +19,26 @@ public class UpDown {
 	public UpDown(PApplet p, Node n){
 		this.p = p;
 		this.n = n;
-		
+
 		for(int i=0; i<n.nozzleList.size(); i++){
 			particleList.add(new UpDownParticle(i+1));
 		}
 	}
-	
+
 	public UpDown(PApplet p, Node n, ColorFade cf, int speed){
 		this.p = p;
 		this.n = n;
 		this.cf = cf;
-		this.speed = 200;
+		this.speed = speed;
 		timer = p.millis();
-		
+
 		for(int i=0; i<n.nozzleList.size(); i++){
 			particleList.add(new UpDownParticle(i*2));
 		}
 	}
-	
+
 	public void draw(){
-		
+
 		/*if(p.frameCount%10==0){
 		if(upDownSpeedBol){
 			speed--;
@@ -52,18 +52,13 @@ public class UpDown {
 			upDownSpeedBol = true;
 		}
 		}*/
-		
+
 		for(int i=0; i<n.nozzleList.size(); i++){
 			PGraphics pg = n.nozzleList.get(i).sysA;
 			pg.beginDraw();
 			pg.colorMode(PConstants.HSB, 360, 100, 100);
 			pg.noStroke();
-			
-			for(int j=0; j<255; j++){
-				pg.fill(cf.hue-5*i, cf.saturation, cf.brightness,255-j);
-				pg.rect(0, particleList.get(i).y+j, pg.width, 1);	
-			}
-			/*pg.fill(cf.hue-5*i, cf.saturation, cf.brightness,255);
+			pg.fill(cf.hue-5*i, cf.saturation, cf.brightness,255);
 			pg.rect(0, particleList.get(i).y, pg.width, 1);
 			pg.fill(cf.hue-5*i, cf.saturation, cf.brightness,100);
 			pg.rect(0, particleList.get(i).y+1, pg.width, 1);
@@ -80,9 +75,9 @@ public class UpDown {
 			pg.fill(cf.hue-5*i, cf.saturation, cf.brightness,10);
 			pg.rect(0, particleList.get(i).y+7, pg.width, 1);
 			pg.fill(cf.hue-5*i, cf.saturation, cf.brightness,5);
-			pg.rect(0, particleList.get(i).y+8, pg.width, 1);*/
+			pg.rect(0, particleList.get(i).y+8, pg.width, 1);
 
-			/*pg.fill(cf.hue-5*i, cf.saturation, cf.brightness,200);
+			pg.fill(cf.hue-5*i, cf.saturation, cf.brightness,200);
 			pg.rect(0, particleList.get(i).y-1, pg.width, 1);
 			pg.fill(cf.hue-5*i, cf.saturation, cf.brightness,180);
 			pg.rect(0, particleList.get(i).y-2, pg.width, 1);
@@ -105,21 +100,21 @@ public class UpDown {
 			pg.fill(cf.hue-5*i, cf.saturation, cf.brightness,10);
 			pg.rect(0, particleList.get(i).y-11, pg.width, 1);
 			pg.fill(cf.hue-5*i, cf.saturation, cf.brightness,5);
-			pg.rect(0, particleList.get(i).y-12, pg.width, 1);*/
-			
-			
-			if(particleList.get(i).y>5){
+			pg.rect(0, particleList.get(i).y-12, pg.width, 1);
+
+
+			/*if(particleList.get(i).y>5){
 			pg.fill(cf.hue-5*i, cf.saturation, cf.brightness,200);
 			pg.rect(0, 4, pg.width, 1);	
 			}
 			if(particleList.get(i).y<0){
 				pg.fill(cf.hue-5*i, cf.saturation, cf.brightness,200);
 				pg.rect(0, 0, pg.width, 1);	
-				}
-			
+				}*/
+
 			pg.endDraw();
-			
-			
+
+
 			PGraphics pg2 = n.nozzleList.get(i).sysB;
 			pg2.beginDraw();
 			pg2.colorMode(PConstants.HSB,360,100,100);
@@ -133,25 +128,25 @@ public class UpDown {
 			pg2.noStroke();
 			pg2.rect(0, 0, pg2.width, pg2.height);
 			pg2.endDraw();
-			
+
 		}
 		int current = p.millis();
 		if(current-timer>speed){	
-			
-			
-			
+
+
+
 		for(int i=0; i<particleList.size(); i++){
 				//if(p.frameCount%3==0){
 				particleList.get(i).update();
-	
-		
+
+
 		}
 		timer = current;
 		}
-	
+
 	}
-	
-	
+
+
 	public void draw2(){
 		for(int i=0; i<n.nozzleList.size(); i++){
 			PGraphics pg = n.nozzleList.get(i).sysA;
@@ -208,8 +203,8 @@ public class UpDown {
 			pg.rect(0, particleList.get(i).y-11, pg.width, 1);
 			pg.fill(255,5);
 			pg.rect(0, particleList.get(i).y-12, pg.width, 1);
-			
-			
+
+
 			if(particleList.get(i).y>5){
 			pg.fill(255,200);
 			pg.rect(0, 4, pg.width, 1);	
@@ -224,8 +219,8 @@ public class UpDown {
 			pg.endDraw();
 		}
 	}
-	
-	
+
+
 	public void draw3(){
 		for(int i=0; i<n.nozzleList.size(); i++){
 			PGraphics pg = n.nozzleList.get(i).sysA;
@@ -282,8 +277,8 @@ public class UpDown {
 			pg.rect(0, particleList.get(i).y-11, pg.width, 1);
 			pg.fill(255,5);
 			pg.rect(0, particleList.get(i).y-12, pg.width, 1);
-			
-			
+
+
 			/*if(particleList.get(i).y>5){
 			pg.fill(255,200);
 			pg.rect(0, 4, pg.width, 1);	
@@ -298,39 +293,39 @@ public class UpDown {
 			pg.endDraw();
 		}
 	}
-	
-	
-	
-	
+
+
+
+
 	class UpDownParticle {
-		
+
 		int y, alpha;
 		boolean down = false;
-		
+
 		public UpDownParticle(int y){
 			this.y = y;
 			down = true;
 			alpha = 255;
 		}
-		
+
 		public void update(){
 			if(down){
 				y--;
 			}else{
 				y++;
 			}
-			if(y==-250){
+			if(y==-15){
 				down = false;
 			}
-			if(y>=250){
+			if(y>=15){
 				down = true;
 			}
-			
-			if(alpha<0){
+
+			if(alpha==-15){
 				alpha = 0;
 			}
-			
+
 		}
 	}
-	
+
 }

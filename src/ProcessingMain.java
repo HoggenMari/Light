@@ -23,6 +23,7 @@ import controlP5.Textfield;
 import controlP5.Textlabel;
 import de.looksgood.ani.Ani;
 import processing.core.*;
+import processing.data.XML;
 import processing.serial.*;
 
 public class ProcessingMain extends PApplet {
@@ -50,8 +51,8 @@ public class ProcessingMain extends PApplet {
 	//Variables for GUI
 	ControlP5 cp5;
 	private CheckBox checkbox;
-	float checkbox_array[] = {0,0,0,0,0,0,0,0,0,0,0,0};
-	boolean activeArray [] = {false, false, false, false, false, false, false, false, false, false, false, false};
+	float checkbox_array[] = {0,0,0,0,0,0,0,0,0,0,0,0,0};
+	boolean activeArray [] = {false, false, false, false, false, false, false, false, false, false, false, false, false};
 	
 	//Arduino Communication
 	static String ARDUINO_DEVICE = "/dev/tty.usbmodemfa121";
@@ -295,7 +296,25 @@ public class ProcessingMain extends PApplet {
 	private int hueBBreath;
 
 	private FineTube FineTube;
-    
+
+	private ColorFade ftbg;
+
+	private int ftbgHue;
+
+	private ColorFade ft1;
+
+	private int ftHue;
+
+	private ColorFade ft2;
+
+	private int ftHue2;
+
+	private XML xml;
+
+	private ColorFade shadowColor;
+
+	private FineTube ShadowTube;
+
 	//Initiate as Application
 	public static void main(String args[]) {
 	    PApplet.main(new String[] { "--present", "ProcessingMain" });
@@ -360,11 +379,9 @@ public class ProcessingMain extends PApplet {
 		checkbox = cp5.addCheckBox("checkBox").setPosition(220, 10)
 				.setColorForeground(color(120)).setColorActive(color(200))
 				.setColorLabel(color(0,0,255)).setSize(15, 15).setItemsPerRow(7)
-				.setSpacingColumn(45).setSpacingRow(20).addItem("Tube", 0)
-				.addItem("Pathos", 50).addItem("Shine", 100).addItem("Lamp", 150)
-				.addItem("Flower", 200).addItem("HueFade", 250).addItem("Pendulum", 300)
-				.addItem("Push", 350).addItem("UPDOWN", 400).addItem("FIREWORK", 450)
-				.addItem("YELLOWCOLD", 500).addItem("BREATH", 550);		
+				.setSpacingColumn(45).setSpacingRow(20).addItem("Black", 0).addItem("YellowBlue", 50)
+				.addItem("Breath1", 100).addItem("Breath2", 150).addItem("FineTube", 200)
+				.addItem("Stars", 250).addItem("Shadows", 300);		
 
 		pg = createGraphics(12, 5);
 		pg2 = createGraphics(12, 5);
@@ -442,6 +459,8 @@ public class ProcessingMain extends PApplet {
 		setupTubeAnimation();
 		setupBreath();
 		setupBreath2();
+		setupFineTube();
+		setupShadows();
 		
 		//frameRate(10);
 		cfList.start();
@@ -468,10 +487,231 @@ public class ProcessingMain extends PApplet {
 		  
 		  nozzlePath = scp.createNodePath(nodeList.get(0));
 		  NozzleLayer nozzleLayer = new NozzleLayer(this, scp, nozzlePath);
-		  FineTube = new FineTube(this, nozzleLayer, c1);
+		  //FineTube = new FineTube(this, nozzleLayer, c1);
+		  
+		  FineTube = new FineTube(this, scp, nozzlePath, nozzleLayer, cb1, cfList);
+		  
+		  nozzlePath = scp.createNodePath(nodeList.get(0));
+		  
+		  NozzleLayer nozzleLayer2 = new NozzleLayer(this, scp, nozzlePath);
+		  ShadowTube = new FineTube(this, scp, nozzlePath, nozzleLayer, cb1, cfList);
+		  
+		  
+		  
+		  
 	}
 		
-	
+	public void draw() {
+		
+		colorMode(HSB,360,100,100);
+		
+		//FLASH
+		if(abs(millis()-flashTimer)>=100 && flashActive){
+			int minValue = flashArray[0];  
+			int minPos = 0;
+			  for(int i=1;i<flashArray.length;i++){  
+			    if(flashArray[i] < minValue){  
+			      minValue = flashArray[i];
+			      minPos = i;
+			    }  
+			  }  
+			for(int i=0; i<flashArray.length; i++){
+				flashArray[i] = 1023;
+			}
+			flashActive = false;
+			System.out.println("FLASH mit "+(minPos+1)+" "+minValue);
+			sensorList.get(minPos).setFlash();
+		}
+		
+		for(Sensor s : sensorList){
+			//System.out.println("SENSOR: "+s.getID()+" STATE: "+s.getState());
+			if(s.getState()){
+				if(activeArray[1]){
+					if(effectList.get(s.getID()-1).isEmpty()){
+					String name = "Interaktion 1";
+					int sensorID = s.getID()-1;
+					writeXML(name, sensorID);
+					nozzlePath = scp.createNodePath(nodeList.get(s.getID()-1));
+					NozzleLayer nozzleLayer = new NozzleLayer(this, scp, nozzlePath);
+					int hue = Integer.valueOf(cfYellow.hue);
+					int sat = Integer.valueOf(cfYellow.saturation);
+					int bri = Integer.valueOf(cfYellow.brightness);
+					effectList.get(s.getID()-1).add(new Emphasize(this, nozzleLayer, hue, sat, bri, cfList));
+					}
+					s.setState(false);
+				}
+				else if(activeArray[2]){
+					String name = "Interaktion 2";
+					int sensorID = s.getID()-1;
+					writeXML(name, sensorID);
+					nozzlePath = scp.createNodePath(nodeList.get(s.getID()-1));
+					NozzleLayer nozzleLayer = new NozzleLayer(this, scp, nozzlePath);
+					effectList.get(s.getID()-1).add(new TopGlow(this, nozzleLayer, 2, 255));
+					s.setState(false);
+				}
+				else if(activeArray[3]){
+					String name = "Interaktion 3";
+					int sensorID = s.getID()-1;
+					writeXML(name, sensorID);
+					nozzlePath = scp.createNodePath(nodeList.get(s.getID()-1));
+					NozzleLayer nozzleLayer = new NozzleLayer(this, scp, nozzlePath);
+					int nId = (s.getID()-1)*8;
+					System.out.println("NID: "+nId);
+					effectList.get(s.getID()-1).add(new Blob2(this, nozzleLayer, nId, cb1, cfList));
+					s.setState(false);
+				}
+				else if(activeArray[4]){
+					if(effectList.get(s.getID()-1).isEmpty()){
+					String name = "Interaktion 4";
+					int sensorID = s.getID()-1;
+					writeXML(name, sensorID);
+					nozzlePath = scp.createNodePath(nodeList.get(s.getID()-1));
+					NozzleLayer nozzleLayer = new NozzleLayer(this, scp, nozzlePath);
+					effectList.get(s.getID()-1).add(new FineTube(this,scp,nozzlePath,nozzleLayer,ft2, cfList));
+					}
+					s.setState(false);
+
+				}
+				else if(activeArray[5]){
+					if(effectList.get(s.getID()-1).isEmpty()){
+					String name = "Interaktion 5";
+					int sensorID = s.getID()-1;
+					writeXML(name, sensorID);
+					nozzlePath = scp.createNodePath(nodeList.get(s.getID()-1));
+					NozzleLayer nozzleLayer = new NozzleLayer(this, scp, nozzlePath);
+					effectList.get(s.getID()-1).add(new Stars(this,nozzleLayer,240, cfList));
+					}
+					s.setState(false);
+				}
+			}
+		}
+
+		 
+		  for(AnimationChanger aC : animationChanger1){
+		  if(!aC.finished){
+			  aC.draw();
+		  }
+		  } 
+		  
+		  
+		  if(activeArray[0]){
+			  scp.clearSysA();
+		  }
+		  else if(activeArray[1]){
+			  drawYellowBlue();
+		  }else if(activeArray[2]){
+			  drawBreath();
+		  }else if(activeArray[3]){
+			  drawBreath2();
+		  }
+		  
+		  else if(activeArray[4]){
+			  drawFineTube();
+			  /*scp.clearSysA();
+			  if(FineTube.isDead()){
+				  nozzlePath = scp.createNodePath(nodeList.get(0));
+				  NozzleLayer nozzleLayer = new NozzleLayer(this, scp, nozzlePath);
+				  FineTube = new FineTube(this, scp, nozzlePath, nozzleLayer, ft1, cfList);
+			  }else{
+			  FineTube.draw2();
+			  }*/
+		  }
+		  else if(activeArray[6]){
+			  drawShadows();
+		  }
+		  
+		  
+		  for(int i=0; i<interactionChanger.size(); i++){
+			  for(Iterator<InteractionChanger> interactionIterator = interactionChanger.iterator(); interactionIterator.hasNext();){
+				  InteractionChanger iC = interactionIterator.next();
+				  
+				  iC.draw();
+				  
+				  if(iC.isDead()){
+					  //System.out.println("DEAD");
+					  interactionIterator.remove();
+				  }
+			  }
+		 }
+		  
+		  for(int i=0; i<effectList.size(); i++){
+		  for(Iterator<Effect> effectIterator = effectList.get(i).iterator(); effectIterator.hasNext();){
+			  Effect e = effectIterator.next();
+			  
+			  e.draw();
+			  
+			  if(e.isDead()){
+				  //System.out.println("DEAD");
+				  effectIterator.remove();
+			  }
+		  }
+		  }
+		  
+		  
+		  //scp.setColor(0, 255, 255);
+		  
+		  //scp.setColor(0, 0, 100);
+		  //drawShadows();
+		  //drawUpDownAnimation();
+		  
+		  colorMode(RGB);
+		  background(255);
+		  
+		  node1.drawOnGui(10, 50);
+		  node2.drawOnGui(150, 50);
+		  node3.drawOnGui(300, 50);
+		  node4.drawOnGui(450, 50);
+		  node5.drawOnGui(600, 50);
+		  node6.drawOnGui(750, 50);
+		  node7.drawOnGui(900, 50);
+		  
+		  for(Sensor s : sensorList){
+			  s.drawOnGui();
+		  }
+		  
+		  
+		  fill(0);
+		  text("FrameRate: "+frameRate, 720, 20);
+		  text("Created by Marius Hoggenmüller on 04.02.14. Copyright (c) 2014 Marius Hoggenmüller, LMU Munich. All rights reserved.", 10, 740);
+		  
+	}
+
+	private void writeXML(String name, int sensorID) {
+		// TODO Auto-generated method stub
+		
+		//XML Logger
+		xml = loadXML("/Users/luminale/Documents/workspace/GSVideo-test/src/evaluation.xml");
+		
+		int day = day();    // Values from 1 - 31
+		int month = month();  // Values from 1 - 12
+		int year = year();
+		int hour = hour();
+		int minute = minute();  // Values from 0 - 59
+		int second = second();  // Values from 0 - 59
+		
+		XML interaction = xml.addChild("interaction");
+		interaction.setContent(name);
+		XML sensor = interaction.addChild("sensor");
+		sensor.setContent(Integer.toString(sensorID));
+		XML date = interaction.addChild("date");
+		XML dayX = date.addChild("day");
+		dayX.setContent(Integer.toString(day));
+		XML monthX = date.addChild("month");
+		monthX.setContent(Integer.toString(month));
+		XML yearX = date.addChild("year");
+		yearX.setContent(Integer.toString(year));
+		XML hourX = date.addChild("hour");
+		hourX.setContent(Integer.toString(hour));
+		XML minuteX = date.addChild("minute");
+		minuteX.setContent(Integer.toString(minute));
+		XML secondX = date.addChild("second");
+		secondX.setContent(Integer.toString(second));
+		
+		//xml.addChild(interaction);
+		saveXML(xml, "/Users/luminale/Documents/workspace/GSVideo-test/src/evaluation.xml");
+		
+	}
+
 	//SETUP ARDUINO
 	public void initArduino() {
 		for (int i = 0; i < Serial.list().length; i++) {
@@ -630,6 +870,25 @@ public class ProcessingMain extends PApplet {
 		}
 	}
 	
+	
+	public void setupShadows(){
+		shadowColor = new ColorFade(this, 163, 10, 255, 255);
+		shadowColor.brightnessFade(255, 1000);
+		cfList.addColorFade(shadowColor);
+	}
+	
+	public void drawShadows(){
+		scp.clearSysA();
+		scp.setColor(240, 30, 100);
+		  if(ShadowTube.isDead()){
+			  nozzlePath = scp.createNodePath(nodeList.get(0));
+			  NozzleLayer nozzleLayer = new NozzleLayer(this, scp, nozzlePath);
+			  ShadowTube = new FineTube(this, nozzleLayer, shadowColor, 120, 10, 10, 20, 10);
+		  }else{
+			  ShadowTube.draw();
+		  }
+	}
+	
 	//SETUP FLOWER
 	public void setupFlower(){
 		cfFlower = new ColorFade(this, 220, 100, 100);
@@ -674,7 +933,7 @@ public class ProcessingMain extends PApplet {
 	
 	//SETUP UPDOWN ANIMATION
 	public void setupUpDownAnimation() {
-		upDownCl = new ColorFade(this, 0, 100, 100);
+		upDownCl = new ColorFade(this, 0, 0, 10);
 		upDownCl.hueFade(360, 100000);
 		cfList.addColorFade(upDownCl);
 		for(int i=0; i<7; i++){
@@ -714,6 +973,49 @@ public class ProcessingMain extends PApplet {
 		  }
 	}
 	
+	public void setupFineTube(){
+	
+		ftbgHue = 302;
+		ftHue = 36;
+		ftHue2 = 36;
+		
+		ftbg = new ColorFade(this, ftbgHue, 180, 50);
+		cfList.addColorFade(ftbg);
+		
+		ft1 = new ColorFade(this, ftHue, 170, 180, 100);
+		cfList.addColorFade(ft1);
+		
+		ft2 = new ColorFade(this, ftHue2, 210, 240, 210);
+		ft2.hueFade(ftHue2-10, 2000);
+		cfList.addColorFade(ft2);
+	
+	}
+	
+	public void drawFineTube(){
+		for(int i=0; i<scp.nozzleList.size(); i++) {
+			PGraphics pg = scp.nozzleList.get(i).sysA;
+			pg.beginDraw();
+			//scp.dimm(80);
+			pg.clear();
+			pg.colorMode(HSB, 360, 255, 255);	
+			pg.noStroke();
+			pg.fill(ftbg.hue, ftbg.saturation, ftbg.brightness);
+			pg.rect(0, 0, pg.width, pg.height);
+			
+			pg.endDraw();
+			
+		}
+			  //scp.clearSysA();
+			  if(FineTube.isDead()){
+				  nozzlePath = scp.createRandomPath(0, 17, 48, 56);
+				  NozzleLayer nozzleLayer = new NozzleLayer(this, scp, nozzlePath);
+				  FineTube = new FineTube(this, nozzleLayer, ft1);
+			  }else{
+			  FineTube.draw();
+			  }
+		
+	}
+	
 	public void setupBreath2(){
 		
 		hueBreath = 240;
@@ -741,7 +1043,7 @@ public class ProcessingMain extends PApplet {
 		
 		cb1 = new ColorFade(this, hueBBreath, 200, 150);
 
-		cb1.brightnessFade(40, 5000, 2);
+		//cb1.brightnessFade(40, 5000, 2);
 		
 		cfList.addColorFade(cb1);
 
@@ -1082,459 +1384,14 @@ public class ProcessingMain extends PApplet {
 			d.draw();
 		}
 	}
-
-	public void draw() {
-		
-		//sensorList.get(4).setState(false);
-		
-		//System.out.println(cfList.colorFadeList.size());
-		colorMode(HSB,360,100,100);
-		//background(lampFade.hue,lampFade.saturation,lampFade.brightness);
-		
-		//FLASH
-		if(abs(millis()-flashTimer)>=100 && flashActive){
-			int minValue = flashArray[0];  
-			int minPos = 0;
-			  for(int i=1;i<flashArray.length;i++){  
-			    if(flashArray[i] < minValue){  
-			      minValue = flashArray[i];
-			      minPos = i;
-			    }  
-			  }  
-			for(int i=0; i<flashArray.length; i++){
-				flashArray[i] = 1023;
-			}
-			flashActive = false;
-			System.out.println("FLASH mit "+(minPos+1)+" "+minValue);
-			sensorList.get(minPos).setFlash();
-		}
-		
-		for(Sensor s : sensorList){
-			//System.out.println("SENSOR: "+s.getID()+" STATE: "+s.getState());
-			if(s.getState()){
-				if(activeArray[6]){
-				if(effectList.get(s.getID()-1).isEmpty()){
-				nozzlePath = scp.createNodePath(nodeList.get(s.getID()-1));
-				HLayer nLayer = new HLayer(this, scp, nozzlePath);
-				Effect e = new Pendulum(scp, nLayer);
-				interactionChanger.add(new InteractionChanger(this, nodeList.get(s.getID()-1),e,200));
-				effectList.get(s.getID()-1).add(e);
-				}
-				s.setState(false);
-				}else if(activeArray[3]){
-				nozzlePath = scp.createNodePath(nodeList.get(s.getID()-1));
-				HLayer nLayer = new HLayer(this, scp, nozzlePath);
-				lampList.add(new Lamp(this, nLayer, cfList, (int)random(300,3000)));
-				s.setState(false);
-				}
-				/*else{
-				nozzlePath = scp.createNodePath(nodeList.get(s.getID()-1));
-				HLayer nLayer = new HLayer(this, scp, nozzlePath);
-				effectList.get(s.getID()-1).add(new Strobo(this, nLayer, 25));
-				s.setState(false);
-				}*/
-				else if(activeArray[9]){
-				if(effectList.get(s.getID()-1).isEmpty()){
-				Effect e = new Firework(this, scp, nodeList.get(s.getID()-1), cfList); 
-				interactionChanger.add(new InteractionChanger(this, nodeList.get(s.getID()-1), e, (int) random(100,255)));
-				//animationChanger1.add(new AnimationChanger(this, scp));
-				effectList.get(s.getID()-1).add(e);
-				}
-				s.setState(false);
-				}	
-				else{
-				//animationChanger1.add(new AnimationChanger(this, scp));
-				nozzlePath = scp.createNodePath(nodeList.get(s.getID()-1));	
-				NozzleLayer nozzleLayer = new NozzleLayer(this, scp, nozzlePath);
-				effectList.get(s.getID()-1).add(new Stars(this, nozzleLayer, color(0,0,100)));
-				s.setState(false);
-				}
-				
-				//else{
-				//nozzlePath = scp.createNodePath(nodeList.get(s.getID()-1));
-				//NozzleLayer nozzleLayer = new NozzleLayer(this, scp, nozzlePath);
-				//effectList.get(s.getID()-1).add(new TopGlow(this, nozzleLayer, 2, 255));
-				//s.setState(false);
-				//}
-				
-				//else{
-				//nozzlePath = scp.createNodePath(nodeList.get(s.getID()-1));
-				//NozzleLayer nozzleLayer = new NozzleLayer(this, scp, nozzlePath);
-				//effectList.get(s.getID()-1).add(new Blob(this, nozzleLayer, cb1, cfList));
-				//s.setState(false);
-				//}
-				
-				//else{
-				//nozzlePath = scp.createNodePath(nodeList.get(s.getID()-1));
-				//NozzleLayer nozzleLayer = new NozzleLayer(this, scp, nozzlePath);
-				//int nId = (s.getID()-1)*8;
-				//System.out.println("NID: "+nId);
-				//effectList.get(s.getID()-1).add(new Blob2(this, nozzleLayer, nId, cb1, cfList));
-				//s.setState(false);	
-				//}
-			}
-		}
-	
-		//scp.clearSysA();
-		//drawBreath2();
-		
-		
-		drawBreath2();
-		//scp.setColor(220, 30, 50);
-
-		//if(frameCount%50<250){
-		//scp.dimm(80);
-		
-		//scp.clearSysB();
-
-		
-		//for(UpDown u : upDown){
-		//u.draw();
-		//}
-		
-		
-		//}else{
-		//scp.clearSysA();
-		//}
-		//if(frameCount%200==0){
-		//	setupBackGroundContrast();
-		//	setupCompTube();
-		//}
-		//drawBackGroundContrast();
-
-		//tubeAnimation.draw2();
-		
-		//drawTubeAnimation();
-		
-		//scp.clearSysA();
-		
-		//scp.dimm(20);
-		
-		//scp.setColor(290, 73, 75);
-		//scp.dimm(80);
-
-		  if(activeArray[5]){
-			  drawHueBackground();
-		  }
-		  if(activeArray[8]){
-			  drawUpDownAnimation();
-		  }
-		  if(activeArray[10]){
-			  drawYellowBlue();
-		  }
-		  if(activeArray[0]){
-			  //scp.dimm(80);
-			  drawSimpleTube();
-			  //drawCompSimpleTube();
-		  }
-		  if(activeArray[1]){
-			  scp.clearSysA();
-			  drawPathosLight();
-		  }
-		  if(activeArray[2]){
-			  drawShine();
-		  }
-		  if(activeArray[3]){
-			  drawLamp();
-		  }
-		  if(activeArray[4]){
-			  openFlower();
-		  }
-		  if(activeArray[6]){
-			  //scp.dimm(30);
-			  //drawPendulum();
-		  }
-		  if(activeArray[7]){
-			  drawPush();
-		  }
-		  if(activeArray[11]){
-			  drawBreath();
-		  }
-		  
-		  
-		  //yellowCold();
-		  		  
-		  //drawLamp();
-		  
-		  	 
-		  
-		  
-		  //if(frameCount%300==0){
-		  //	  animationChanger1.add(new AnimationChanger(this, scp));
-		  //}
-		 
-		  for(AnimationChanger aC : animationChanger1){
-		  if(!aC.finished){
-			  aC.draw();
-		  }
-		  }
-		  
-		  
-		  //scp.dimm(20);
-		  
-		  if(FineTube.isDead()){
-			nozzlePath = scp.createNodePath(nodeList.get(0));
-			NozzleLayer nozzleLayer = new NozzleLayer(this, scp, nozzlePath);
-			FineTube = new FineTube(this,nozzleLayer,cb1);
-		  }
-			FineTube.draw();
-
-		  
-		  
-		  /*for(Sensor s : sensorList){
-			  System.out.println(s.toString());
-		  }*/
-
-		  /*for(NozzleLayer nL : nLayerList){
-			  nL.add();
-		  }*/
-		  
-		  //drawPush();
-		  //drawPendulum();
-		  
-		  /*layerGraphics.beginDraw();
-		  layerGraphics.clear();
-		  layerGraphics.colorMode(RGB);
-		  
-		  
-		  
-
-		  
-		  
-		  layerGraphics.beginDraw();
-			layerGraphics.clear();
-			layerGraphics.colorMode(HSB,360,100,100);
-			  layerGraphics.fill(cfFlower.hue, cfFlower.saturation, cfFlower.brightness, 255);
-			  layerGraphics.noStroke();
-			  layerGraphics.rect(0, y, 100, -1);
-			  
-			  layerGraphics.fill(cfFlower.hue, cfFlower.saturation, cfFlower.brightness, 100);
-			  layerGraphics.rect(0, y, 100, -2);
-			  layerGraphics.fill(cfFlower.hue, cfFlower.saturation, cfFlower.brightness, 50);
-			  layerGraphics.rect(0, y, 100, -3);
-
-			  layerGraphics.endDraw();
-			  
-			  if(y<5) {
-				  y += 0.1;
-			  } else {
-				  z ++;
-				  if(z>1){
-				  y = 0;
-				  z=0;
-				  cfFlower.hue=(int) random(0,60);
-				  }
-				  if(acc<0.2){
-					  acc +=0.02;
-				  } else {
-					  acc = 0.05;
-				  }
-			  }
-			 
-			  
-			  nLayer.add();*/
-			  
-			  
-			  
-		  /*layerGraphics.fill(255, 100, 50);
-		  layerGraphics.noStroke();
-		  layerGraphics.rect((int)x, 0, 1, 5);
-		  layerGraphics.rect((int)x-5, 0, 1, 5);
-		  layerGraphics.rect((int)x-10, 0, 1, 5);
-		  layerGraphics.rect((int)x-15, 0, 1, 5);
-		  layerGraphics.fill(255, 225);
-		  layerGraphics.rect((int)x-1, 0, 1, 5);
-		  layerGraphics.rect((int)x-6, 0, 1, 5);
-		  layerGraphics.rect((int)x-11, 0, 1, 5);
-		  layerGraphics.rect((int)x-16, 0, 1, 5);
-		  layerGraphics.fill(255, 200);
-		  layerGraphics.rect((int)x-2, 0, 1, 5);
-		  layerGraphics.rect((int)x-7, 0, 1, 5);
-		  layerGraphics.rect((int)x-12, 0, 1, 5);
-		  layerGraphics.rect((int)x-17, 0, 1, 5);
-		  layerGraphics.fill(255, 175);
-		  layerGraphics.rect((int)x-3, 0, 1, 5);
-		  layerGraphics.rect((int)x-8, 0, 1, 5);
-		  layerGraphics.rect((int)x-13, 0, 1, 5);
-		  layerGraphics.rect((int)x-18, 0, 1, 5);
-		  layerGraphics.fill(255, 150);
-		  layerGraphics.rect((int)x-4, 0, 1, 5);
-		  layerGraphics.rect((int)x-9, 0, 1, 5);
-		  layerGraphics.rect((int)x-14, 0, 1, 5);
-		  layerGraphics.rect((int)x-19, 0, 1, 5);
-		  layerGraphics.fill(255, 125);
-		  layerGraphics.rect((int)x-5, 0, 1, 5);
-		  layerGraphics.fill(255, 100);
-		  layerGraphics.rect((int)x-6, 0, 1, 5);
-		  layerGraphics.fill(255, 75);
-		  layerGraphics.rect((int)x-7, 0, 1, 5);*/
-		  
-		  /*for(int j=0; j<1000; j++) {
-		  for(int i=0; i<3; i++){
-			  layerGraphics.noStroke();
-			  layerGraphics.fill(255, 100, 50, 255-80*i);
-			  layerGraphics.rect(100-(int)x-i-j*10, 0, 1, 5);
-		  }
-		  }*/
-		  
-		  
-		  
-		  
-		  
-		  /*for(int i=0; i<50; i++){
-			  layerGraphics.noStroke();
-			  layerGraphics.fill(255, 100, 50, 100-5*i);
-			  layerGraphics.rect((int)x-i, 0, 1, 1);
-			  layerGraphics.fill(255, 100, 50, 170-5*i);
-			  layerGraphics.rect((int)x-i, 1, 1, 1);
-			  layerGraphics.fill(255, 180, 50, 255-5*i);
-			  layerGraphics.rect((int)x-i, 2, 1, 1);
-			  layerGraphics.fill(255, 100, 50, 170-5*i);
-			  layerGraphics.rect((int)x-i, 3, 1, 1);
-			  layerGraphics.fill(255, 100, 50, 100-5*i);
-			  layerGraphics.rect((int)x-i, 4, 1, 1);
-		  }
-		  
-		  
-		  if(x<layerGraphics.width) {
-			  x = x*1.02+0.5;
-		  }else{
-			  x=0;
-		  }*/
-		  
-		  
-		  //drawYellowBlue();
-		 		 
-		  
-		  //nLayer.add();
-		  		  
-		  //Draw on GUI  
-		  
-		  for(int i=0; i<interactionChanger.size(); i++){
-			  for(Iterator<InteractionChanger> interactionIterator = interactionChanger.iterator(); interactionIterator.hasNext();){
-				  InteractionChanger iC = interactionIterator.next();
-				  
-				  iC.draw();
-				  
-				  if(iC.isDead()){
-					  //System.out.println("DEAD");
-					  interactionIterator.remove();
-				  }
-			  }
-		 }
-		  
-		  for(int i=0; i<effectList.size(); i++){
-		  for(Iterator<Effect> effectIterator = effectList.get(i).iterator(); effectIterator.hasNext();){
-			  Effect e = effectIterator.next();
-			  
-			  e.draw();
-			  
-			  if(e.isDead()){
-				  //System.out.println("DEAD");
-				  effectIterator.remove();
-			  }
-		  }
-		  }
-		  
-		  
-		  
-		  /*for(Effect e : effectList){
-			  System.out.println("GO EFFEKT LIST");
-				e.draw();
-				
-		  }*/
-		  
-		  colorMode(RGB);
-		  background(255);
-		  
-		  
-		  node1.drawOnGui(10, 50);
-		  node2.drawOnGui(150, 50);
-		  node3.drawOnGui(300, 50);
-		  node4.drawOnGui(450, 50);
-		  node5.drawOnGui(600, 50);
-		  node6.drawOnGui(750, 50);
-		  node7.drawOnGui(900, 50);
-		  
-		  for(Sensor s : sensorList){
-			  s.drawOnGui();
-		  }
-		  
-		  
-		  
-		  fill(0);
-		  text("FrameRate: "+frameRate, 720, 20);
-		  text("Created by Marius Hoggenmüller on 04.02.14. Copyright (c) 2014 Marius Hoggenmüller, LMU Munich. All rights reserved.", 10, 740);
-		  
-		  
-		  //background(255);
-		  //fill(0);
-		  //ellipse((float) Xx,Yy,diameter,diameter);
-		  
-	}
-	
 	
 
-	public void openFlower(){
-		flowerLayerGraphics.beginDraw();
-		flowerLayerGraphics.clear();
-		flowerLayerGraphics.colorMode(HSB,360,100,100);
-		flowerLayerGraphics.fill(cfFlower.hue, cfFlower.saturation, cfFlower.brightness, 255);
-		flowerLayerGraphics.noStroke();
-		flowerLayerGraphics.rect(0, y, 100, -5);
-		  
-		flowerLayerGraphics.endDraw();
-		  
-		  if(y<5) {
-			  y += 0.4;
-		  } else {
-			  z ++;
-			  if(z>100){
-			  y = 0;
-			  z=0;
-			  cfFlower.hue=(int) random(0,360);
-			  }
-			  /*if(acc<0.2){
-				  acc +=0.02;
-			  } else {
-				  acc = 0.05;
-			  }*/
-		  }
-		 
-		  
-		  flowerLayer.add();
-	}
-	
-	public void easyColor() {
-		
-		/*scp.clearSysA();
-
-		for(Iterator<HorizontalShine> shIterator = horizontalShineList.iterator(); shIterator.hasNext();){
-		  HorizontalShine sh = shIterator.next();
-		  
-		  sh.updateShine();
-		  sh.drawShine();
-		  
-		  if(sh.isDead()){
-			  shIterator.remove();
-		  }
-	  }
-	  
-	  while(horizontalShineList.size()<SHINE_HOR_MAX){
-		  nozzlePath = createPath(7,6,5,4,3,2,1,0);
-		  //nozzlePath = createRandomPath(0, 17, 57, 65);
-		  colorMode(HSB, 360, 100, 100);
-		  color = color((int)random(0,20), 100, 100);
-		  horizontalShineList.add(new HorizontalShine(this, nozzlePath, color, (int) random(2,2)));  
-	  }*/
-	}
-	
 	public void setupYellowBlue() {
 		yelBlutimer = 0;
-		cfYellow = new ColorFade(this, 270, 70, 100);
-		cfYellow.saturationFade(0, 5000, 2);
-		cfYellow.brightnessFade(100, 5000, 2);
+		cfYellow = new ColorFade(this, 270, 180, 255);
 		cfYellow.hueFade(30, 10000, 1);
+		cfYellow.saturationFade(0, 5000, 2);
+		//cfYellow.brightnessFade(100, 5000, 2);
 		cfList.addColorFade(cfYellow);
 		
 		yelBlu = true;
@@ -1560,13 +1417,13 @@ public class ProcessingMain extends PApplet {
 			pg2.background(0);
 			pg2.beginDraw();
 			for(int iy=0; iy<pg.height; iy++){
-				pg.colorMode(HSB, 360, 100, 100,100);	
+				pg.colorMode(HSB, 360, 255, 255,255);	
 				pg.fill(cfYellow.hue-5*iy,cfYellow.saturation,cfYellow.brightness-5*iy, 70);
 				pg.noStroke();
 				pg2.noStroke();
 				pg.rect(0, iy, pg.width, 1);
 		   }
-			pg2.colorMode(HSB, 360, 100, 100,100);
+			pg2.colorMode(HSB, 360, 255, 255,255);
 			pg2.fill(Math.abs(cfYellow.hue-270)+30,cfYellow.saturation,cfYellow.brightness, 70);
 			pg2.rect(0, 0, pg2.width, 1);
 
@@ -1580,17 +1437,15 @@ public class ProcessingMain extends PApplet {
 			yelBlutimer++;
 			if(yelBlutimer>200){
 			if(yelBlu){
-			cfYellow = new ColorFade(this, 30, 70, 100);
-			cfYellow.saturationFade(0, 5000, 2);
-			cfYellow.brightnessFade(100, 5000, 2);
+			cfYellow = new ColorFade(this, 30, 180, 255);
 			cfYellow.hueFade(270, 10000, 1);
+			cfYellow.saturationFade(0, 5000, 2);
 			cfList.addColorFade(cfYellow);
 			yelBlu = !yelBlu;
 			}else{
-			cfYellow = new ColorFade(this, 270, 70, 100);
-			cfYellow.saturationFade(0, 5000, 2);
-			cfYellow.brightnessFade(100, 5000, 2);
+			cfYellow = new ColorFade(this, 270, 180, 255);
 			cfYellow.hueFade(30, 10000, 1);
+			cfYellow.saturationFade(0, 5000, 2);
 			cfList.addColorFade(cfYellow);
 			yelBlu = !yelBlu;	
 			}
@@ -1852,6 +1707,9 @@ public class ProcessingMain extends PApplet {
 		    } else if(checkbox_array[11] != theEvent.getGroup().getArrayValue(11)) {
 		    	activeArray[11] =! activeArray[11];
 		    	System.out.println("BUTTON12");
+		    } else if(checkbox_array[12] != theEvent.getGroup().getArrayValue(12)) {
+		    	activeArray[12] =! activeArray[12];
+		    	System.out.println("BUTTON13");
 		    }
 		    
 		}
