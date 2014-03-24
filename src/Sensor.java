@@ -18,6 +18,10 @@ public class Sensor {
 	private boolean active = false;
 	private int x;
 	private int y;
+	private int errorWi = 0;
+	boolean disableWi = false;
+	private int errorFlash = 0;
+	boolean disableFlash = false;
 
 	public Sensor(PApplet p, int id, int x, int y){
 		this.p = p;
@@ -61,7 +65,17 @@ public class Sensor {
 	
 	public void setFlash(){
 		flash = true;
+		if(Math.abs(p.millis()-timerFlash)<1150){
+			errorFlash++;
+		}else{
+			errorFlash = 0;
+			disableFlash = false;
+		}
+		if(errorFlash>60){
+			disableFlash = true;
+		}
 		timerFlash = p.millis();
+		System.out.println(timerFlash);
 		active = true;
 	}
 	
@@ -76,6 +90,15 @@ public class Sensor {
 	public void setWi(int posX[], int posY[]){
 		this.posX=posX;
 		this.posY=posY;
+		if(Math.abs(p.millis()-timerWi)<1150){
+			errorWi++;
+		}else{
+			errorWi = 0;
+			disableWi = false;
+		}
+		if(errorWi>60){
+			disableWi = true;
+		}
 		timerWi = p.millis();
 		active = true;
 	}

@@ -137,7 +137,7 @@ public class ColorFadeList extends Thread {
 				colorFadeList.remove(cf);
 				//System.out.println("GO2");
 				cf.setDead();
-				System.out.println("REMOVE");
+				//System.out.println("REMOVE");
 			}
 			}
 		}

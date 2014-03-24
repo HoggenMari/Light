@@ -11,6 +11,7 @@ import ijeoma.motion.tween.Tween;
 import java.awt.Color;
 import java.util.AbstractList;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedList;
 
@@ -51,8 +52,8 @@ public class ProcessingMain extends PApplet {
 	//Variables for GUI
 	ControlP5 cp5;
 	private CheckBox checkbox;
-	float checkbox_array[] = {0,0,0,0,0,0,0,0,0,0,0,0,0};
-	boolean activeArray [] = {false, false, false, false, false, false, false, false, false, false, false, false, false};
+	float checkbox_array[] = {0,1,0,0,0,0,0,0,0,0,0,0,0};
+	boolean activeArray [] = {false, true, false, false, false, false, false, false, false, false, false, false, false};
 	
 	//Arduino Communication
 	static String ARDUINO_DEVICE = "/dev/tty.usbmodemfa121";
@@ -63,6 +64,18 @@ public class ProcessingMain extends PApplet {
 	//Sensors
 	private ArrayList<Sensor> sensorList = new ArrayList<Sensor>();
 	private static int SENSORS = 5;
+	private int[] sMap = {2,3,4,5,6};
+	private int hoursWi = 22;
+	private int minutesWi = 41;
+	private int hoursFlash = 22;
+	private int minutesFlash = 42;
+	private Date dFlash = new Date();
+	private Date dWi = new Date();
+	
+	
+	private boolean allWi = true;
+	private boolean allFlash = true;
+	private boolean once = false;
 
 	//Animation Stuff
 	private PGraphics pg, pg2;
@@ -315,6 +328,8 @@ public class ProcessingMain extends PApplet {
 
 	private FineTube ShadowTube;
 
+	
+
 	//Initiate as Application
 	public static void main(String args[]) {
 	    PApplet.main(new String[] { "--present", "ProcessingMain" });
@@ -382,6 +397,14 @@ public class ProcessingMain extends PApplet {
 				.setSpacingColumn(45).setSpacingRow(20).addItem("Black", 0).addItem("YellowBlue", 50)
 				.addItem("Breath1", 100).addItem("Breath2", 150).addItem("FineTube", 200)
 				.addItem("Stars", 250).addItem("Shadows", 300);		
+		
+		
+		cp5.addToggle("toggle")
+	     .setPosition(40,250)
+	     .setSize(50,20)
+	     .setValue(true)
+	     .setMode(ControlP5.SWITCH)
+	     ;
 
 		pg = createGraphics(12, 5);
 		pg2 = createGraphics(12, 5);
@@ -497,11 +520,27 @@ public class ProcessingMain extends PApplet {
 		  ShadowTube = new FineTube(this, scp, nozzlePath, nozzleLayer, cb1, cfList);
 		  
 		  
+		//Arduino ein/ausschalten
+		
 		  
+		  dWi.setHours(hoursWi);
+		  dWi.setMinutes(minutesWi);
+		  dFlash.setHours(hoursFlash);
+		  dFlash.setMinutes(minutesFlash);
+		  
+		  delay(3000);
+		  
+		  ArduinoZeitschaltUhr();
+		  
+		  
+		  //println("Time :"+d.getHours()+" "+d2.getHours());
 		  
 	}
 		
 	public void draw() {
+		
+		ArduinoZeitschaltUhr();
+
 		
 		colorMode(HSB,360,100,100);
 		
@@ -525,13 +564,14 @@ public class ProcessingMain extends PApplet {
 		
 		for(Sensor s : sensorList){
 			//System.out.println("SENSOR: "+s.getID()+" STATE: "+s.getState());
-			if(s.getState()){
+			if(s.getState() && !s.disableWi && !s.disableFlash){
 				if(activeArray[1]){
 					if(effectList.get(s.getID()-1).isEmpty()){
 					String name = "Interaktion 1";
 					int sensorID = s.getID()-1;
-					writeXML(name, sensorID);
-					nozzlePath = scp.createNodePath(nodeList.get(s.getID()-1));
+					int nodeID = sMap[sensorID];
+					writeXML(name, sensorID, nodeID);
+					nozzlePath = scp.createNodePath(nodeList.get(nodeID-1));
 					NozzleLayer nozzleLayer = new NozzleLayer(this, scp, nozzlePath);
 					int hue = Integer.valueOf(cfYellow.hue);
 					int sat = Integer.valueOf(cfYellow.saturation);
@@ -543,8 +583,9 @@ public class ProcessingMain extends PApplet {
 				else if(activeArray[2]){
 					String name = "Interaktion 2";
 					int sensorID = s.getID()-1;
-					writeXML(name, sensorID);
-					nozzlePath = scp.createNodePath(nodeList.get(s.getID()-1));
+					int nodeID = sMap[sensorID];
+					writeXML(name, sensorID, nodeID);
+					nozzlePath = scp.createNodePath(nodeList.get(nodeID-1));
 					NozzleLayer nozzleLayer = new NozzleLayer(this, scp, nozzlePath);
 					effectList.get(s.getID()-1).add(new TopGlow(this, nozzleLayer, 2, 255));
 					s.setState(false);
@@ -552,8 +593,9 @@ public class ProcessingMain extends PApplet {
 				else if(activeArray[3]){
 					String name = "Interaktion 3";
 					int sensorID = s.getID()-1;
-					writeXML(name, sensorID);
-					nozzlePath = scp.createNodePath(nodeList.get(s.getID()-1));
+					int nodeID = sMap[sensorID];
+					writeXML(name, sensorID, nodeID);
+					nozzlePath = scp.createNodePath(nodeList.get(nodeID-1));
 					NozzleLayer nozzleLayer = new NozzleLayer(this, scp, nozzlePath);
 					int nId = (s.getID()-1)*8;
 					System.out.println("NID: "+nId);
@@ -564,8 +606,9 @@ public class ProcessingMain extends PApplet {
 					if(effectList.get(s.getID()-1).isEmpty()){
 					String name = "Interaktion 4";
 					int sensorID = s.getID()-1;
-					writeXML(name, sensorID);
-					nozzlePath = scp.createNodePath(nodeList.get(s.getID()-1));
+					int nodeID = sMap[sensorID];
+					writeXML(name, sensorID, nodeID);
+					nozzlePath = scp.createNodePath(nodeList.get(nodeID-1));
 					NozzleLayer nozzleLayer = new NozzleLayer(this, scp, nozzlePath);
 					effectList.get(s.getID()-1).add(new FineTube(this,scp,nozzlePath,nozzleLayer,ft2, cfList));
 					}
@@ -576,8 +619,9 @@ public class ProcessingMain extends PApplet {
 					if(effectList.get(s.getID()-1).isEmpty()){
 					String name = "Interaktion 5";
 					int sensorID = s.getID()-1;
-					writeXML(name, sensorID);
-					nozzlePath = scp.createNodePath(nodeList.get(s.getID()-1));
+					int nodeID = sMap[sensorID];
+					writeXML(name, sensorID, nodeID);
+					nozzlePath = scp.createNodePath(nodeList.get(nodeID-1));
 					NozzleLayer nozzleLayer = new NozzleLayer(this, scp, nozzlePath);
 					effectList.get(s.getID()-1).add(new Stars(this,nozzleLayer,240, cfList));
 					}
@@ -676,7 +720,7 @@ public class ProcessingMain extends PApplet {
 		  
 	}
 
-	private void writeXML(String name, int sensorID) {
+	private void writeXML(String name, int sensorID, int nodeID) {
 		// TODO Auto-generated method stub
 		
 		//XML Logger
@@ -693,6 +737,8 @@ public class ProcessingMain extends PApplet {
 		interaction.setContent(name);
 		XML sensor = interaction.addChild("sensor");
 		sensor.setContent(Integer.toString(sensorID));
+		XML node = interaction.addChild("node");
+		node.setContent(Integer.toString(nodeID));
 		XML date = interaction.addChild("date");
 		XML dayX = date.addChild("day");
 		dayX.setContent(Integer.toString(day));
@@ -1551,7 +1597,7 @@ public class ProcessingMain extends PApplet {
 	public void serialEvent(Serial myPort) {
 		try {
 			myString = myPort.readStringUntil(lf);
-			System.out.println(myString);
+			//System.out.println(myString);
 			if (myString != null) {
 				String[] spl1 = split(myString, '\n');
 				String[] spl2 = split(spl1[0], '/');
@@ -1778,6 +1824,53 @@ public class ProcessingMain extends PApplet {
 	
 	public void mousePressed(){
 		  animationChanger1.add(new AnimationChanger(this, scp));
+	}
+	
+	public void ArduinoZeitschaltUhr(){
+		Date cTime = new Date();
+		  if(cTime.compareTo(dWi)<0){
+			  if(allWi==true && !once){
+				  System.out.println("KLEINER");
+				  for(int i=0; i<wiActiveArray.length; i++){
+					  wiActiveArray[i] = false;
+				  }
+				  sendArduinoWi(myPort);
+				  allWi = false;
+			  }
+			  }
+				  
+		  else{
+			  if(allWi==false){
+				  System.out.println("GR…SSER");
+				  for(int i=0; i<wiActiveArray.length; i++){
+					  wiActiveArray[i] = true;
+				  }
+				  sendArduinoWi(myPort);
+				  allWi = true;
+			  }
+		  }
+
+		  if(cTime.compareTo(dFlash)<0){
+			  if(allFlash==true && !once){
+				  System.out.println("KLEINER");
+				  for(int i=0; i<flashActiveArray.length; i++){
+					  flashActiveArray[i] = false;
+				  }
+				  sendArduinoFlash(myPort);
+				  allFlash = false;
+			  }
+		  }else{
+			  if(allFlash==false){
+				  System.out.println("GR…SSER");
+				  for(int i=0; i<flashActiveArray.length; i++){
+					  flashActiveArray[i] = true;
+				  }
+				  sendArduinoFlash(myPort);
+				  allFlash = true;
+			  }
+		  }
+		  
+		  once = true;
 	}
 	
 	
