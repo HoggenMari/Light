@@ -597,6 +597,7 @@ public class ProcessingMain extends PApplet {
 					s.setState(false);
 				}
 				else if(checkbox_array[3]==1){
+					if(effectList.get(s.getID()-1).isEmpty()){
 					String name = "Interaktion 3";
 					int sensorID = s.getID()-1;
 					int nodeID = sMap[sensorID];
@@ -606,6 +607,7 @@ public class ProcessingMain extends PApplet {
 					int nId = (s.getID()-1)*8;
 					System.out.println("NID: "+nId);
 					effectList.get(s.getID()-1).add(new Blob2(this, nozzleLayer, nId, cb1, cfList));
+					}
 					s.setState(false);
 				}
 				else if(checkbox_array[4]==1){
@@ -1084,7 +1086,7 @@ public class ProcessingMain extends PApplet {
 		ft1 = new ColorFade(this, ftHue, 170, 180, 100);
 		cfList.addColorFade(ft1);
 		
-		ft2 = new ColorFade(this, ftHue2, 210, 240, 210);
+		ft2 = new ColorFade(this, ftHue2, 0, 160, 210);
 		ft2.hueFade(ftHue2-10, 2000);
 		cfList.addColorFade(ft2);
 	

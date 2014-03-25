@@ -218,8 +218,8 @@ public class FineTube implements Effect{
 
 		if(x>pg.width-(a1+m1+e1)){
 			if(first){
-				end = new ColorFade(p, cf.hue, 255, 255, 0);
-				end.saturationFade(80, 1000, 2);
+				end = new ColorFade(p, cf.hue, 0, 255, 0);
+				end.saturationFade(0, 1000, 2);
 				end.alphaFade(255, 1000, 2);
 				cfList.addColorFade(end);
 			first = false;

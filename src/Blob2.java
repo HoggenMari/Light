@@ -23,8 +23,8 @@ public class Blob2 implements Effect {
 		this.cfList = cfList;
 				
 		cfIn = new ColorFade(p,cf.hue+id,cf.saturation,cf.brightness,0);
-		cfIn.brightnessFade(cf.brightness+50, 2000, 1);
-		cfIn.alphaFade(255, 2000, 1);
+		cfIn.brightnessFade(255, 500, 1);
+		cfIn.alphaFade(255, 500, 1);
 		this.cfList.addColorFade(cfIn);
 		
 		pg = nozzleLayer.getLayer();
@@ -40,13 +40,13 @@ public class Blob2 implements Effect {
 		pg.noStroke();
 		pg.fill(cfIn.hue, cfIn.saturation, cfIn.brightness, cfIn.alpha);
 		pg.rect(0, 0, pg.width, 1);
-		pg.fill(cfIn.hue, cfIn.saturation, cfIn.brightness-5, cfIn.alpha);
+		pg.fill(cfIn.hue, cfIn.saturation, cfIn.brightness-2, cfIn.alpha);
 		pg.rect(0, 1, pg.width, 1);
-		pg.fill(cfIn.hue, cfIn.saturation, cfIn.brightness-10, cfIn.alpha);
+		pg.fill(cfIn.hue, cfIn.saturation, cfIn.brightness-4, cfIn.alpha);
 		pg.rect(0, 2, pg.width, 1);
-		pg.fill(cfIn.hue, cfIn.saturation, cfIn.brightness-20, cfIn.alpha);
+		pg.fill(cfIn.hue, cfIn.saturation, cfIn.brightness-8, cfIn.alpha);
 		pg.rect(0, 3, pg.width, 1);
-		pg.fill(cfIn.hue, cfIn.saturation, cfIn.brightness-30, cfIn.alpha);
+		pg.fill(cfIn.hue, cfIn.saturation, cfIn.brightness-10, cfIn.alpha);
 		pg.rect(0, 4, pg.width, 1);
 		
 		if(cfIn.isDead()){
