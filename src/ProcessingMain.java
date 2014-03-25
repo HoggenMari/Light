@@ -52,8 +52,8 @@ public class ProcessingMain extends PApplet {
 	//Variables for GUI
 	ControlP5 cp5;
 	private CheckBox checkbox;
-	float checkbox_array[] = {0,1,0,0,0,0,0,0,0,0,0,0,0};
-	boolean activeArray [] = {false, true, false, false, false, false, false, false, false, false, false, false, false};
+	float checkbox_array[] = {0,0,0,0,0,0,0,0,0,0,0,0,0};
+	//boolean activeArray [] = {false, false, false, false, false, false, false, false, false, false, false, false, false};
 	
 	//Arduino Communication
 	static String ARDUINO_DEVICE = "/dev/tty.usbmodemfa121";
@@ -64,11 +64,11 @@ public class ProcessingMain extends PApplet {
 	//Sensors
 	private ArrayList<Sensor> sensorList = new ArrayList<Sensor>();
 	private static int SENSORS = 5;
-	private int[] sMap = {2,3,4,5,6};
-	private int hoursWi = 22;
-	private int minutesWi = 41;
-	private int hoursFlash = 22;
-	private int minutesFlash = 42;
+	private int[] sMap = {1,2,3,4,5};
+	private int hoursWi = 01;
+	private int minutesWi = 00;
+	private int hoursFlash = 01;
+	private int minutesFlash = 00;
 	private Date dFlash = new Date();
 	private Date dWi = new Date();
 	
@@ -326,7 +326,13 @@ public class ProcessingMain extends PApplet {
 
 	private ColorFade shadowColor;
 
-	private FineTube ShadowTube;
+	private ArrayList<ShadowColorTube> ShadowTube = new ArrayList<ShadowColorTube>();
+
+	private boolean manuell = false;
+
+	private int bigFineTube;
+
+	private ColorFade shadowInnerColor;
 
 	
 
@@ -399,12 +405,14 @@ public class ProcessingMain extends PApplet {
 				.addItem("Stars", 250).addItem("Shadows", 300);		
 		
 		
-		cp5.addToggle("toggle")
-	     .setPosition(40,250)
-	     .setSize(50,20)
-	     .setValue(true)
+		cp5.addToggle("Manuell")
+	     .setPosition(900,10)
+	     .setSize(30,15)
+	     .setValue(false)
 	     .setMode(ControlP5.SWITCH)
 	     ;
+		
+		
 
 		pg = createGraphics(12, 5);
 		pg2 = createGraphics(12, 5);
@@ -517,7 +525,6 @@ public class ProcessingMain extends PApplet {
 		  nozzlePath = scp.createNodePath(nodeList.get(0));
 		  
 		  NozzleLayer nozzleLayer2 = new NozzleLayer(this, scp, nozzlePath);
-		  ShadowTube = new FineTube(this, scp, nozzlePath, nozzleLayer, cb1, cfList);
 		  
 		  
 		//Arduino ein/ausschalten
@@ -528,7 +535,6 @@ public class ProcessingMain extends PApplet {
 		  dFlash.setHours(hoursFlash);
 		  dFlash.setMinutes(minutesFlash);
 		  
-		  delay(3000);
 		  
 		  ArduinoZeitschaltUhr();
 		  
@@ -565,7 +571,7 @@ public class ProcessingMain extends PApplet {
 		for(Sensor s : sensorList){
 			//System.out.println("SENSOR: "+s.getID()+" STATE: "+s.getState());
 			if(s.getState() && !s.disableWi && !s.disableFlash){
-				if(activeArray[1]){
+				if(checkbox_array[1]==1){
 					if(effectList.get(s.getID()-1).isEmpty()){
 					String name = "Interaktion 1";
 					int sensorID = s.getID()-1;
@@ -580,7 +586,7 @@ public class ProcessingMain extends PApplet {
 					}
 					s.setState(false);
 				}
-				else if(activeArray[2]){
+				else if(checkbox_array[2]==1){
 					String name = "Interaktion 2";
 					int sensorID = s.getID()-1;
 					int nodeID = sMap[sensorID];
@@ -590,7 +596,7 @@ public class ProcessingMain extends PApplet {
 					effectList.get(s.getID()-1).add(new TopGlow(this, nozzleLayer, 2, 255));
 					s.setState(false);
 				}
-				else if(activeArray[3]){
+				else if(checkbox_array[3]==1){
 					String name = "Interaktion 3";
 					int sensorID = s.getID()-1;
 					int nodeID = sMap[sensorID];
@@ -602,26 +608,45 @@ public class ProcessingMain extends PApplet {
 					effectList.get(s.getID()-1).add(new Blob2(this, nozzleLayer, nId, cb1, cfList));
 					s.setState(false);
 				}
-				else if(activeArray[4]){
+				else if(checkbox_array[4]==1){
 					if(effectList.get(s.getID()-1).isEmpty()){
 					String name = "Interaktion 4";
 					int sensorID = s.getID()-1;
 					int nodeID = sMap[sensorID];
 					writeXML(name, sensorID, nodeID);
+					if(bigFineTube<10){
 					nozzlePath = scp.createNodePath(nodeList.get(nodeID-1));
+					bigFineTube++;
+					}else{
+					nozzlePath = scp.createNodeToNodeNozzle(nodeList.get(nodeID-1), node1);
+					bigFineTube=0;
+					}
 					NozzleLayer nozzleLayer = new NozzleLayer(this, scp, nozzlePath);
 					effectList.get(s.getID()-1).add(new FineTube(this,scp,nozzlePath,nozzleLayer,ft2, cfList));
 					}
 					s.setState(false);
 
 				}
-				else if(activeArray[5]){
+				else if(checkbox_array[5]==1){
 					if(effectList.get(s.getID()-1).isEmpty()){
 					String name = "Interaktion 5";
 					int sensorID = s.getID()-1;
 					int nodeID = sMap[sensorID];
 					writeXML(name, sensorID, nodeID);
 					nozzlePath = scp.createNodePath(nodeList.get(nodeID-1));
+					NozzleLayer nozzleLayer = new NozzleLayer(this, scp, nozzlePath);
+					effectList.get(s.getID()-1).add(new Stars(this,nozzleLayer,240, cfList));
+					}
+					s.setState(false);
+				}
+				else if(checkbox_array[6]==1){
+					if(effectList.get(s.getID()-1).isEmpty()){
+					String name = "Interaktion 5";
+					int sensorID = s.getID()-1;
+					int nodeID = sMap[sensorID];
+					writeXML(name, sensorID, nodeID);
+					//nozzlePath = scp.createNodePath(nodeList.get(nodeID-1));
+					nozzlePath = scp.createNodeToNodeNozzle(nodeList.get(nodeID-1), node1);
 					NozzleLayer nozzleLayer = new NozzleLayer(this, scp, nozzlePath);
 					effectList.get(s.getID()-1).add(new Stars(this,nozzleLayer,240, cfList));
 					}
@@ -638,18 +663,18 @@ public class ProcessingMain extends PApplet {
 		  } 
 		  
 		  
-		  if(activeArray[0]){
+		  if(checkbox_array[0]==1){
 			  scp.clearSysA();
 		  }
-		  else if(activeArray[1]){
+		  else if(checkbox_array[1]==1){
 			  drawYellowBlue();
-		  }else if(activeArray[2]){
+		  }else if(checkbox_array[2]==1){
 			  drawBreath();
-		  }else if(activeArray[3]){
+		  }else if(checkbox_array[3]==1){
 			  drawBreath2();
 		  }
 		  
-		  else if(activeArray[4]){
+		  else if(checkbox_array[4]==1){
 			  drawFineTube();
 			  /*scp.clearSysA();
 			  if(FineTube.isDead()){
@@ -660,7 +685,7 @@ public class ProcessingMain extends PApplet {
 			  FineTube.draw2();
 			  }*/
 		  }
-		  else if(activeArray[6]){
+		  else if(checkbox_array[6]==1){
 			  drawShadows();
 		  }
 		  
@@ -918,21 +943,49 @@ public class ProcessingMain extends PApplet {
 	
 	
 	public void setupShadows(){
-		shadowColor = new ColorFade(this, 163, 10, 255, 255);
-		shadowColor.brightnessFade(255, 1000);
-		cfList.addColorFade(shadowColor);
+
+		
+		shadowInnerColor = new ColorFade(this, 163, 150, 100);
+		shadowInnerColor.saturationFade(10, 5000, 2);
+		shadowInnerColor.brightnessFade(50, 5000,2);
+		cfList.addColorFade(shadowInnerColor);
 	}
 	
 	public void drawShadows(){
 		scp.clearSysA();
-		scp.setColor(240, 30, 100);
-		  if(ShadowTube.isDead()){
+		scp.setColor(163, 30, 50);
+		
+		scp.clearSysB();
+		scp.setColorB(shadowInnerColor.hue, shadowInnerColor.saturation, shadowInnerColor.brightness);
+		for(Iterator<ShadowColorTube> shadowIterator = ShadowTube.iterator(); shadowIterator.hasNext();){
+			ShadowColorTube shadow = shadowIterator.next();
+			  
+			shadow.draw();
+			  
+			  if(shadow.isDead()){
+				  shadowIterator.remove();
+			  }
+		  }
+		
+		System.out.println("ShadowTubeSize: "+ShadowTube.size());
+		
+		while(ShadowTube.size()<1){
+			ShadowTube.add(new ShadowColorTube(this, scp, cfList));
+		  }
+		
+		if(shadowInnerColor.isDead()){
+			shadowInnerColor = new ColorFade(this, 163, 150, 100);
+			shadowInnerColor.saturationFade(10, 5000, 2);
+			shadowInnerColor.brightnessFade(50, 5000,2);
+			cfList.addColorFade(shadowInnerColor);
+		}
+		  /*if(ShadowTube.isDead()){
 			  nozzlePath = scp.createNodePath(nodeList.get(0));
 			  NozzleLayer nozzleLayer = new NozzleLayer(this, scp, nozzlePath);
 			  ShadowTube = new FineTube(this, nozzleLayer, shadowColor, 120, 10, 10, 20, 10);
 		  }else{
 			  ShadowTube.draw();
-		  }
+		  }*/
 	}
 	
 	//SETUP FLOWER
@@ -1597,7 +1650,7 @@ public class ProcessingMain extends PApplet {
 	public void serialEvent(Serial myPort) {
 		try {
 			myString = myPort.readStringUntil(lf);
-			//System.out.println(myString);
+			System.out.println(myString);
 			if (myString != null) {
 				String[] spl1 = split(myString, '\n');
 				String[] spl2 = split(spl1[0], '/');
@@ -1656,60 +1709,71 @@ public class ProcessingMain extends PApplet {
 			if(checkBoxSensorArray[0][0] != checkBoxSensorList.get(0).getArrayValue(0)){
 				flashActiveArray[0] =! flashActiveArray[0];
 				System.out.println("SENSOR0"+checkBoxSensorList.get(0).getArrayValue(0));
-				sendArduinoFlash(myPort);
+				//sendArduinoFlash(myPort);
+				sensorList.get(0).inactiveFlash = !sensorList.get(0).inactiveFlash;
 			} else if(checkBoxSensorArray[0][1] != checkBoxSensorList.get(0).getArrayValue(1)){
 				wiActiveArray[0] =! wiActiveArray[0];
 				System.out.println("SENSOR0"+checkBoxSensorList.get(0).getArrayValue(1));
 				//sensorList.get(0).setState(false);
-				sendArduinoWi(myPort);
+				//sendArduinoWi(myPort);
+				sensorList.get(0).inactiveWi = !sensorList.get(0).inactiveWi;
+				System.out.println(sensorList.get(0).inactiveWi);
 			}
 			checkBoxSensorArray[0] = checkBoxSensorList.get(0).getArrayValue();
 		} else if (theEvent.isFrom(checkBoxSensorList.get(1))) {
 			if(checkBoxSensorArray[1][0] != checkBoxSensorList.get(1).getArrayValue(0)){
 				flashActiveArray[1] =! flashActiveArray[1];
 				System.out.println("SENSOR1"+checkBoxSensorList.get(1).getArrayValue(0));
-				sendArduinoFlash(myPort);
+				//sendArduinoFlash(myPort);
+				sensorList.get(1).inactiveFlash = !sensorList.get(1).inactiveFlash;
 			} else if(checkBoxSensorArray[1][1] != checkBoxSensorList.get(1).getArrayValue(1)){
 				wiActiveArray[1] =! wiActiveArray[1];
 				System.out.println("SENSOR0"+checkBoxSensorList.get(1).getArrayValue(1));
 				//sensorList.get(1).setState(false);
-				sendArduinoWi(myPort);
+				//sendArduinoWi(myPort);
+				sensorList.get(1).inactiveWi = !sensorList.get(1).inactiveWi;
 			}
 			checkBoxSensorArray[1] = checkBoxSensorList.get(1).getArrayValue();
 		} else if (theEvent.isFrom(checkBoxSensorList.get(2))) {
 			if(checkBoxSensorArray[2][0] != checkBoxSensorList.get(2).getArrayValue(0)){
 				flashActiveArray[2] =! flashActiveArray[2];
 				System.out.println("SENSOR2"+checkBoxSensorList.get(2).getArrayValue(0));
-				sendArduinoFlash(myPort);
+				//sendArduinoFlash(myPort);
+				sensorList.get(2).inactiveFlash = !sensorList.get(2).inactiveFlash;
 			} else if(checkBoxSensorArray[2][1] != checkBoxSensorList.get(2).getArrayValue(1)){
 				wiActiveArray[2] =! wiActiveArray[2];
 				System.out.println("SENSOR0"+checkBoxSensorList.get(2).getArrayValue(1));
 				//sensorList.get(2).setState(false);
-				sendArduinoWi(myPort);
+				//sendArduinoWi(myPort);
+				sensorList.get(2).inactiveWi = !sensorList.get(2).inactiveWi;
 			}
 			checkBoxSensorArray[2] = checkBoxSensorList.get(2).getArrayValue();
 		} else if (theEvent.isFrom(checkBoxSensorList.get(3))) {
 			if(checkBoxSensorArray[3][0] != checkBoxSensorList.get(3).getArrayValue(0)){
 				flashActiveArray[3] =! flashActiveArray[3];
 				System.out.println("SENSOR3"+checkBoxSensorList.get(3).getArrayValue(0));
-				sendArduinoFlash(myPort);
+				//sendArduinoFlash(myPort);
+				sensorList.get(3).inactiveFlash = !sensorList.get(3).inactiveFlash;
 			} else if(checkBoxSensorArray[3][1] != checkBoxSensorList.get(3).getArrayValue(1)){
 				wiActiveArray[3] =! wiActiveArray[3];
 				System.out.println("SENSOR0"+checkBoxSensorList.get(3).getArrayValue(1));
 				//sensorList.get(3).setState(false);
-				sendArduinoWi(myPort);
+				//sendArduinoWi(myPort);
+				sensorList.get(3).inactiveWi = !sensorList.get(3).inactiveWi;
 			}
 			checkBoxSensorArray[3] = checkBoxSensorList.get(3).getArrayValue();
 		} else if (theEvent.isFrom(checkBoxSensorList.get(4))) {
 			if(checkBoxSensorArray[4][0] != checkBoxSensorList.get(4).getArrayValue(0)){
 				flashActiveArray[4] =! flashActiveArray[4];
 				System.out.println("SENSOR4"+checkBoxSensorList.get(4).getArrayValue(0));
-				sendArduinoFlash(myPort);
+				//sendArduinoFlash(myPort);
+				sensorList.get(4).inactiveFlash = !sensorList.get(4).inactiveFlash;
 			} else if(checkBoxSensorArray[4][1] != checkBoxSensorList.get(4).getArrayValue(1)){
 				wiActiveArray[4] =! wiActiveArray[4];
 				System.out.println("SENSOR0"+checkBoxSensorList.get(4).getArrayValue(1));
 				//sensorList.get(4).setState(false);
-				sendArduinoWi(myPort);
+				//sendArduinoWi(myPort);
+				sensorList.get(4).inactiveWi = !sensorList.get(4).inactiveWi;
 			}
 			checkBoxSensorArray[4] = checkBoxSensorList.get(4).getArrayValue();
 		}
@@ -1717,53 +1781,56 @@ public class ProcessingMain extends PApplet {
 		if(theEvent.getGroup().getName() == "checkBox") {
 		    print("got an event from "+theEvent.getName()+"\t");
 		    //System.out.println(theEvent.getGroup().getArrayValue().length);
+		    if(manuell){
 		    if(checkbox_array[0] != theEvent.getGroup().getArrayValue(0)) {
-		    	activeArray[0] =! activeArray[0];
+		    	//activeArray[0] =! activeArray[0];
 		    	System.out.println("BUTTON1");
 		    } else if(checkbox_array[1] != theEvent.getGroup().getArrayValue(1)) {
-		    	activeArray[1] =! activeArray[1];
+		    	//activeArray[1] =! activeArray[1];
 		    	System.out.println("BUTTON2");
 		    } else if(checkbox_array[2] != theEvent.getGroup().getArrayValue(2)) {
-		    	activeArray[2] =! activeArray[2];
+		    	//activeArray[2] =! activeArray[2];
 		    	System.out.println("BUTTON3");
 		    } else if(checkbox_array[3] != theEvent.getGroup().getArrayValue(3)) {
-		    	activeArray[3] =! activeArray[3];
+		    	//activeArray[3] =! activeArray[3];
 		    	System.out.println("BUTTON4");
 		    } else if(checkbox_array[4] != theEvent.getGroup().getArrayValue(4)) {
-		    	activeArray[4] =! activeArray[4];
+		    	//activeArray[4] =! activeArray[4];
 		    	System.out.println("BUTTON5");
 		    } else if(checkbox_array[5] != theEvent.getGroup().getArrayValue(5)) {
-		    	activeArray[5] =! activeArray[5];
+		    	//activeArray[5] =! activeArray[5];
 		    	System.out.println("BUTTON6");
 		    } else if(checkbox_array[6] != theEvent.getGroup().getArrayValue(6)) {
-		    	activeArray[6] =! activeArray[6];
+		    	//activeArray[6] =! activeArray[6];
 		    	System.out.println("BUTTON7");
 		    } else if(checkbox_array[7] != theEvent.getGroup().getArrayValue(7)) {
-		    	activeArray[7] =! activeArray[7];
+		    	//activeArray[7] =! activeArray[7];
 		    	System.out.println("BUTTON8");
 		    } else if(checkbox_array[8] != theEvent.getGroup().getArrayValue(8)) {
-		    	activeArray[8] =! activeArray[8];
+		    	//activeArray[8] =! activeArray[8];
 		    	System.out.println("BUTTON9");
 		    } else if(checkbox_array[9] != theEvent.getGroup().getArrayValue(9)) {
-		    	activeArray[9] =! activeArray[9];
+		    	//activeArray[9] =! activeArray[9];
 		    	System.out.println("BUTTON10");
 		    } else if(checkbox_array[10] != theEvent.getGroup().getArrayValue(10)) {
-		    	activeArray[10] =! activeArray[10];
+		    	//activeArray[10] =! activeArray[10];
 		    	System.out.println("BUTTON11");
 		    } else if(checkbox_array[11] != theEvent.getGroup().getArrayValue(11)) {
-		    	activeArray[11] =! activeArray[11];
+		    	//activeArray[11] =! activeArray[11];
 		    	System.out.println("BUTTON12");
 		    } else if(checkbox_array[12] != theEvent.getGroup().getArrayValue(12)) {
-		    	activeArray[12] =! activeArray[12];
+		    	//activeArray[12] =! activeArray[12];
 		    	System.out.println("BUTTON13");
+		    }
+		    checkbox_array = checkbox.getArrayValue();
+			scp.clearSysA();
+			scp.clearSysB();
 		    }
 		    
 		}
 		//println("\t "+theEvent.getValue());
 		//System.out.println("ACTIVE_ARRAY: "+activeArray[0]+" "+activeArray[1]);
-		checkbox_array = checkbox.getArrayValue();
-		scp.clearSysA();
-		scp.clearSysB();
+		
 	
 		//System.out.println(theEvent.getGroup().getName());
 		
@@ -1831,42 +1898,54 @@ public class ProcessingMain extends PApplet {
 		  if(cTime.compareTo(dWi)<0){
 			  if(allWi==true && !once){
 				  System.out.println("KLEINER");
-				  for(int i=0; i<wiActiveArray.length; i++){
-					  wiActiveArray[i] = false;
-				  }
-				  sendArduinoWi(myPort);
+				  //for(int i=0; i<wiActiveArray.length; i++){
+				  //	  wiActiveArray[i] = false;
+				  //}
+				  //sendArduinoWi(myPort);
 				  allWi = false;
+				  for(Sensor s : sensorList){
+					  s.inactiveWi = true;
+				  }
 			  }
 			  }
 				  
 		  else{
 			  if(allWi==false){
 				  System.out.println("GR…SSER");
-				  for(int i=0; i<wiActiveArray.length; i++){
-					  wiActiveArray[i] = true;
-				  }
-				  sendArduinoWi(myPort);
+				  //for(int i=0; i<wiActiveArray.length; i++){
+				  //	  wiActiveArray[i] = true;
+				  //}
+				  //sendArduinoWi(myPort);
 				  allWi = true;
+				  for(Sensor s : sensorList){
+					  s.inactiveWi = false;
+				  }
 			  }
 		  }
 
 		  if(cTime.compareTo(dFlash)<0){
 			  if(allFlash==true && !once){
 				  System.out.println("KLEINER");
-				  for(int i=0; i<flashActiveArray.length; i++){
-					  flashActiveArray[i] = false;
-				  }
-				  sendArduinoFlash(myPort);
+				  //for(int i=0; i<flashActiveArray.length; i++){
+				  //	  flashActiveArray[i] = false;
+				  //}
+				  //sendArduinoFlash(myPort);
 				  allFlash = false;
+				  for(Sensor s : sensorList){
+					  s.inactiveFlash = true;
+				  }
 			  }
 		  }else{
 			  if(allFlash==false){
 				  System.out.println("GR…SSER");
-				  for(int i=0; i<flashActiveArray.length; i++){
-					  flashActiveArray[i] = true;
-				  }
-				  sendArduinoFlash(myPort);
+				  //for(int i=0; i<flashActiveArray.length; i++){
+				  //	  flashActiveArray[i] = true;
+				  //}
+				  //sendArduinoFlash(myPort);
 				  allFlash = true;
+				  for(Sensor s : sensorList){
+					  s.inactiveFlash = false;
+				  }
 			  }
 		  }
 		  
@@ -1874,6 +1953,18 @@ public class ProcessingMain extends PApplet {
 	}
 	
 	
+	public void Manuell(boolean theFlag) {
+		  if(theFlag){
+			  manuell = true;
+			  checkbox_array = checkbox.getArrayValue();
+		  }
+		  else{
+			  manuell = false;
+		  }
+		  //	  checkbox_array = checkbox.getArrayValue();
+		  //}
+		  println("a toggle event."+theFlag);
+		}
 
 
 }

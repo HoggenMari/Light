@@ -398,6 +398,19 @@ public class Pavillon extends Thread {
 		}
 	}
 	
+	public void setColorB(int hue, int saturation, int brightness){
+		for(Nozzle n: nozzleList){
+			PGraphics pg = n.sysB;
+			pg.beginDraw();
+			pg.colorMode(PConstants.HSB, 360, 255, 255, 255);
+			pg.noStroke();
+			int c = pg.color(hue, saturation, brightness);
+			pg.fill(c);
+			pg.rect(0, 0, pg.width, pg.height);
+			pg.endDraw();
+		}
+	}
+	
 
 
 	//NozzlePath
@@ -414,6 +427,15 @@ public class Pavillon extends Thread {
 	  randomPath = breadthFirstSearch(nozzleList.get(r1), nozzleList.get(r2));
 	}while(randomPath.size()<5);
 	return randomPath;
+	}
+	
+	public LinkedList<Nozzle> reversePath(LinkedList<Nozzle> nozzleList) {
+		LinkedList<Nozzle> path = new LinkedList<Nozzle>();
+		for(int i=1; i<=nozzleList.size(); i++){
+			Nozzle n = nozzleList.get(nozzleList.size()-i);
+			path.add(n);
+		}
+		return path;
 	}
 
 	
@@ -445,6 +467,18 @@ public class Pavillon extends Thread {
 			path.add(n);
 		}
 		return path;
+	}
+	
+	public LinkedList<Nozzle> createNodeToNodeNozzle(Node node1, Node node2){
+		LinkedList<Nozzle> path = new LinkedList<Nozzle>();
+		/*for(Nozzle n : node1.nozzleList){
+			path.add(n);
+		}*/
+		LinkedList<Nozzle> randomPath = breadthFirstSearch(node1.nozzleList.get(0), node2.nozzleList.get(0));
+		for(Nozzle n : node1.nozzleList){
+			randomPath.add(n);
+		}
+		return randomPath;
 	}
 	
 	public LinkedList<Nozzle> createReverseNodePath(Node node){

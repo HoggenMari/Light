@@ -132,7 +132,7 @@ public class FineTube implements Effect{
 
 	public void drawType1() {
 		
-		System.out.println("SPEED: "+speed);
+		//System.out.println("SPEED: "+speed);
 		
 		pg.beginDraw();
 		pg.colorMode(PConstants.HSB,360,255,255,255);
@@ -178,7 +178,7 @@ public class FineTube implements Effect{
 	
 	public void drawType2() {
 		
-		System.out.println("SPEED2: "+speed);
+		//System.out.println("SPEED2: "+speed);
 		
 		pg.beginDraw();
 		pg.colorMode(PConstants.HSB,360,255,255,255);
@@ -247,7 +247,7 @@ public class FineTube implements Effect{
 	
 	public void drawType3() {
 		
-		System.out.println("SPEED: "+speed);
+		//System.out.println("SPEED: "+speed);
 		
 		pg.beginDraw();
 		pg.colorMode(PConstants.HSB,360,255,255,255);
