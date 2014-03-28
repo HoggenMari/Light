@@ -74,11 +74,11 @@ public class Sensor {
 			errorFlash = 0;
 			disableFlash = false;
 		}
-		if(errorFlash>60){
+		if(errorFlash>5){
 			disableFlash = true;
 		}
 		timerFlash = p.millis();
-		System.out.println(timerFlash);
+		//System.out.println(timerFlash);
 		active = true;
 		}
 	}
@@ -101,7 +101,7 @@ public class Sensor {
 			errorWi = 0;
 			disableWi = false;
 		}
-		if(errorWi>60){
+		if(errorWi>5){
 			disableWi = true;
 		}
 		timerWi = p.millis();

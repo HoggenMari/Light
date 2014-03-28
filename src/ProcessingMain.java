@@ -34,7 +34,7 @@ public class ProcessingMain extends PApplet {
 	//Network settings
 	private final String IP = "224.1.1.1";
 	private final int PORT = 5026;
-	private final int[] CONTROLLER_ID = {4, 1};
+	private final int[] CONTROLLER_ID = {1, 4};
 	
 	//Init Nozzles, Node, Sculpture Objects
 	private final int NODE1_LEDS[] = {75,60,75,60,90,75,60,75};
@@ -65,9 +65,9 @@ public class ProcessingMain extends PApplet {
 	private ArrayList<Sensor> sensorList = new ArrayList<Sensor>();
 	private static int SENSORS = 5;
 	private int[] sMap = {1,2,3,4,5};
-	private int hoursWi = 01;
+	private int hoursWi = 22;
 	private int minutesWi = 00;
-	private int hoursFlash = 01;
+	private int hoursFlash = 22;
 	private int minutesFlash = 00;
 	private Date dFlash = new Date();
 	private Date dWi = new Date();
@@ -334,6 +334,18 @@ public class ProcessingMain extends PApplet {
 
 	private ColorFade shadowInnerColor;
 
+	private boolean hueDown;
+
+	private Breath ShadowBreath;
+
+	private int shadowSpeed = 5000;
+
+	private ColorFade shadowInnerColor3;
+
+	private ColorFade shadowInnerColor4;
+
+	private NodeDrop nodeDrop;
+
 	
 
 	//Initiate as Application
@@ -402,7 +414,8 @@ public class ProcessingMain extends PApplet {
 				.setColorLabel(color(0,0,255)).setSize(15, 15).setItemsPerRow(7)
 				.setSpacingColumn(45).setSpacingRow(20).addItem("Black", 0).addItem("YellowBlue", 50)
 				.addItem("Breath1", 100).addItem("Breath2", 150).addItem("FineTube", 200)
-				.addItem("Stars", 250).addItem("Shadows", 300);		
+				.addItem("Stars", 250).addItem("Shadows", 300).addItem("Shadows2", 350)
+				.addItem("Shadows3", 400).addItem("Shadows4", 450);		
 		
 		
 		cp5.addToggle("Manuell")
@@ -492,6 +505,8 @@ public class ProcessingMain extends PApplet {
 		setupBreath2();
 		setupFineTube();
 		setupShadows();
+		setupShadows3();
+		setupShadows4();
 		
 		//frameRate(10);
 		cfList.start();
@@ -538,6 +553,7 @@ public class ProcessingMain extends PApplet {
 		  
 		  ArduinoZeitschaltUhr();
 		  
+		  nodeDrop = new NodeDrop(this, scp, node1, cfList);
 		  
 		  //println("Time :"+d.getHours()+" "+d2.getHours());
 		  
@@ -564,13 +580,14 @@ public class ProcessingMain extends PApplet {
 				flashArray[i] = 1023;
 			}
 			flashActive = false;
-			System.out.println("FLASH mit "+(minPos+1)+" "+minValue);
+			//System.out.println("FLASH mit "+(minPos+1)+" "+minValue);
 			sensorList.get(minPos).setFlash();
 		}
 		
 		for(Sensor s : sensorList){
+			//System.out.println("SENSOR_DISABLE: "+s.getID()+" WI: "+s.inactiveWi+" Flash: "+s.inactiveFlash);
 			//System.out.println("SENSOR: "+s.getID()+" STATE: "+s.getState());
-			if(s.getState() && !s.disableWi && !s.disableFlash){
+			if(s.getState() && (!s.inactiveWi | !s.inactiveFlash)){
 				if(checkbox_array[1]==1){
 					if(effectList.get(s.getID()-1).isEmpty()){
 					String name = "Interaktion 1";
@@ -690,7 +707,18 @@ public class ProcessingMain extends PApplet {
 		  else if(checkbox_array[6]==1){
 			  drawShadows();
 		  }
-		  
+		  else if(checkbox_array[7]==1){
+			  drawShadows2();
+		  }
+		  else if(checkbox_array[8]==1){
+			  drawShadows3();
+		  }
+		  else if(checkbox_array[9]==1){
+			  drawShadows4();
+		  }
+		  /*else if(checkbox_array[10]==1){
+			  drawShadows3();
+		  }*/
 		  
 		  for(int i=0; i<interactionChanger.size(); i++){
 			  for(Iterator<InteractionChanger> interactionIterator = interactionChanger.iterator(); interactionIterator.hasNext();){
@@ -718,8 +746,38 @@ public class ProcessingMain extends PApplet {
 		  }
 		  }
 		  
+		  scp.clearSysA();
+		  nodeDrop.draw();
 		  
-		  //scp.setColor(0, 255, 255);
+		  /*node4.nozzleList.get(0).setColorA(0, 255, 255);
+		  node4.nozzleList.get(1).setColorA(50, 255, 255);
+		  node4.nozzleList.get(2).setColorA(100, 255, 255);
+		  node4.nozzleList.get(3).setColorA(150, 255, 255);
+		  node4.nozzleList.get(4).setColorA(200, 255, 255);
+		  node4.nozzleList.get(5).setColorA(250, 255, 255);
+		  node4.nozzleList.get(6).setColorA(300, 255, 255);
+		  node4.nozzleList.get(7).setColorA(350, 255, 255);*/
+		  
+		  /*node1.setColorA(0, 0, 255);
+		  node2.setColorA(60, 0, 255);
+		  node3.setColorA(120, 0, 255);
+		  node4.setColorA(180, 0, 255);
+		  node5.setColorA(240, 0, 255);
+		  node6.setColorA(300, 0, 255);
+		  node7.setColorA(360, 0, 255);*/
+		  
+		  
+		  /*node1.setColorB(0, 0, 255);
+		  node2.setColorB(60, 0, 255);
+		  node3.setColorB(120, 0, 255);
+		  node4.setColorB(180, 0, 255);
+		  node5.setColorB(240, 0, 255);
+		  node6.setColorB(300, 0, 255);
+		  node7.setColorB(360, 0, 255);*/
+		  
+		  //scp.setColor(0, 0, 255);
+		  
+		  //scp.setColorB(0, 0, 255);
 		  
 		  //scp.setColor(0, 0, 100);
 		  //drawShadows();
@@ -947,15 +1005,88 @@ public class ProcessingMain extends PApplet {
 	public void setupShadows(){
 
 		
-		shadowInnerColor = new ColorFade(this, 163, 150, 100);
+		shadowInnerColor = new ColorFade(this, 163, 150, 255);
 		shadowInnerColor.saturationFade(10, 5000, 2);
 		shadowInnerColor.brightnessFade(50, 5000,2);
 		cfList.addColorFade(shadowInnerColor);
+		
+		ShadowBreath = new Breath(this, scp, cfList, 163, 30, 5000);
 	}
 	
 	public void drawShadows(){
+		
+		if(shadowInnerColor.isDead()){
+			shadowInnerColor = new ColorFade(this, 163, 150, 100);
+			shadowInnerColor.saturationFade(10, shadowSpeed, 2);
+			shadowInnerColor.brightnessFade(50, shadowSpeed,2);
+			cfList.addColorFade(shadowInnerColor);
+			
+			if(shadowSpeed>2000){
+				shadowSpeed-=100;
+			}else{
+				shadowSpeed=5000;
+			}
+		}
+		
 		scp.clearSysA();
-		scp.setColor(163, 30, 50);
+		//scp.setColor(163, 30, 255);
+		ShadowBreath.draw(shadowSpeed);
+		
+		scp.clearSysB();
+		scp.setColorB(shadowInnerColor.hue, shadowInnerColor.saturation, shadowInnerColor.brightness);
+		for(Iterator<ShadowColorTube> shadowIterator = ShadowTube.iterator(); shadowIterator.hasNext();){
+			ShadowColorTube shadow = shadowIterator.next();
+			  
+			shadow.draw();
+			  
+			  if(shadow.isDead()){
+				  shadowIterator.remove();
+			  }
+		  }
+		
+		System.out.println("ShadowTubeSize: "+ShadowTube.size());
+		
+		/*while(ShadowTube.size()<1){
+			ShadowTube.add(new ShadowColorTube(this, scp, cfList));
+		}*/
+		
+		
+		  /*if(ShadowTube.isDead()){
+			  nozzlePath = scp.createNodePath(nodeList.get(0));
+			  NozzleLayer nozzleLayer = new NozzleLayer(this, scp, nozzlePath);
+			  ShadowTube = new FineTube(this, nozzleLayer, shadowColor, 120, 10, 10, 20, 10);
+		  }else{
+			  ShadowTube.draw();
+		  }*/
+	}
+	
+	public void setupShadows2(){	
+		shadowInnerColor = new ColorFade(this, 163, 150, 255);
+		shadowInnerColor.saturationFade(10, 5000, 2);
+		shadowInnerColor.brightnessFade(50, 5000,2);
+		cfList.addColorFade(shadowInnerColor);
+		
+		ShadowBreath = new Breath(this, scp, cfList, 163, 30, 5000);
+	}
+
+	public void drawShadows2(){
+		
+		if(shadowInnerColor.isDead()){
+			shadowInnerColor = new ColorFade(this, 163, 150, 255);
+			shadowInnerColor.saturationFade(10, shadowSpeed, 2);
+			shadowInnerColor.brightnessFade(50, shadowSpeed,2);
+			cfList.addColorFade(shadowInnerColor);
+			
+			if(shadowSpeed>2000){
+				shadowSpeed-=100;
+			}else{
+				shadowSpeed=5000;
+			}
+		}
+		
+		scp.clearSysA();
+		//scp.setColor(163, 30, 255);
+		ShadowBreath.draw(shadowSpeed);
 		
 		scp.clearSysB();
 		scp.setColorB(shadowInnerColor.hue, shadowInnerColor.saturation, shadowInnerColor.brightness);
@@ -973,14 +1104,68 @@ public class ProcessingMain extends PApplet {
 		
 		while(ShadowTube.size()<1){
 			ShadowTube.add(new ShadowColorTube(this, scp, cfList));
+		}
+		
+		
+		  /*if(ShadowTube.isDead()){
+			  nozzlePath = scp.createNodePath(nodeList.get(0));
+			  NozzleLayer nozzleLayer = new NozzleLayer(this, scp, nozzlePath);
+			  ShadowTube = new FineTube(this, nozzleLayer, shadowColor, 120, 10, 10, 20, 10);
+		  }else{
+			  ShadowTube.draw();
+		  }*/
+	}
+
+	public void setupShadows3(){
+
+		shadowInnerColor3 = new ColorFade(this, 163, 150, 50);
+		shadowInnerColor3.saturationFade(10, 5000, 2);
+		shadowInnerColor3.brightnessFade(50, 5000,2);
+		cfList.addColorFade(shadowInnerColor3);
+		
+		
+		//ShadowBreath = new Breath(this, scp, cfList, 163, 30, 5000);
+	}
+	
+	public void drawShadows3(){
+		
+		
+		if(shadowInnerColor3.isDead()){
+			shadowInnerColor3 = new ColorFade(this, 163, 150, 50);
+			shadowInnerColor3.saturationFade(10, shadowSpeed, 2);
+			shadowInnerColor3.brightnessFade(50, shadowSpeed,2);
+			cfList.addColorFade(shadowInnerColor3);
+			
+			if(shadowSpeed>2000){
+				shadowSpeed-=100;
+			}else{
+				shadowSpeed=5000;
+			}
+		}
+		
+		scp.clearSysA();
+		scp.setColor(163, 30, 0);
+		//ShadowBreath.draw(shadowSpeed);
+		
+		scp.clearSysB();
+		scp.setColorB(shadowInnerColor3.hue, shadowInnerColor3.saturation, shadowInnerColor3.brightness);
+		for(Iterator<ShadowColorTube> shadowIterator = ShadowTube.iterator(); shadowIterator.hasNext();){
+			ShadowColorTube shadow = shadowIterator.next();
+			  
+			shadow.draw();
+			  
+			  if(shadow.isDead()){
+				  shadowIterator.remove();
+			  }
 		  }
 		
-		if(shadowInnerColor.isDead()){
-			shadowInnerColor = new ColorFade(this, 163, 150, 100);
-			shadowInnerColor.saturationFade(10, 5000, 2);
-			shadowInnerColor.brightnessFade(50, 5000,2);
-			cfList.addColorFade(shadowInnerColor);
+		System.out.println("ShadowTubeSize: "+ShadowTube.size());
+		
+		while(ShadowTube.size()<1){
+			ShadowTube.add(new ShadowColorTube(this, scp, cfList));
 		}
+		
+		
 		  /*if(ShadowTube.isDead()){
 			  nozzlePath = scp.createNodePath(nodeList.get(0));
 			  NozzleLayer nozzleLayer = new NozzleLayer(this, scp, nozzlePath);
@@ -990,6 +1175,86 @@ public class ProcessingMain extends PApplet {
 		  }*/
 	}
 	
+	public void setupShadows4(){
+		shadowInnerColor4 = new ColorFade(this, 163, 150, 255);
+		shadowInnerColor4.saturationFade(10, 5000, 2);
+		shadowInnerColor4.brightnessFade(50, 5000,2);
+		cfList.addColorFade(shadowInnerColor4);
+		
+		ShadowBreath = new Breath(this, scp, cfList, 163, 30, 5000);
+	}
+
+	public void drawShadows4(){
+		
+		
+		if(shadowInnerColor4.isDead()){
+			shadowInnerColor4 = new ColorFade(this, 163, 150, 50);
+			shadowInnerColor4.saturationFade(10, shadowSpeed, 2);
+			shadowInnerColor4.brightnessFade(50, shadowSpeed,2);
+			cfList.addColorFade(shadowInnerColor4);
+			
+			if(shadowSpeed>2000){
+				shadowSpeed-=100;
+			}else{
+				shadowSpeed=5000;
+			}
+		}
+		
+		for(int i=0; i<scp.nozzleList.size(); i++) {
+			PGraphics pg = scp.nozzleList.get(i).sysA;
+			pg.beginDraw();
+			pg.background(0);
+
+			pg.colorMode(HSB, 360, 255, 255);	
+			pg.noStroke();
+			pg.fill(160+i,80,100);
+			pg.rect(0, 0, pg.width, pg.height);
+			pg.endDraw();
+			
+			PGraphics pg2 = scp.nozzleList.get(i).sysB;
+			pg2.beginDraw();
+			pg2.background(0);
+
+			pg2.colorMode(HSB, 360, 255, 255);	
+			pg2.noStroke();
+			pg2.fill(160+i,80,100);
+			pg2.rect(0, 0, pg2.width, pg2.height);
+			pg2.endDraw();
+			
+		}
+		
+		//scp.clearSysA();
+		//scp.setColor(163, 30, 0);
+		//ShadowBreath.draw(shadowSpeed);
+		
+		//scp.clearSysB();
+		//scp.setColorB(shadowInnerColor3.hue, shadowInnerColor3.saturation, shadowInnerColor3.brightness);
+		for(Iterator<ShadowColorTube> shadowIterator = ShadowTube.iterator(); shadowIterator.hasNext();){
+			ShadowColorTube shadow = shadowIterator.next();
+			  
+			shadow.draw();
+			  
+			  if(shadow.isDead()){
+				  shadowIterator.remove();
+			  }
+		  }
+		
+		System.out.println("ShadowTubeSize: "+ShadowTube.size());
+		
+		while(ShadowTube.size()<1){
+			ShadowTube.add(new ShadowColorTube(this, scp, cfList));
+		}
+		
+		
+		  /*if(ShadowTube.isDead()){
+			  nozzlePath = scp.createNodePath(nodeList.get(0));
+			  NozzleLayer nozzleLayer = new NozzleLayer(this, scp, nozzlePath);
+			  ShadowTube = new FineTube(this, nozzleLayer, shadowColor, 120, 10, 10, 20, 10);
+		  }else{
+			  ShadowTube.draw();
+		  }*/
+	}
+
 	//SETUP FLOWER
 	public void setupFlower(){
 		cfFlower = new ColorFade(this, 220, 100, 100);
@@ -1290,7 +1555,20 @@ public class ProcessingMain extends PApplet {
 		
 		if(c1.isDead()){
 			
-			hueBreath++;
+			if(hueDown){
+				hueBreath--;
+			}else{
+				hueBreath++;
+			}
+			if(hueBreath==240){
+				hueDown = false;
+			}
+			if(hueBreath>=300){
+				hueDown = true;
+			}
+			
+			System.out.println("HUE: "+hueBreath+" HUEDOWN"+hueDown);
+			
 			if(speedBreath>2000){
 			speedBreath-=100;
 			}else{
@@ -1519,13 +1797,13 @@ public class ProcessingMain extends PApplet {
 			pg2.beginDraw();
 			for(int iy=0; iy<pg.height; iy++){
 				pg.colorMode(HSB, 360, 255, 255,255);	
-				pg.fill(cfYellow.hue-5*iy,cfYellow.saturation,cfYellow.brightness-5*iy, 70);
+				pg.fill(cfYellow.hue-5*iy,cfYellow.saturation,cfYellow.brightness-5*iy, 255);
 				pg.noStroke();
 				pg2.noStroke();
 				pg.rect(0, iy, pg.width, 1);
 		   }
 			pg2.colorMode(HSB, 360, 255, 255,255);
-			pg2.fill(Math.abs(cfYellow.hue-270)+30,cfYellow.saturation,cfYellow.brightness, 70);
+			pg2.fill(Math.abs(cfYellow.hue-270)+30,cfYellow.saturation,cfYellow.brightness, 255);
 			pg2.rect(0, 0, pg2.width, 1);
 
 			pg2.endDraw();
@@ -1652,14 +1930,14 @@ public class ProcessingMain extends PApplet {
 	public void serialEvent(Serial myPort) {
 		try {
 			myString = myPort.readStringUntil(lf);
-			System.out.println(myString);
+			//System.out.println(myString);
 			if (myString != null) {
 				String[] spl1 = split(myString, '\n');
 				String[] spl2 = split(spl1[0], '/');
 				//System.out.println(spl1[0]);
 
 				if(spl2[0].compareTo("FLASH")==0){
-					System.out.println("GO: "+spl2[1]);
+					//System.out.println("GO: "+spl2[1]);
 					spl2 = split(spl2[1], '-');
 					int id = Integer.parseInt(spl2[0]);
 					spl2 = split(spl2[1], ',');
@@ -1670,7 +1948,7 @@ public class ProcessingMain extends PApplet {
 					flashTimer = millis();
 				}
 				if(spl2[0].compareTo("WII")==0){
-					System.out.println("GO");
+					//System.out.println("GO");
 					spl2 = split(spl2[1], '-');
 					int id = Integer.parseInt(spl2[0]);
 					spl2 = split(spl2[1], ':');
@@ -1685,7 +1963,7 @@ public class ProcessingMain extends PApplet {
 						}
 						output += posX[i]+":"+posY[i]+",";
 					}
-					System.out.println("OUTPUT: "+output);
+					//System.out.println("OUTPUT: "+output);
 					sensorList.get(id-1).setWi(posX, posY); 
 				}
 				

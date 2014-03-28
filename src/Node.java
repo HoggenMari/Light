@@ -36,6 +36,32 @@ public class Node {
 		}
 	}
 	
+	public void setColorA(int hue, int saturation, int brightness){
+		for(Nozzle n: nozzleList){
+			PGraphics pg = n.sysA;
+			pg.beginDraw();
+			pg.colorMode(PConstants.HSB, 360, 255, 255, 255);
+			pg.noStroke();
+			int c = pg.color(hue, saturation, brightness);
+			pg.fill(c);
+			pg.rect(0, 0, pg.width, pg.height);
+			pg.endDraw();
+		}
+	}
+	
+	public void setColorB(int hue, int saturation, int brightness){
+		for(Nozzle n: nozzleList){
+			PGraphics pg = n.sysB;
+			pg.beginDraw();
+			pg.colorMode(PConstants.HSB, 360, 255, 255, 255);
+			pg.noStroke();
+			int c = pg.color(hue, saturation, brightness);
+			pg.fill(c);
+			pg.rect(0, 0, pg.width, pg.height);
+			pg.endDraw();
+		}
+	}
+	
 	public void clearSysB(){
 		for(Nozzle n: nozzleList){
 			PGraphics pg = n.sysB;

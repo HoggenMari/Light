@@ -141,4 +141,26 @@ public class Nozzle {
 		}
 	}
     
+	void setColorA(int hue, int saturation, int brightness){
+			PGraphics pg = sysA;
+			pg.beginDraw();
+			pg.colorMode(PConstants.HSB, 360, 255, 255, 255);
+			pg.noStroke();
+			int c = pg.color(hue, saturation, brightness);
+			pg.fill(c);
+			pg.rect(0, 0, pg.width, pg.height);
+			pg.endDraw();
+	}
+	
+	void setColorB(int hue, int saturation, int brightness){
+		PGraphics pg = sysB;
+		pg.beginDraw();
+		pg.colorMode(PConstants.HSB, 360, 255, 255, 255);
+		pg.noStroke();
+		int c = pg.color(hue, saturation, brightness);
+		pg.fill(c);
+		pg.rect(0, 0, pg.width, pg.height);
+		pg.endDraw();
 }
+	
+	}

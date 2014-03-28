@@ -42,7 +42,7 @@ public class Pavillon extends Thread {
 		{8, 6};
 	
 	private static int puffer[] =
-		{21, 36, 21, 36, 6, 0, 0, 0,
+		{0, 0, 0, 0, 0, 0, 0, 0,
 		 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 		 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 		 0, 0, 0, 0, 0, 0, 0, 0,
