@@ -469,6 +469,20 @@ public class Pavillon extends Thread {
 		return path;
 	}
 	
+	public LinkedList<Nozzle> createNodeMinus(Node node){
+		LinkedList<Nozzle> path = new LinkedList<Nozzle>();
+		for(int i=1; i<node.nozzleList.size()-1; i++){
+			path.add(node.nozzleList.get(i));
+		}
+		return path;
+	}
+	
+	public LinkedList<Nozzle> createRandomSingleNozzle(){
+		LinkedList<Nozzle> path = new LinkedList<Nozzle>();
+		path.add(nozzleList.get((int)p.random(0,65)));
+		return path;
+	}
+	
 	public LinkedList<Nozzle> createNodeToNodeNozzle(Node node1, Node node2){
 		LinkedList<Nozzle> path = new LinkedList<Nozzle>();
 		/*for(Nozzle n : node1.nozzleList){

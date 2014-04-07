@@ -213,7 +213,7 @@ public class UpDown {
 				pg.fill(255,200);
 				pg.rect(0, 0, pg.width, 1);	
 				}
-			if(p.frameCount%2==0){
+			if(p.frameCount%10==0){
 			particleList.get(i).update();
 			}
 			pg.endDraw();

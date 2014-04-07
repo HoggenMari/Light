@@ -32,9 +32,9 @@ public class Stars implements Effect {
 			glitterList.add(new GlitterParticle(p,pg.width));
 		}
 		
-		cf1 = new ColorFade(p, color, 120, 255, 50);
+		cf1 = new ColorFade(p, color, 0, 255, 255);
 		cf1.alphaFade(255, 3000, 2);
-		cf1.saturationFade(0, 1000, 1);
+		cf1.saturationFade(0, 3000, 1);
 		cfl.addColorFade(cf1);
 
 	}

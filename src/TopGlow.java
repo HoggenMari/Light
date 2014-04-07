@@ -13,15 +13,21 @@ public class TopGlow implements Effect{
 	float alpha;
 	private AniSequence seq;
 	private boolean dead;
+	private ColorFade cf;
+	private ColorFadeList cfList;
+	private boolean cfStart;
+	private ColorFade cf2;
 
-	public TopGlow(PApplet p, NozzleLayer nozzleLayer, int startGlow, int maxGlow){
+	public TopGlow(PApplet p, NozzleLayer nozzleLayer, ColorFadeList cfList, int startGlow, int maxGlow){
 	  System.out.println("KONSTRUKTOR");
 	  this.p = p;
 	  this.nozzleLayer = nozzleLayer;
 	  this.alpha = startGlow;
+	  this.cfList = cfList;
+	  //this.pg = pg;
 	  pg = nozzleLayer.getLayer();
 	  
-	  Ani.init(p);
+	  /*Ani.init(p);
 	  
 	  seq = new AniSequence(p);
 	  seq.beginSequence();
@@ -31,7 +37,11 @@ public class TopGlow implements Effect{
 
 	  seq.endSequence();
 	  
-	  seq.start();
+	  seq.start();*/
+	  
+	  cf = new ColorFade(p, 0, 0, 255, 0);
+	  cf.alphaFade(255, (int)p.random(300,600), 1);
+	  cfList.addColorFade(cf);
 	  
 	  //Ani.to(p, (float) 1.0, "alpha", 255, Ani.QUINT_IN);
 		  
@@ -43,16 +53,35 @@ public class TopGlow implements Effect{
 		pg.beginDraw();
 		pg.clear();
 		pg.colorMode(PConstants.HSB, 360,255,255, 255);
-		System.out.println(alpha);
-		pg.fill(0,0,255,alpha);
+		//System.out.println(alpha);
+		pg.fill(cf.hue,cf.saturation,cf.brightness,cf.alpha);
 		pg.noStroke();
 		pg.rect(0, 4, pg.width, 1);
 		pg.endDraw();
-		nozzleLayer.add();
+		//nozzleLayer.add();
 		
-		if(seq.isEnded()){
-			dead = true;
+		if(cf.isDead() && !cfStart){
+			cf2 = new ColorFade(p, 0, 0, 255, 255);
+			cf2.alphaFade(0, (int)p.random(2500,3000), 1);
+			cfList.addColorFade(cf2);
+			cfStart = true;
+		} else if(cf.isDead()) {
+			pg.beginDraw();
+			pg.clear();
+			pg.colorMode(PConstants.HSB, 360,255,255, 255);
+			//System.out.println(alpha);
+			pg.fill(cf2.hue,cf2.saturation,cf2.brightness,cf2.alpha);
+			pg.noStroke();
+			pg.rect(0, 4, pg.width, 1);
+			pg.endDraw();
+			//nozzleLayer.add();
+			
+			if(cf2.isDead()){
+				dead = true;
+			}
 		}
+		
+		nozzleLayer.add();
 		
 	}
 

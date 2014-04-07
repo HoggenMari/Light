@@ -7,6 +7,7 @@ import processing.core.PGraphics;
 public class Node {
 	private PApplet p;
 	ArrayList<Nozzle> nozzleList = new ArrayList<Nozzle>();
+	private int id;
 
 
 	public Node(PApplet p) {
@@ -25,6 +26,14 @@ public class Node {
 			nozzleList.get(i).drawOnGui(x, y+i*60);
 			
 		}
+	}
+	
+	public void setID(int id){
+		this.id = id;
+	}
+	
+	public int getID(){
+		return id;
 	}
 	
 	public void clearSysA(){

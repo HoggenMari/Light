@@ -34,10 +34,10 @@ public class ProcessingMain extends PApplet {
 	//Network settings
 	private final String IP = "224.1.1.1";
 	private final int PORT = 5026;
-	private final int[] CONTROLLER_ID = {1, 4};
+	private final int[] CONTROLLER_ID = {1, 2};
 	
 	//Init Nozzles, Node, Sculpture Objects
-	private final int NODE1_LEDS[] = {75,60,75,60,90,75,60,75};
+	private final int NODE1_LEDS[] = {75,60,75,60,60,75,60,75};
 	private final int NODE2_LEDS[] = {75,75,75,75,60,60,75,75,60,90};
 	private final int NODE3_LEDS[] = {75,75,75,60,90,75,75,60,75,75,75};
 	private final int NODE4_LEDS[] = {60,75,60,75,60,75,75,60};
@@ -52,7 +52,7 @@ public class ProcessingMain extends PApplet {
 	//Variables for GUI
 	ControlP5 cp5;
 	private CheckBox checkbox;
-	float checkbox_array[] = {0,0,0,0,0,0,0,0,0,0,0,0,0};
+	float checkbox_array[] = {0,0,0,0,0,0,0,0,0,0,0,0,1};
 	//boolean activeArray [] = {false, false, false, false, false, false, false, false, false, false, false, false, false};
 	
 	//Arduino Communication
@@ -64,13 +64,17 @@ public class ProcessingMain extends PApplet {
 	//Sensors
 	private ArrayList<Sensor> sensorList = new ArrayList<Sensor>();
 	private static int SENSORS = 5;
-	private int[] sMap = {1,2,3,4,5};
+	private int[] sMap = {2,3,5,7,5};
 	private int hoursWi = 22;
 	private int minutesWi = 00;
 	private int hoursFlash = 22;
 	private int minutesFlash = 00;
 	private Date dFlash = new Date();
 	private Date dWi = new Date();
+	private int hoursOff = 4;
+	private Date dateOff = new Date();
+	private int hoursOn = 17;
+	private Date dateOn = new Date();
 	
 	
 	private boolean allWi = true;
@@ -344,7 +348,25 @@ public class ProcessingMain extends PApplet {
 
 	private ColorFade shadowInnerColor4;
 
-	private NodeDrop nodeDrop;
+	private ArrayList<NodeDrop> nodeDropList = new ArrayList<NodeDrop>();
+
+	private UpDown uD;
+
+	private ColorFade hFT;
+
+	private HorizontalFineTube horFineTube;
+
+	private ArrayList<TopGlow> topGlowList = new ArrayList<TopGlow>();
+
+	private ColorFade shadowInnerColor5;
+
+	private Breath2 ShadowBreath2;
+
+	private Jeff jeffEffect;
+
+	private Zünden zünden;
+
+	private ColorFade redGlow;
 
 	
 
@@ -415,7 +437,7 @@ public class ProcessingMain extends PApplet {
 				.setSpacingColumn(45).setSpacingRow(20).addItem("Black", 0).addItem("YellowBlue", 50)
 				.addItem("Breath1", 100).addItem("Breath2", 150).addItem("FineTube", 200)
 				.addItem("Stars", 250).addItem("Shadows", 300).addItem("Shadows2", 350)
-				.addItem("Shadows3", 400).addItem("Shadows4", 450);		
+				.addItem("Shadows3", 400).addItem("Shadows4", 450).addItem("Shadows5", 500);		
 		
 		
 		cp5.addToggle("Manuell")
@@ -507,6 +529,8 @@ public class ProcessingMain extends PApplet {
 		setupShadows();
 		setupShadows3();
 		setupShadows4();
+		setupHorizontalFineTube();
+		setupShadows5();
 		
 		//frameRate(10);
 		cfList.start();
@@ -551,17 +575,26 @@ public class ProcessingMain extends PApplet {
 		  dFlash.setMinutes(minutesFlash);
 		  
 		  
-		  ArduinoZeitschaltUhr();
+		  //ArduinoZeitschaltUhr();
 		  
-		  nodeDrop = new NodeDrop(this, scp, node1, cfList);
+		  nodeDropList.add(new NodeDrop(this, scp, node1, cfList));
 		  
+		  uD = new UpDown(this, node1, ft1, 5000);
+		  		  
 		  //println("Time :"+d.getHours()+" "+d2.getHours());
 		  
+		  nozzlePath = scp.createRowPath(0, 65);
+		  NozzleLayer nozzleLayer3 = new NozzleLayer(this, scp, nozzlePath);
+		  jeffEffect = new Jeff(this, cfList, nozzleLayer3, 500);
+		  
+		  nozzlePath = scp.createNodePath(nodeList.get(0));
+		  NozzleLayer nozzleLayerB = new NozzleLayer(this, scp, nozzlePath);
+		  zünden = new Zünden(this, nozzleLayerB, cfList);
 	}
 		
 	public void draw() {
 		
-		ArduinoZeitschaltUhr();
+		//ArduinoZeitschaltUhr();
 
 		
 		colorMode(HSB,360,100,100);
@@ -610,7 +643,9 @@ public class ProcessingMain extends PApplet {
 					writeXML(name, sensorID, nodeID);
 					nozzlePath = scp.createNodePath(nodeList.get(nodeID-1));
 					NozzleLayer nozzleLayer = new NozzleLayer(this, scp, nozzlePath);
-					effectList.get(s.getID()-1).add(new TopGlow(this, nozzleLayer, 2, 255));
+					//PGraphics pg = nozzleLayer.getLayer();
+					effectList.get(s.getID()-1).add(new TopGlow(this, nozzleLayer, cfList, 2, 255));
+					nozzleLayer.add();
 					s.setState(false);
 				}
 				else if(checkbox_array[3]==1){
@@ -654,11 +689,11 @@ public class ProcessingMain extends PApplet {
 					writeXML(name, sensorID, nodeID);
 					nozzlePath = scp.createNodePath(nodeList.get(nodeID-1));
 					NozzleLayer nozzleLayer = new NozzleLayer(this, scp, nozzlePath);
-					effectList.get(s.getID()-1).add(new Stars(this,nozzleLayer,240, cfList));
+					effectList.get(s.getID()-1).add(new Stars(this,nozzleLayer,160, cfList));
+					effectList.get(s.getID()-1).add(new Zünden(this, nozzleLayer, cfList));
 					}
 					s.setState(false);
 				}
-				else if(checkbox_array[6]==1){
 					if(effectList.get(s.getID()-1).isEmpty()){
 					String name = "Interaktion 5";
 					int sensorID = s.getID()-1;
@@ -667,10 +702,11 @@ public class ProcessingMain extends PApplet {
 					//nozzlePath = scp.createNodePath(nodeList.get(nodeID-1));
 					nozzlePath = scp.createNodeToNodeNozzle(nodeList.get(nodeID-1), node1);
 					NozzleLayer nozzleLayer = new NozzleLayer(this, scp, nozzlePath);
-					effectList.get(s.getID()-1).add(new Stars(this,nozzleLayer,240, cfList));
+					effectList.get(s.getID()-1).add(new Stars(this,nozzleLayer,160, cfList));
+					effectList.get(s.getID()-1).add(new Zünden(this, nozzleLayer, cfList));
 					}
 					s.setState(false);
-				}
+				
 			}
 		}
 
@@ -681,6 +717,8 @@ public class ProcessingMain extends PApplet {
 		  }
 		  } 
 		  
+		  drawShadows5();
+
 		  
 		  if(checkbox_array[0]==1){
 			  scp.clearSysA();
@@ -691,6 +729,7 @@ public class ProcessingMain extends PApplet {
 			  drawBreath();
 		  }else if(checkbox_array[3]==1){
 			  drawBreath2();
+			  
 		  }
 		  
 		  else if(checkbox_array[4]==1){
@@ -716,6 +755,10 @@ public class ProcessingMain extends PApplet {
 		  else if(checkbox_array[9]==1){
 			  drawShadows4();
 		  }
+		  else if(checkbox_array[10]==1){
+			  drawShadows5();
+		  }
+
 		  /*else if(checkbox_array[10]==1){
 			  drawShadows3();
 		  }*/
@@ -733,9 +776,30 @@ public class ProcessingMain extends PApplet {
 			  }
 		 }
 		  
-		  for(int i=0; i<effectList.size(); i++){
-		  for(Iterator<Effect> effectIterator = effectList.get(i).iterator(); effectIterator.hasNext();){
-			  Effect e = effectIterator.next();
+		  
+		  
+		  //scp.clearSysA();
+		  redGlow = new ColorFade(this, 160, 40, 255);
+		  redGlow.brightnessFade(0, 2000);
+		  cfList.addColorFade(redGlow);
+		  
+		  scp.clearSysB();
+		  //scp.setColorB(redGlow.hue, redGlow.saturation, redGlow.brightness);
+		  //jeffEffect.draw();
+		  
+		  //scp.clearSysB();
+		  //zünden.draw();
+		  
+		  //scp.clearSysA();
+		  //nodeDrop.draw();
+		  //uD.draw2();
+		  
+		  //drawHorizontalFineTube();
+		  
+		  //NODEDROP
+		  //scp.clearSysA();		  
+		  for(Iterator<NodeDrop> effectIterator = nodeDropList.iterator(); effectIterator.hasNext();){
+			  NodeDrop e = effectIterator.next();
 			  
 			  e.draw();
 			  
@@ -744,10 +808,14 @@ public class ProcessingMain extends PApplet {
 				  effectIterator.remove();
 			  }
 		  }
+		  if(frameCount%100==0){
+		  while(nodeDropList.size()<1){
+			  nodeDropList.add(new NodeDrop(this, scp, node2, cfList));
+		  }
 		  }
 		  
-		  scp.clearSysA();
-		  nodeDrop.draw();
+		  
+		  
 		  
 		  /*node4.nozzleList.get(0).setColorA(0, 255, 255);
 		  node4.nozzleList.get(1).setColorA(50, 255, 255);
@@ -759,21 +827,38 @@ public class ProcessingMain extends PApplet {
 		  node4.nozzleList.get(7).setColorA(350, 255, 255);*/
 		  
 		  /*node1.setColorA(0, 0, 255);
-		  node2.setColorA(60, 0, 255);
-		  node3.setColorA(120, 0, 255);
-		  node4.setColorA(180, 0, 255);
-		  node5.setColorA(240, 0, 255);
-		  node6.setColorA(300, 0, 255);
-		  node7.setColorA(360, 0, 255);*/
+		  node2.setColorA(0, 0, 255);
+		  node3.setColorA(0, 0, 255);
+		  node4.setColorA(0, 0, 255);
+		  node5.setColorA(0, 0, 255);
+		  node6.setColorA(0, 0, 255);
+		  node7.setColorA(0, 0, 255);
 		  
 		  
-		  /*node1.setColorB(0, 0, 255);
-		  node2.setColorB(60, 0, 255);
-		  node3.setColorB(120, 0, 255);
+		  node1.setColorB(180, 0, 255);
+		  node2.setColorB(180, 0, 255);
+		  node3.setColorB(180, 0, 255);
 		  node4.setColorB(180, 0, 255);
-		  node5.setColorB(240, 0, 255);
-		  node6.setColorB(300, 0, 255);
-		  node7.setColorB(360, 0, 255);*/
+		  node5.setColorB(180, 0, 255);
+		  node6.setColorB(180, 0, 255);
+		  node7.setColorB(180, 0, 255);
+		  
+		  node1.setColorA(0, 255, 255);
+		  node2.setColorA(0, 255, 255);
+		  node3.setColorA(0, 255, 255);
+		  node4.setColorA(0, 255, 255);
+		  node5.setColorA(0, 255, 255);
+		  node6.setColorA(0, 255, 255);
+		  node7.setColorA(0, 255, 255);
+		  
+		  
+		  node1.setColorB(180, 255, 255);
+		  node2.setColorB(180, 255, 255);
+		  node3.setColorB(180, 255, 255);
+		  node4.setColorB(180, 255, 255);
+		  node5.setColorB(180, 255, 255);
+		  node6.setColorB(180, 255, 255);
+		  node7.setColorB(180, 255, 255);*/
 		  
 		  //scp.setColor(0, 0, 255);
 		  
@@ -782,6 +867,29 @@ public class ProcessingMain extends PApplet {
 		  //scp.setColor(0, 0, 100);
 		  //drawShadows();
 		  //drawUpDownAnimation();
+		  
+		  Date cTime = new Date();
+		  dateOff.setHours(hoursOff);
+		  dateOn.setHours(hoursOn);
+		  
+		 
+		  for(int i=0; i<effectList.size(); i++){
+			  for(Iterator<Effect> effectIterator = effectList.get(i).iterator(); effectIterator.hasNext();){
+				  Effect e = effectIterator.next();
+				  
+				  e.draw();
+				  
+				  if(e.isDead()){
+					  //System.out.println("DEAD");
+					  effectIterator.remove();
+				  }
+			  }
+			  }
+		  
+		  /*if(cTime.compareTo(dateOn)<0 && cTime.compareTo(dateOff)>0){
+			  scp.clearSysA();
+			  scp.clearSysB();
+		  }*/
 		  
 		  colorMode(RGB);
 		  background(255);
@@ -809,7 +917,7 @@ public class ProcessingMain extends PApplet {
 		// TODO Auto-generated method stub
 		
 		//XML Logger
-		xml = loadXML("/Users/luminale/Documents/workspace/GSVideo-test/src/evaluation.xml");
+		/*xml = loadXML("/Users/luminale/Documents/workspace/GSVideo-test/src/evaluation2.xml");
 		
 		int day = day();    // Values from 1 - 31
 		int month = month();  // Values from 1 - 12
@@ -839,7 +947,7 @@ public class ProcessingMain extends PApplet {
 		secondX.setContent(Integer.toString(second));
 		
 		//xml.addChild(interaction);
-		saveXML(xml, "/Users/luminale/Documents/workspace/GSVideo-test/src/evaluation.xml");
+		saveXML(xml, "/Users/luminale/Documents/workspace/GSVideo-test/src/evaluation.xml");*/
 		
 	}
 
@@ -1046,9 +1154,9 @@ public class ProcessingMain extends PApplet {
 		
 		System.out.println("ShadowTubeSize: "+ShadowTube.size());
 		
-		/*while(ShadowTube.size()<1){
+		while(ShadowTube.size()<1){
 			ShadowTube.add(new ShadowColorTube(this, scp, cfList));
-		}*/
+		}
 		
 		
 		  /*if(ShadowTube.isDead()){
@@ -1207,7 +1315,7 @@ public class ProcessingMain extends PApplet {
 
 			pg.colorMode(HSB, 360, 255, 255);	
 			pg.noStroke();
-			pg.fill(160+i,80,100);
+			pg.fill(160+i,20,40);
 			pg.rect(0, 0, pg.width, pg.height);
 			pg.endDraw();
 			
@@ -1255,6 +1363,91 @@ public class ProcessingMain extends PApplet {
 		  }*/
 	}
 
+	public void setupShadows5(){
+		shadowInnerColor5 = new ColorFade(this, 163, 150, 255);
+		shadowInnerColor5.saturationFade(10, 5000, 2);
+		shadowInnerColor5.brightnessFade(50, 5000,2);
+		cfList.addColorFade(shadowInnerColor5);
+		
+		ShadowBreath2 = new Breath2(this, scp, cfList, 183, 40, 5000);
+	}
+	
+	public void drawShadows5(){
+
+		if(shadowInnerColor5.isDead()){
+			shadowInnerColor5 = new ColorFade(this, 163, 150, 50);
+			shadowInnerColor5.saturationFade(10, shadowSpeed, 2);
+			shadowInnerColor5.brightnessFade(50, shadowSpeed,2);
+			cfList.addColorFade(shadowInnerColor5);
+			
+			if(shadowSpeed>2000){
+				shadowSpeed-=100;
+			}else{
+				shadowSpeed=5000;
+			}
+		}
+		
+		for(int i=0; i<scp.nozzleList.size(); i++) {
+			PGraphics pg = scp.nozzleList.get(i).sysA;
+			pg.beginDraw();
+			pg.background(0);
+
+			pg.colorMode(HSB, 360, 255, 255);	
+			pg.noStroke();
+			pg.fill(160+i,20,40);
+			pg.rect(0, 0, pg.width, pg.height);
+			pg.endDraw();
+			
+			PGraphics pg2 = scp.nozzleList.get(i).sysB;
+			pg2.beginDraw();
+			pg2.background(0);
+
+			pg2.colorMode(HSB, 360, 255, 255);	
+			pg2.noStroke();
+			pg2.fill(160+i,80,100);
+			pg2.rect(0, 0, pg2.width, pg2.height);
+			pg2.endDraw();
+			
+		}
+		
+		scp.clearSysA();
+		//scp.setColor(163, 30, 0);
+		ShadowBreath2.draw(shadowSpeed);
+		
+		//scp.clearSysB();
+		//scp.setColorB(shadowInnerColor3.hue, shadowInnerColor3.saturation, shadowInnerColor3.brightness);
+		for(Iterator<ShadowColorTube> shadowIterator = ShadowTube.iterator(); shadowIterator.hasNext();){
+			ShadowColorTube shadow = shadowIterator.next();
+			  
+			shadow.draw();
+			  
+			  if(shadow.isDead()){
+				  shadowIterator.remove();
+			  }
+		  }
+		
+		System.out.println("ShadowTubeSize: "+ShadowTube.size());
+		
+		while(ShadowTube.size()<1){
+			ShadowTube.add(new ShadowColorTube(this, scp, cfList));
+		}
+		
+	}
+	
+	public void setupHorizontalFineTube(){
+		hFT = new ColorFade(this, 0,0,255);
+		cfList.addColorFade(hFT);
+		
+		nozzlePath = scp.createNodePath(nodeList.get(0));
+		NozzleLayer nozzleLayer = new NozzleLayer(this, scp, nozzlePath);
+		PGraphics pg = nozzleLayer.getLayer();
+		horFineTube = new HorizontalFineTube(this, pg, hFT, 40, 10, 40, 100);
+	}
+	
+	public void drawHorizontalFineTube(){
+		horFineTube.draw();
+		
+	}
 	//SETUP FLOWER
 	public void setupFlower(){
 		cfFlower = new ColorFade(this, 220, 100, 100);
@@ -1345,10 +1538,10 @@ public class ProcessingMain extends PApplet {
 		ftHue = 36;
 		ftHue2 = 36;
 		
-		ftbg = new ColorFade(this, ftbgHue, 180, 50);
+		ftbg = new ColorFade(this, ftbgHue, 180, 150);
 		cfList.addColorFade(ftbg);
 		
-		ft1 = new ColorFade(this, ftHue, 170, 180, 100);
+		ft1 = new ColorFade(this, ftHue, 0, 180, 100);
 		cfList.addColorFade(ft1);
 		
 		ft2 = new ColorFade(this, ftHue2, 0, 160, 210);
@@ -1373,7 +1566,8 @@ public class ProcessingMain extends PApplet {
 		}
 			  //scp.clearSysA();
 			  if(FineTube.isDead()){
-				  nozzlePath = scp.createRandomPath(0, 17, 48, 56);
+				  //nozzlePath = scp.createRandomPath(0, 17, 48, 56);
+				  nozzlePath = scp.createNodePath(node3);
 				  NozzleLayer nozzleLayer = new NozzleLayer(this, scp, nozzlePath);
 				  FineTube = new FineTube(this, nozzleLayer, ft1);
 			  }else{
@@ -1503,11 +1697,11 @@ public class ProcessingMain extends PApplet {
 		hueBreath = 35;
 		speedBreath = 5000;
 		
-		c1 = new ColorFade(this, hueBreath, 220, 255);
-		c2 = new ColorFade(this, hueBreath, 220, 150);
-		c3 = new ColorFade(this, hueBreath, 220, 100);
-		c4 = new ColorFade(this, hueBreath, 220, 70);
-		c5 = new ColorFade(this, hueBreath, 220, 55);
+		c1 = new ColorFade(this, hueBreath, 0, 255);
+		c2 = new ColorFade(this, hueBreath, 0, 150);
+		c3 = new ColorFade(this, hueBreath, 0, 100);
+		c4 = new ColorFade(this, hueBreath, 0, 70);
+		c5 = new ColorFade(this, hueBreath, 0, 55);
 		
 		c1.brightnessFade(80, 5000, 2);
 		c2.brightnessFade(80, 5000, 2);
@@ -1524,6 +1718,7 @@ public class ProcessingMain extends PApplet {
 	}
 	
 	public void drawBreath(){
+	
 		for(Nozzle nozzle : scp.nozzleList) {
 			PGraphics pg = nozzle.sysA;
 			pg.beginDraw();
@@ -1543,6 +1738,8 @@ public class ProcessingMain extends PApplet {
 				pg.rect(0, 0, pg.width, 1);
 		   
 			
+			
+			
 			//pg2.colorMode(HSB, 360, 100, 100,100);
 			//pg2.fill(Math.abs(cfYellow.hue-270)+30,cfYellow.saturation,cfYellow.brightness, 70);
 			//pg2.rect(0, 0, pg2.width, 1);
@@ -1552,6 +1749,23 @@ public class ProcessingMain extends PApplet {
 			
 			//System.out.println("Hue1: "+(Math.abs(cfYellow.hue-270)+30)+" Sat1: "+(Math.abs(cfYellow.saturation-100))+" Bright: "+(Math.abs(cfYellow.brightness-100)+40));
 		}
+		
+		while(topGlowList.size()<10){
+			nozzlePath = scp.createRandomSingleNozzle();
+			NozzleLayer nozzleLayer = new NozzleLayer(this, scp, nozzlePath);
+			//PGraphics pg = nozzleLayer.getLayer();
+			topGlowList.add(new TopGlow(this, nozzleLayer, cfList, 50, 255));
+		}
+		
+		for(Iterator<TopGlow> hMIterator = topGlowList.iterator(); hMIterator.hasNext();){
+			  TopGlow hM = hMIterator.next();
+			  
+			  hM.draw();
+			  
+			  if(hM.isDead()){
+				  hMIterator.remove();
+			  }
+		  }
 		
 		if(c1.isDead()){
 			
@@ -2061,7 +2275,6 @@ public class ProcessingMain extends PApplet {
 		if(theEvent.getGroup().getName() == "checkBox") {
 		    print("got an event from "+theEvent.getName()+"\t");
 		    //System.out.println(theEvent.getGroup().getArrayValue().length);
-		    if(manuell){
 		    if(checkbox_array[0] != theEvent.getGroup().getArrayValue(0)) {
 		    	//activeArray[0] =! activeArray[0];
 		    	System.out.println("BUTTON1");
@@ -2105,7 +2318,7 @@ public class ProcessingMain extends PApplet {
 		    checkbox_array = checkbox.getArrayValue();
 			scp.clearSysA();
 			scp.clearSysB();
-		    }
+		    
 		    
 		}
 		//println("\t "+theEvent.getValue());

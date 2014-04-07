@@ -102,9 +102,9 @@ public class FineTube implements Effect{
 		this.cfList = cfList;
 		this.TYPE = 2;
 		
-		a1 = 10;
+		a1 = 40;
 		m1 = 10;
-		e1 = 5;
+		e1 = 10;
 		
 		x=-(a1+m1+e1);
 		
@@ -122,7 +122,7 @@ public class FineTube implements Effect{
 		timer = p.millis();
 		
 		Ani.init(p);
-		Ani.to(this, (float) 13.0, "speed", 60, Ani.QUINT_IN);
+		Ani.to(this, (float) 13.0, "speed", 60, Ani.CIRC_IN);
 
 		  
 		
@@ -216,7 +216,7 @@ public class FineTube implements Effect{
 		timer=current;
 		}
 
-		if(x>pg.width-(a1+m1+e1)){
+		if(x>pg.width-(a1+m1)){
 			if(first){
 				end = new ColorFade(p, cf.hue, 0, 255, 0);
 				end.saturationFade(0, 1000, 2);
