@@ -11,5 +11,7 @@
 	<classpathentry kind="lib" path="libs/serial.jar"/>
 	<classpathentry kind="lib" path="libs/Arduino.jar"/>
 	<classpathentry kind="lib" path="libs/rxtx-2.1.7.jar"/>
+	<classpathentry kind="lib" path="libs/ijeomamotion.jar"/>
+	<classpathentry kind="lib" path="libs/Ani/library/Ani.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

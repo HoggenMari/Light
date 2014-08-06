@@ -56,7 +56,7 @@ public class ProcessingMain extends PApplet {
 	//boolean activeArray [] = {false, false, false, false, false, false, false, false, false, false, false, false, false};
 	
 	//Arduino Communication
-	static String ARDUINO_DEVICE = "/dev/tty.usbmodemfa121";
+	static String ARDUINO_DEVICE = "/dev/tty.usbmodem1421";
 	static int lf = 10; // Linefeed in ASCII
 	String myString = null; // Serial Output String
 	Serial myPort; // Serial port you are using
@@ -508,8 +508,8 @@ public class ProcessingMain extends PApplet {
 			  hsv1.add(new hsvGradient(this, n, startHue-2*n.id, 120, 120));
 		}
 		
-		//m = new GSMovie(this, "ko.avi");
-		//m.loop();
+		m = new GSMovie(this, "honess.avi");
+		m.loop();
 		
 		
 		setupPathosLight();
@@ -909,8 +909,9 @@ public class ProcessingMain extends PApplet {
 		  
 		  fill(0);
 		  text("FrameRate: "+frameRate, 720, 20);
-		  text("Created by Marius Hoggenmüller on 04.02.14. Copyright (c) 2014 Marius Hoggenmüller, LMU Munich. All rights reserved.", 10, 740);
+		  text("gggCreated by Marius Hoggenmüller on 04.02.14. Copyright (c) 2014 Marius Hoggenmüller, LMU Munich. All rights reserved.", 10, 740);
 		  
+		  image(m, 0, 0, 100, 100);
 	}
 
 	private void writeXML(String name, int sensorID, int nodeID) {
